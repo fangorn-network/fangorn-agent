@@ -12,7 +12,7 @@ This project showcases what we are calling x402f. It is an extension of the x402
 1. Be sure that MCP client is built by running ```npm run build``` in its root directory.
 2. In a new terminal window, navigate to the curator directory and run ```node src/index.ts```
 3. From the mcp-client root directory run ```node build/src/index.js```. This will initialize the model and prompt the user to "Query" the agent
-4. The most successful way to have the model use all of the tools (for now) is to ask "Can you please fetch me data from a datasource model"
+4. The most successful way to have the agent use all of the tools (for now) is to ask "Can you please fetch me data from a datasource agent"
 
 ## Components
 
