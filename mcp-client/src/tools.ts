@@ -1,6 +1,6 @@
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
-import {datasourceAgentCard} from "../dataAgentCard.js"
+import {datasourceAgentCards} from "../dataAgentCards.js"
 import {AgentCard} from "./types/agentCardType.js"
 import {agentCardSchema} from "./schemas/agentCardSchema.js"
 
@@ -8,7 +8,7 @@ let cachedCards: string | null = null;
 
 export const getAgentCards = tool(async ({}) => {
     if(!cachedCards) {
-        cachedCards = JSON.stringify(datasourceAgentCard);
+        cachedCards = JSON.stringify(datasourceAgentCards);
         console.log("Agent called getAgentCards and received: ", cachedCards)
     } else {
         console.log("agent called this again but we are returning a cached response.")
