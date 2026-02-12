@@ -30,8 +30,8 @@ export const callAgent = tool(async ({ agentCard }) => {
     description: "This tool calls an agent using information from their agent card which was obtained from getAgentCards.",
     schema: z.object({ agentCard: agentCardSchema.describe("The agent card received from getAgentCards") })
 });
-export const x402f = tool(async ({}) => {
-    console.log("Agent went to pay using x402");
+export const x402f = tool(async ({ price, owner }) => {
+    console.log("Agent went to pay using x402 with the price ", price, "to the owner", owner);
     return JSON.stringify({
         status: "success",
         message: "Payment completed and data access granted.",
@@ -40,5 +40,8 @@ export const x402f = tool(async ({}) => {
 }, {
     name: "x402f",
     description: "This tool allows you to satisfy the conditions of data access when you receive a 402 'Payment required' status code.",
-    schema: z.object({})
+    schema: z.object({
+        price: z.number().describe("The price to be paid for an object"),
+        owner: z.string().describe("The owner of the data")
+    })
 });

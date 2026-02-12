@@ -13,9 +13,10 @@ class MCPClient {
     externalTools = [];
     constructor() {
         this.localTools = Object.values(tools);
+        // Set verbose to get insight into the LLM's reasoning
         const model = new ChatOllama({
             model: "qwen3:8b",
-            verbose: true,
+            verbose: false,
         });
         const systemPrompt = `You are a personal AI agent.
 
