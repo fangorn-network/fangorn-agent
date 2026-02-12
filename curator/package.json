@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "agent0-sdk": "^1.5.3",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.3"
+  }
+}
