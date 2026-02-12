@@ -19,11 +19,11 @@ This project showcases what we are calling x402f. It is an extension of the x402
 ### mcp-client
 This is the local MCP client that contains some tools that the local LLM can use. There are 3 tools currently available which are stored in ```tools.ts```:
 
-1. **getAgentCards()**: This tool is a mock of what would be returned when searching for an agent to fulfill a request. It returns the dataAgentCard.ts to the agent which allows the agent to reason if the remote agent has the functionality it needs.
+1. **getAgentCards()**: This tool is a mock of what would be returned when searching for an agent to fulfill a request. It returns the dataAgentCards.ts to the agent which allows the agent to reason if the remote agents have the functionality it needs to fulfill the user's request.
 
 2. **callAgent(agentCard)**: This tool takes in an agent card as its argument then attempts to call the ```/resource``` endpoint to retrieve data which then gets returned to the LLM.
 
-3. **x402f()**: This tool is used when the agent receives a 402 "Payment required" http status code. It is currently mocked to return some data that the LLM can display to the user.
+3. **x402f(price, owner)**: This tool is used when the agent receives a 402 "Payment required" http status code. It is currently mocked and prints the price and owner that is returned by the callAgent tool and returns some data that the LLM can display to the user.
 
 The mcp-client directory also has two subdirectories which are important for the LLM to understand the agent cards.
 
