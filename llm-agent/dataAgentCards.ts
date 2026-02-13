@@ -1,15 +1,15 @@
 import { AgentCard } from "./src/types/agentCardType.js";
 
 export const datasourceAgentCards: AgentCard[] = [
-  {
-  name: "Weather Agent",
-  description: "An agent that provides forecasts based on results from the NSW's API",
+   {
+  name: "MCP Entertainment Data Agent",
+  description: "An MCP server that provides game and music lookup tools. Connect via MCP to discover and use its tools directly.",
   version: "1.0.0",
 
   supportedInterfaces: [
     {
-      url: "http://localhost:3001",
-      protocolBinding: "HTTP+JSON",
+      url: "http://localhost:3001/mcp",
+      protocolBinding: "JSONRPC",
       protocolVersion: "1.0",
     },
   ],
@@ -21,10 +21,16 @@ export const datasourceAgentCards: AgentCard[] = [
 
   skills: [
     {
-      id: "provide-forecast",
-      name: "Provide Forecast",
-      description: "Provides a human readable forecast.",
-      tags: ["weather", "forecast"],
+      id: "find-game",
+      name: "Find Game",
+      description: "Finds a video game by name.",
+      tags: ["datasource", "data", "games", "mcp"],
+    },
+    {
+      id: "find-music",
+      name: "Find Music",
+      description: "Finds a song by name.",
+      tags: ["datasource", "data", "music", "song", "mcp"],
     },
   ],
 
@@ -56,7 +62,7 @@ export const datasourceAgentCards: AgentCard[] = [
       id: "provide-data",
       name: "Provide Data",
       description: "Provides data.",
-      tags: ["datasource", "data", "Tony"],
+      tags: ["datasource", "data", "games", "rest"],
     },
   ],
 
@@ -88,7 +94,7 @@ export const datasourceAgentCards: AgentCard[] = [
       id: "provide-data",
       name: "Provide Data",
       description: "Provides data.",
-      tags: ["datasource", "data", "music"],
+      tags: ["datasource", "data", "music", "rest"],
     },
   ],
 
