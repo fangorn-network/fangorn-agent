@@ -13,8 +13,8 @@ They can then publish the encrypted data publicly without worrying about anyone,
 0. Ensure ollama is installed `curl -fsSL https://ollama.com/install.sh | sh` and that the "qwen3:8b" model is installed `ollama pull qwen3:8b`
 1. Be sure that MCP client is built by running `npm run build` in its root directory.
 2. In a new terminal window, navigate to the curators directory
-    a. To run the curator-mcp first build the curator by running `npm run build` in the curator-mcp directory then run `node build/index.js`
-    b. To run the curator-http (for x402) simply navigate to the curator-http directory and run `node src/index.ts`
+    - To run the curator-mcp first build the curator by running `npm run build` in the curator-mcp directory then run `node build/index.js`
+    - To run the curator-http (for x402) simply navigate to the curator-http directory and run `node src/index.ts`
 3. From the mcp-client root directory run `node build/src/index.js`. This will initialize the model and prompt the user to "Query" the agent
 4. You can now interact with the agent via the command line. It sometimes has trouble with tool usage since the agents overlap in their domains. One agent sells data while the other agent just returns data via MCP tools.
 
@@ -52,7 +52,7 @@ The curators directory contains two different "Curators"
 #### curator-http
 This is a server that returns a 402 http status code with payment information. It is currently just an express.js server that mocks x402 payment responses.
 
-### curator-mcp
+#### curator-mcp
 This is an entertainment based Agent that returns metadata about music and games by exposing two tools: get_game and get_song
 
 ## Tools
