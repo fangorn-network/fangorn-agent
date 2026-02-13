@@ -27,12 +27,12 @@ export const datasourceAgentCards = [
         },
     },
     {
-        name: "Data Source Agent",
-        description: "An agent that provides data and acts as a data source.",
+        name: "Game Data Source Agent",
+        description: "An agent that sells video games.",
         version: "1.0.0",
         supportedInterfaces: [
             {
-                url: "http://localhost:3000",
+                url: "http://localhost:3000/games",
                 protocolBinding: "HTTP+JSON",
                 protocolVersion: "1.0",
             },
@@ -45,7 +45,34 @@ export const datasourceAgentCards = [
                 id: "provide-data",
                 name: "Provide Data",
                 description: "Provides data.",
-                tags: ["datasource", "data"],
+                tags: ["datasource", "data", "Tony"],
+            },
+        ],
+        provider: {
+            organization: "Fangorn",
+            url: "https://fangorn.network",
+        },
+    },
+    {
+        name: "Music Data Source Agent",
+        description: "An agent that sells music.",
+        version: "1.0.0",
+        supportedInterfaces: [
+            {
+                url: "http://localhost:3000/music",
+                protocolBinding: "HTTP+JSON",
+                protocolVersion: "1.0",
+            },
+        ],
+        capabilities: {},
+        defaultInputModes: ["text/plain", "application/json"],
+        defaultOutputModes: ["text/plain", "application/json"],
+        skills: [
+            {
+                id: "provide-data",
+                name: "Provide Data",
+                description: "Provides data.",
+                tags: ["datasource", "data", "music"],
             },
         ],
         provider: {

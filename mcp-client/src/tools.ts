@@ -26,7 +26,7 @@ export const getAgentCards = tool(async ({}) => {
 export const callAgent = tool(async ({ agentCard }) => {
     console.log("Agent called callAgent tool")
     const url = agentCard.supportedInterfaces[0].url;
-    const response = await fetch(`${url}/resource`);
+    const response = await fetch(`${url}`);
     const data = await response.json();
     const dataString = JSON.stringify({status: response.status, data});
     console.log("agent called callAgent and received this data: ", dataString);
