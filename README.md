@@ -10,18 +10,18 @@ They can then publish the encrypted data publicly without worrying about anyone,
 
 ## To run
 
-0. Ensure ollama is installed `curl -fsSL https://ollama.com/install.sh | sh` and that the "qwen3:8b" model is installed `ollama pull qwen3:8b`
+0. Ensure ollama is installed `curl -fsSL https://ollama.com/install.sh | sh` and that the "glm-4.7-flash" model is installed `ollama pull glm-4.7-flash`
 1. Build llm-agent by running `npm run build` in its root directory.
-2. Use `node build/src/index.js` to initialize the local MCP server, intialize the LLM model, and prompt the user to "Query" the agent
+2. Use `node build/index.js` to initialize the local MCP server, intialize the LLM model, and prompt the user to "Query" the agent
 3. In a new terminal window, navigate to the curators directory
     - To run the curator-mcp first build the curator by running `npm run build` in the curator-mcp directory then run `node build/index.js`
     - To run the curator-http (for x402) simply navigate to the curator-http directory and run `node src/index.ts`
-4. You can now interact with the agent via the command line. It sometimes has trouble with tool usage since the curator agents overlap in their domains. One agent sells data while the other agent just returns data via MCP tools.
+4. You can now interact with the agent via the command line. It sometimes has trouble with tool usage since the curator agents overlap in their domains. One agent type sells data while the other agent type just returns data via MCP tools.
 
 ## Components
 
 ### llm-agent
-This is the the LLM agent which uses a local MCP client that contains the necessary tools for general interactions. There are 5 tools currently available in `mcpClient.ts`:
+This is the the LLM agent which uses a local MCP client that contains the necessary tools for general interactions. There are 6 tools currently available in `mcpClient.ts`:
 
 1. **getAgentCards()**: This tool is a mock of what would be returned when searching for an agent to fulfill a request. It returns the dataAgentCards.ts to the agent which allows the agent to reason if the remote agents have the functionality it needs to fulfill the user's request.
 
@@ -32,6 +32,8 @@ This is the the LLM agent which uses a local MCP client that contains the necess
 4. **connectToMcpServer(url)**: This tool is used to connect to remote MCP servers that provide tools which can help the agent fulfill user requests. This is a naive implementation and is insecure.
 
 5. **useExternalTool(mcpServerUrl, toolName, toolArgs)**: This tool is used to make remote tool calls that are exposed by connected MCP servers.
+
+6. **disconnectFromMcpServer(url)**: This tool is used by the agent to disconnect from a remote MCP server when it determines that the request has been fulfilled.
 
 The llm-agent directory also has two subdirectories which are important for the LLM to understand the agent cards.
 
@@ -44,7 +46,7 @@ This is currently an unused file, but is going to use the Agent0 sdk in order to
 #### dataAgentCard.ts 
 contains a very simple agent card that is returned to the LLM when it calls the `getAgentCards` tool.
 
-**Note:** There is a `utils.ts` file that contains the function `jsonSchemaToZod`. This is used to allow the langchain agent to understand the tool metadata that is returned from other MCP servers. It is currently not being used.
+**Note:** There is a `utils.ts` file that contains the function `jsonSchemaToZod`. This was used to allow the langchain agent to understand the tool metadata that is returned from other MCP servers. It is currently not being used.
 
 ### curators
 The curators directory contains two different "Curators"
@@ -59,4 +61,4 @@ This is an entertainment based Agent that returns metadata about music and games
 The client and agent pieces of this project are primarily written in typescript with the contracts written using Stylus.
 
 ### Langchain
-Langchain is an open source framework with a pre-built agent architecture and integrations for any model or tool.
+Langchain is an open source framework with a pre-built agent architecture and integrations for many models and tools.

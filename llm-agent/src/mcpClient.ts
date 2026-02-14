@@ -1,12 +1,9 @@
 import { DynamicStructuredTool, tool } from "@langchain/core/tools";
 import { z } from "zod";
-import {datasourceAgentCards} from "../dataAgentCards.js"
+import {datasourceAgentCards} from "./dataAgentCards.js"
 import {agentCardSchema} from "./schemas/agentCardSchema.js"
 import { Client } from "@modelcontextprotocol/sdk/client";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
-
-// let cachedCards: string | null = null;
 
 interface McpConnection {
   client: Client;
@@ -27,7 +24,7 @@ export class LocalAgentMcp {
     return this.localTools;
   }
 
-    async close(): Promise<void> {
+  async close(): Promise<void> {
     for (const [, conn] of this.activeConnections) {
       try {
         await conn.client.close();
@@ -84,7 +81,7 @@ export class LocalAgentMcp {
     const getAgentCards = tool(async ({}) => {
     if(!this.cachedCards) {
         this.cachedCards = JSON.stringify(datasourceAgentCards);
-        console.log("Agent called getAgentCards and received: ", this.cachedCards)
+        console.log("Agent called getAgentCards")
     } else {
         console.log("agent called this again but we are returning a cached response.")
     }
@@ -98,8 +95,9 @@ export class LocalAgentMcp {
 }
 )
 
-const callRestAgent = tool(async ({ agentCard }) => {
+const callDatasourceAgent = tool(async ({ agentCard }) => {
     console.log("Agent called callRestAgent tool")
+    console.log(JSON.stringify(agentCard))
     const url = agentCard.supportedInterfaces[0].url;
     const response = await fetch(`${url}`);
     const data = await response.json();
@@ -110,8 +108,8 @@ const callRestAgent = tool(async ({ agentCard }) => {
 
 },
 {
-    name: "call_rest_agent",
-    description: "This tool calls an agent using information from their agent card which was obtained from getAgentCards.",
+    name: "call_datasource_agent",
+    description: "This tool calls a datasource agent via the REST protocol using information from their agent card. Use this tool if you need to call a REST based datasource agent.",
     schema: z.object({agentCard: agentCardSchema.describe("The agent card received from getAgentCards")})
 }
 )
@@ -120,15 +118,15 @@ const callRestAgent = tool(async ({ agentCard }) => {
     console.log("Agent went to pay using x402 with the price ", price, "to the owner", owner)
     return JSON.stringify({ 
         status: "success", 
-        message: "Payment completed and data access granted.",
+        message: "Conditions fulfilled and data access granted.",
         data: "Boy Tony sure is a handsome fella"
     });
 },
 {
     name: "x402f",
-    description: "This tool allows you to satisfy the conditions of data access when you receive a 402 'Payment required' status code.",
+    description: "This tool allows you to satisfy the conditions of data access when you receive a 402 status code.",
     schema: z.object({
-        price: z.number().describe("The price to be paid for an object"),
+        price: z.number().describe("The condition represented as an integer needed to obtain data"),
         owner: z.string().describe("The owner of the data")
     })
 }
@@ -140,12 +138,18 @@ const connectToMcpServer = tool(
         try {
           const connection = await this.connectMcp(url);
           console.log("Connection made. Getting tools...")
-          const toolNames = Array.from(connection.tools.keys());
+      const toolDetails = Array.from(connection.tools.entries()).map(
+        ([name, info]) => ({
+          name,
+          description: info.description,
+          inputSchema: info.inputSchema,
+        })
+      );
           console.log("Received tools")
           return JSON.stringify({
             status: "connected",
             url,
-            availableTools: toolNames,
+            availableTools: toolDetails,
           });
         } catch (err: any) {
           return JSON.stringify({
@@ -158,13 +162,40 @@ const connectToMcpServer = tool(
       {
         name: "connect_to_mcp_server",
         description:
-          "Connects to a remote MCP server and discovers its available tools. Returns the list of tool names you can then invoke with use_external_tool.",
+          "This tool connects to a remote MCP server and discovers its available tools. Returns the list of tool names you can then invoke with use_external_tool.",
         schema: z.object({
           url: z.string().describe("The URL of the remote MCP server"),
         }),
       }
     );
 
+  const disconnectFromMcpServer = tool(
+      async ({ url }) => {
+        console.log(`agent called close_connection_to_mcp_server with url ${url}`);
+        try {
+          const connection = this.activeConnections.get(url);
+          console.log("obtained connection, attempting to disconnect")
+          await connection?.client.close()
+          return JSON.stringify({
+            status: "200",
+          });
+        } catch (err: any) {
+          console.log("Disconnect failed")
+          return JSON.stringify({
+            status: "500",
+          });
+        }
+      },
+      {
+        name: "disconnect_from_mcp_server",
+        description:
+          "This tool disconnects from a remote MCP server. You MUST call this when you are done with an MCP server. If you receive a status of 200 the disconnect was a success. If you receive a 500 the disconnect failed and you should notify the user.",
+        schema: z.object({
+          url: z.string().describe("The URL of the remote MCP server that you wish to disconnect from"),
+        }),
+      }
+    );
+    
     const useExternalTool = tool(
       async ({ serverUrl, toolName, toolArgs }) => {
         console.log("going to use external tool")
@@ -208,7 +239,7 @@ const connectToMcpServer = tool(
       {
         name: "use_external_tool",
         description:
-          "Calls a tool on a remote MCP server you have already connected to via connect_to_mcp_server.",
+          "This tool calls a tool on a remote MCP server you have already connected to via connect_to_mcp_server.",
         schema: z.object({
           serverUrl: z
             .string()
@@ -223,7 +254,7 @@ const connectToMcpServer = tool(
       }
     );
 
-    return [getAgentCards, callRestAgent, x402f, connectToMcpServer, useExternalTool];
+    return [getAgentCards, callDatasourceAgent, x402f, connectToMcpServer, useExternalTool, disconnectFromMcpServer];
 
   }
 

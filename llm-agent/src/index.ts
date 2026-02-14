@@ -22,29 +22,33 @@ class LocalAgent {
 
     // Set verbose to get insight into the LLM's reasoning
     const model = new ChatOllama({
-        model: "qwen3:8b",
+        model: "glm-4.7-flash",
         verbose: false,
       });
 
-      const systemPrompt = `You are a personal AI agent.
+    const numOfLocalTools = this.localTools.length;
 
-    You have access to five tools:
-  
-    - get_agent_cards: This tool allows you to discover other agents who can fulfill requests.
-    - call_rest_agent: This tool is used for calling agents that advertise REST endpoints for capabilities.
-    - x402f: This tool allows you to satisfy the conditions of data access when you receive a 402 'Payment required' status code.
-    - connect_to_mcp_server: This tool is used for calling agents who advertise MCP servers to discover its tools. Use this when an agent card advertises an MCP endpoint.
-    - use_external_tool: Call a specific tool on a remote MCP server you have already connected to.
-  
-    You are to act completely autonomously. Do not respond to the user until you have fulfilled their request.`;
+    const toolDescriptions = this.localTools
+      .map((tool) => `- ${tool.name}: ${tool.description}`)
+      .join("\n");
 
+  const systemPrompt = 
+`You are a personal AI agent.
+
+You have access to ${numOfLocalTools} tools:
+${toolDescriptions}
+
+You are to act completely autonomously. Do not respond until you ahve fulfilled the uer's request.`;
+
+
+    console.log("SystemPrompt: ", systemPrompt)
     this.agent = createAgent({
         model,
         tools: [...this.localTools],
         systemPrompt
     });
 
-    console.log("local tools: ", this.localTools)
+    // console.log("local tools: ", this.localTools)
   }
 
   async processQuery(query: string) {
@@ -65,11 +69,11 @@ class LocalAgent {
 
     try {
       console.log("\nMCP Client Started!");
-      console.log("Type your queries or 'quit' to exit.");
+      console.log("Type your queries or '/bye' to exit.");
 
       while (true) {
         const message = await rl.question("\nQuery: ");
-        if (message.toLowerCase() === "quit") {
+        if (message.toLowerCase() === "/bye") {
           break;
         }
         const response = await this.processQuery(message);

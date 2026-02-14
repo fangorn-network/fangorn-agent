@@ -76,6 +76,7 @@ const app = express();
 const transports = new Map<string, StreamableHTTPServerTransport>();
 
 app.post("/mcp", async (req, res) => {
+  console.log("POST received on /mcp endpoint")
   const sessionId = req.headers["mcp-session-id"] as string | undefined;
 
   if (sessionId && transports.has(sessionId)) {
@@ -102,6 +103,7 @@ app.post("/mcp", async (req, res) => {
 });
 
 app.get("/mcp", async (req, res) => {
+  console.log("GET received on /mcp endpoint")
   const sessionId = req.headers["mcp-session-id"] as string | undefined;
   if (sessionId && transports.has(sessionId)) {
     const transport = transports.get(sessionId)!;
@@ -112,6 +114,7 @@ app.get("/mcp", async (req, res) => {
 });
 
 app.delete("/mcp", async (req, res) => {
+  console.log("DELETE received on /mcp endpoint")
   const sessionId = req.headers["mcp-session-id"] as string | undefined;
   if (sessionId && transports.has(sessionId)) {
     const transport = transports.get(sessionId)!;

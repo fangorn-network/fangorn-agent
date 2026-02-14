@@ -1,4 +1,4 @@
-import { AgentCard } from "./src/types/agentCardType.js";
+import { AgentCard } from "./types/agentCardType.js";
 
 export const datasourceAgentCards: AgentCard[] = [
    {
@@ -24,13 +24,13 @@ export const datasourceAgentCards: AgentCard[] = [
       id: "find-game",
       name: "Find Game",
       description: "Finds a video game by name.",
-      tags: ["datasource", "data", "games", "mcp"],
+      tags: ["games", "search", "mcp", "tools"],
     },
     {
       id: "find-music",
       name: "Find Music",
       description: "Finds a song by name.",
-      tags: ["datasource", "data", "music", "song", "mcp"],
+      tags: ["music", "search", "song", "mcp", "tools"],
     },
   ],
 
@@ -41,7 +41,7 @@ export const datasourceAgentCards: AgentCard[] = [
 },
   {
   name: "Game Data Source Agent",
-  description: "An agent that sells video games.",
+  description: "A REST based agent that provides the latest video game data.",
   version: "1.0.0",
 
   supportedInterfaces: [
@@ -59,10 +59,10 @@ export const datasourceAgentCards: AgentCard[] = [
 
   skills: [
     {
-      id: "provide-data",
-      name: "Provide Data",
-      description: "Provides data.",
-      tags: ["datasource", "data", "games", "rest"],
+      id: "obtain-x402f",
+      name: "Obtain x402f",
+      description: "Calling the agent via REST will result in the appropriate x402f response.",
+      tags: ["datasource", "data", "games", "rest", "x402f"],
     },
   ],
 
@@ -73,7 +73,7 @@ export const datasourceAgentCards: AgentCard[] = [
 },
   {
   name: "Music Data Source Agent",
-  description: "An agent that sells music.",
+  description: "A REST based agent that provides the latest music data.",
   version: "1.0.0",
 
   supportedInterfaces: [
@@ -91,10 +91,10 @@ export const datasourceAgentCards: AgentCard[] = [
 
   skills: [
     {
-      id: "provide-data",
-      name: "Provide Data",
-      description: "Provides data.",
-      tags: ["datasource", "data", "music", "rest"],
+      id: "obtain-x402f",
+      name: "Obtain x402f",
+      description: "Calling the agent via REST will result in the appropriate x402f response.",
+      tags: ["datasource", "data", "music", "rest", "x402f"],
     },
   ],
 
