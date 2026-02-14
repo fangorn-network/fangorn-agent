@@ -25,9 +25,9 @@ This is the the LLM agent which uses a local MCP client that contains the necess
 
 1. **getAgentCards()**: This tool is a mock of what would be returned when searching for an agent to fulfill a request. It returns the dataAgentCards.ts to the agent which allows the agent to reason if the remote agents have the functionality it needs to fulfill the user's request.
 
-2. **callAgent(agentCard)**: This tool takes in an agent card as its argument then attempts to call the `/resource` endpoint to retrieve data which then gets returned to the LLM.
+2. **callRestAgent(agentCard)**: This tool takes in an agent card as its argument then attempts to call the `/resource` endpoint to retrieve data which then gets returned to the LLM.
 
-3. **x402f(price, owner)**: This tool is used when the agent receives a 402 "Payment required" http status code. It is currently mocked and prints the price and owner that is returned by the callAgent tool and returns some data that the LLM can display to the user.
+3. **x402f(price, owner)**: This tool is used when the agent receives a 402 "Payment required" http status code. It is currently mocked and prints the price and owner that is returned by the callRestAgent tool and returns some data that the LLM can display to the user.
 
 4. **connectToMcpServer(url)**: This tool is used to connect to remote MCP servers that provide tools which can help the agent fulfill user requests. This is a naive implementation and is insecure.
 

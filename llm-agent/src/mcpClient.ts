@@ -98,19 +98,19 @@ export class LocalAgentMcp {
 }
 )
 
-const callAgent = tool(async ({ agentCard }) => {
-    console.log("Agent called callAgent tool")
+const callRestAgent = tool(async ({ agentCard }) => {
+    console.log("Agent called callRestAgent tool")
     const url = agentCard.supportedInterfaces[0].url;
     const response = await fetch(`${url}`);
     const data = await response.json();
     const dataString = JSON.stringify({status: response.status, data});
-    console.log("agent called callAgent and received this data: ", dataString);
+    console.log("agent called callRestAgent and received this data: ", dataString);
 
     return dataString;
 
 },
 {
-    name: "call_agent",
+    name: "call_rest_agent",
     description: "This tool calls an agent using information from their agent card which was obtained from getAgentCards.",
     schema: z.object({agentCard: agentCardSchema.describe("The agent card received from getAgentCards")})
 }
@@ -223,7 +223,7 @@ const connectToMcpServer = tool(
       }
     );
 
-    return [getAgentCards, callAgent, x402f, connectToMcpServer, useExternalTool];
+    return [getAgentCards, callRestAgent, x402f, connectToMcpServer, useExternalTool];
 
   }
 
