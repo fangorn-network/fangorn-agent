@@ -82,6 +82,7 @@ export class LocalAgentMcp {
     if(!this.cachedCards) {
         this.cachedCards = JSON.stringify(datasourceAgentCards);
         console.log("Agent called getAgentCards")
+        // console.log("agent cards", this.cachedCards)
     } else {
         console.log("agent called this again but we are returning a cached response.")
     }
