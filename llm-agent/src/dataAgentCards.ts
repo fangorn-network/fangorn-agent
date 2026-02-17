@@ -131,6 +131,15 @@ export const datasourceAgentCards: AgentCard[] = [
     .addSkill("obtain-x402f", "Obtain x402f", "Calling the agent via REST will result in the appropriate x402f response.", ["datasource", "games", "rest", "x402f"])
     .provider("Fangorn", "https://x402.fangorn.network")
     .build(),
+    
+  agentCard()
+    .name("Coleman hello.txt provider")
+    .description("A REST based agent that provides the hello world text files.")
+    .version("1.0.0")
+    .url("http://localhost:4021/resource")
+    .addSkill("obtain-x402f", "Obtain x402f", "Calling the agent via REST will result in the appropriate x402f response.", ["datasource", "hello", "world", "helloworld", "rest", "x402f"])
+    .provider("Fangorn", "https://x402.fangorn.network")
+    .build(),
 ];
 
 // import { AgentCard } from "./types/agentCardType.js";

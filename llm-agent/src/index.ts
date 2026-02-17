@@ -1,12 +1,9 @@
 import readline from "readline/promises";
-import dotenv from "dotenv";
 // import { ChatGroq } from "@langchain/groq";
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { createAgent } from "langchain";
 import {LocalAgentMcp} from "./mcpClient.js"
 import { ChatOllama } from "@langchain/ollama";
-
-dotenv.config();
 
 
 
@@ -15,9 +12,16 @@ class LocalAgent {
   private localTools: DynamicStructuredTool[] = [];
   private localMcp: LocalAgentMcp;
 
-  constructor() {
+  static async create(): Promise<LocalAgent> {
 
-    this.localMcp = new LocalAgentMcp();
+    const localMcp = await LocalAgentMcp.create();
+
+    return new LocalAgent(localMcp);
+  }
+
+  constructor(localMcp: LocalAgentMcp) {
+
+    this.localMcp = localMcp;
     this.localTools = this.localMcp.getLocalTools();
 
     // Set verbose to get insight into the LLM's reasoning
@@ -38,7 +42,7 @@ class LocalAgent {
 You have access to ${numOfLocalTools} tools:
 ${toolDescriptions}
 
-You are to act completely autonomously. Do not respond until you ahve fulfilled the uer's request.`;
+You are to act completely autonomously. Do not respond until you have fulfilled the user's request.`;
 
 
     console.log("SystemPrompt: ", systemPrompt)
@@ -84,22 +88,22 @@ You are to act completely autonomously. Do not respond until you ahve fulfilled 
     }
   }
 
-  async cleanup() {
-    await this.localMcp.close();
-  }
+  // async cleanup() {
+  //   await this.localMcp.close();
+  // }
 }
 
 async function main() {
 
-  const localAgent = new LocalAgent();
+  const localAgent = await LocalAgent.create();
   try {
     await localAgent.chatLoop();
   } catch (e) {
     console.error("Error:", e);
-    await localAgent.cleanup();
+    // await localAgent.cleanup();
     process.exit(1);
   } finally {
-    await localAgent.cleanup();
+    // await localAgent.cleanup();
     process.exit(0);
   }
 }
