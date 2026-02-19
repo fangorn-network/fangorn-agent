@@ -9,6 +9,7 @@ import { Chain, createWalletClient, Hex, http, WalletClient } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import {FangornConfig} from "fangorn/lib/config.js"
 import {createFangornMiddleware, FangornX402Middleware} from "x402f"
+import { SDK } from "agent0-sdk";
 
 dotenv.config();
 // interface McpConnection {
@@ -20,7 +21,7 @@ dotenv.config();
 export class LocalAgentMcp {
 
   // private activeConnections = new Map<string, McpConnection>();
-  private cachedCards: string | null = null;
+  private agent0Sdk: SDK;
   private localTools: DynamicStructuredTool[];
   // private walletClient: WalletClient;
   private x402fClient: FangornX402Middleware;
@@ -30,6 +31,7 @@ export class LocalAgentMcp {
     const key = process.env.ETH_PRIVATE_KEY;
     if(!key) throw new Error("No private key found")
     const envChain = process.env.CHAIN
+    console.log("chain: ", envChain)
     if(!envChain) throw new Error("No chain specified")
     const config = envChain == "arbitrumSepolia" ? FangornConfig.ArbitrumSepolia : FangornConfig.BaseSepolia;
   
@@ -56,12 +58,48 @@ export class LocalAgentMcp {
         pinataGateway
     );
 
-    return new LocalAgentMcp(x402fClient)
+    let agent0Sdk: SDK;
+
+    if (config.chain.id === 421614) {
+        console.log("Using arbitrum sepolia")
+        const registryOverrides = {
+			421614: {
+				IDENTITY: "0x8004A818BFB912233c491871b3d84c89A494BD9e",
+				REPUTATION: "0x8004B663056A597Dffe9eCcC1965A193B7388713",
+			},
+		};
+		const subgraphOverrides = {
+			421614:
+				"https://api.studio.thegraph.com/query/1742225/erc-8004-arbitrum-sepolia/version/latest",
+		};
+        agent0Sdk = new SDK({
+				chainId: 421614,
+				rpcUrl: "https://sepolia-rollup.arbitrum.io/rpc",
+				subgraphUrl:
+					"https://api.studio.thegraph.com/query/1742225/erc-8004-arbitrum-sepolia/version/latest",
+				registryOverrides,
+				subgraphOverrides,
+				ipfs: "pinata",
+				pinataJwt,
+				privateKey: key
+		});
+    } else {
+        agent0Sdk = new SDK({
+			chainId: config.chain.id,
+			rpcUrl: config.chain.rpcUrls.default.http[0],
+			ipfs: "pinata",
+			pinataJwt,
+			privateKey: key,
+		});
+    }
+
+    return new LocalAgentMcp(x402fClient, agent0Sdk)
 
   }
 
-  constructor(x402fClient: FangornX402Middleware) {
+  constructor(x402fClient: FangornX402Middleware, agent0Sdk: SDK) {
     this.localTools = this.buildTools();
+    this.agent0Sdk = agent0Sdk;
     this.x402fClient = x402fClient;
   }
 
@@ -120,104 +158,34 @@ export class LocalAgentMcp {
 
   private buildTools(): DynamicStructuredTool[] {
 
-    // const getAgentCards = tool(async ({}) => {
-    //     if(!this.cachedCards) {
-    //         this.cachedCards = JSON.stringify(datasourceAgentCards);
-    //         console.log("Agent called getAgentCards")
-    //         // console.log("agent cards", this.cachedCards)
-    //     } else {
-    //         console.log("agent called this again but we are returning a cached response.")
-    //     }
+    const searchAgents = tool(async ({agentName}) => {
 
-    //     return this.cachedCards
-    //     },
-    //     {
-    //         name: "get_agent_cards",
-    //         description: "This tool fetches agent cards that can fulfill requests. If there are no agents that can fulfill a request, please let the user know.",
-    //         schema: z.object({})
-    //     }
-    // )
+        console.log(`agent called searchAgents using agent name: ${agentName}`)
 
-    // const getAgentCards = tool(async ({}) => {
-    //     if(!this.cachedCards) {
-    //         this.cachedCards = JSON.stringify(datasourceAgentCards);
-    //         console.log("Agent called getAgentCards")
-    //         // console.log("agent cards", this.cachedCards)
-    //     } else {
-    //         console.log("agent called this again but we are returning a cached response.")
-    //     }
+        try {
+            const agentResults = await this.agent0Sdk.searchAgents({name: agentName, chains: [421614]});      
+            console.log("agentResults: ")
+            console.log(JSON.stringify(agentResults, null, 2))      
+            return JSON.stringify(agentResults)
+        } catch (error) {
+            console.log("Something went wrong: ", error)
+            return JSON.stringify(error)
+        }
 
-    //     return this.cachedCards
-    //     },
-    //     {
-    //         name: "get_agent_cards",
-    //         description: "This tool fetches agent cards that can fulfill requests. If there are no agents that can fulfill a request, please let the user know.",
-    //         schema: z.object({})
-    //     }
-    // )
-    
-
-
-    // const callDatasourceAgent = tool(async ({ agentCard }) => {
-    //     console.log("Agent called callRestAgent tool")
-    //     console.log(JSON.stringify(agentCard))
-    //     const url = agentCard.supportedInterfaces[0].url;
-    //     const response = await fetch(`${url}`);
-    //     const data = await response.json();
-    //     const dataString = JSON.stringify({status: response.status, data});
-    //     console.log("agent called callRestAgent and received this data: ", dataString);
-    //     return dataString;
-    //     },
-    //     {
-    //         name: "get_agent_info",
-    //         description: "This tool calls a datasource agent via the REST protocol using information from their agent card. Use this tool if you need to call a REST based datasource agent.",
-    //         schema: z.object({agentCard: agentCardSchema.describe("The agent card received from getAgentCards")})
-    //     }
-    // )
-
-    const searchAgents = tool(async ({}) => {
-
-        console.log("agent called searchAgents")
-
-        // We can feasibly give enough information to obtain only one agent result
-        const agentResults = {
-            agents: [{
-                chainId: "421614",
-                agentId: "0xfbe3194b6f46cc654d6a79632e5cab97d66e9d0bb14c553c063fe5457d929b41",
-                name: "coleman_ds",
-                description: "A REST based agent that provides the hello world text files.",
-                owners: ["0x951f9e73FA32A83246782edb659ae1669C035BdF"],
-                operators: [],
-                active: true,
-                x402support: true,
-                updatedAt: "02/17/2026",
-                a2aEndpoint: "https://a2a.fangorn.network/.well-known/agent-card.json",
-                agentUri: "ipfs://thisissomedummyagenturithatimusingrightnow",
-                agentURIType: 'ipfs'
-        }]}
-
-        return JSON.stringify(agentResults)
         },
         {
             name: "search_agents",
-            description: "This tool finds agents that are registered in an ERC-8004 compliant manner. Use this when looking for agents to fulfill requests. You MUST remember the agentId for the agent you choose.",
-            schema: z.object({})
+            description: "This tool finds agents that are registered in an ERC-8004 compliant manner. Use this when looking for agents to fulfill requests. You MUST remember the agentId and the owner for the agent you choose.",
+            schema: z.object({
+                agentName: z.string().describe("This is the name of the agent that you think has what you need.")
+            })
         }
     )
 
     const getAgentCard = tool(async ({a2aEndpoint}) => {
 
         console.log(`a2aEndpoint: ${a2aEndpoint}`)
-
-        let result;
-
-        if(a2aEndpoint === "https://a2a.fangorn.network/.well-known/agent-card.json") {
-            console.log("agent passed in correct a2a url")
-            result = {"status": "200", "agent-card": datasourceAgentCards[2]}
-        } else {
-            result = {"status": "404"}
-        }
-
+        const result = await fetch(`${a2aEndpoint}/.well-known/agent-card.json`, )
         return JSON.stringify(result);
         },
         {
@@ -227,39 +195,26 @@ export class LocalAgentMcp {
         }
     )
 
-    
-
-
-    const callx402fAgent = tool(async ({ id, tag, url }) => {
+    const callx402fAgent = tool(async ({ id, tag, url, owner }) => {
         console.log("Agent called callx402fAgent tool")
         console.log(`agentId: ${id}, file tag: ${tag}, urlbeingcalled: ${url}`)
 
-        const hexId = id as Hex;
+        const hexId = owner as Hex;
 
-        if(url === "http://localhost:4021/resource") {
-
-            const result = await this.x402fClient.fetchResource({
-            id: hexId,
+        const result = await this.x402fClient.fetchResource({
+            datasourceName: id,
             tag,
-            baseUrl: "http://localhost:4021"
+            baseUrl: url,
+            owner: hexId 
         })
-
-            if (result.success) {
-                console.log("It was a success")
-                return JSON.stringify({"status": 200, "filename": tag, filecontents: atob(result.dataString!)})
-            } else {
-                console.log("Something went wrong")
-                console.log(result)
-                return JSON.stringify({"status": "500"})
-            }
-            
+        if (result.success) {
+            console.log("It was a success")
+            return JSON.stringify({"status": 200, "filename": tag, filecontents: atob(result.dataString!)})
         } else {
-
-            console.log("The agent didn't pass in the correct URL")
-            return JSON.stringify({"status": "404"})
-
+            console.log("Something went wrong")
+            console.log(result)
+            return JSON.stringify({"status": "500"})
         }
-
         },
         {
             name: "call_x402f_agent",
@@ -267,7 +222,8 @@ export class LocalAgentMcp {
             schema: z.object({
                 id: z.string().describe("This is the id of the agent that provides the data"),
                 tag: z.string().describe("This is the name of the file the user is looking for"),
-                url: z.string().describe("This is the url that is advertised in the agent card")
+                url: z.string().describe("This is the url that is advertised in the agent card"),
+                owner: z.string().describe("This is the owner of the datasource agent")
             })
         }
     )
