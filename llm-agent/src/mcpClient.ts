@@ -215,6 +215,10 @@ export class LocalAgentMcp {
 					`agentId: ${id}, file tag: ${tag}, urlbeingcalled: ${agentCardUrl}`,
 				);
 
+                if(agentCardUrl.startsWith("ipfs")) {
+                    return 'It appears you passed in an ipfs URI. The required URL should have come from the agent card itself.'
+                }
+
 				const hexId = owner as Hex;
 
 				const result = await this.x402fClient.fetchResource({
@@ -249,7 +253,7 @@ export class LocalAgentMcp {
 						.describe("This is the name of the file the user is looking for"),
 					agentCardUrl: z
 						.string()
-						.describe("This is the url that is advertised in the agent card"),
+						.describe("This is the URL that is advertised in the agent card"),
 					owner: z
 						.string()
 						.describe("This is the owner of the datasource agent"),
