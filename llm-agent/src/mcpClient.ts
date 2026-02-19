@@ -156,9 +156,9 @@ export class LocalAgentMcp {
 					`agentId: ${id}, file tag: ${tag}, urlbeingcalled: ${agentCardUrl}`,
 				);
 
-                if(agentCardUrl.startsWith("ipfs")) {
-                    return 'It appears you passed in an ipfs URI. The required URL should have come from the agent card itself.'
-                }
+				if (agentCardUrl.startsWith("ipfs")) {
+					return "It appears you passed in an ipfs URI. The required URL should have come from the agent card itself.";
+				}
 
 				const hexId = owner as Hex;
 
@@ -203,6 +203,5 @@ export class LocalAgentMcp {
 		);
 
 		return [searchAgents, getAgentCard, callx402fAgent];
-
 	}
 }
