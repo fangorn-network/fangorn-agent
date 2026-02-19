@@ -21,7 +21,7 @@
 // export type Transport = "JSONRPC" | "GRPC" | "HTTP+JSON";
 
 // /**
-//  * A self-describing manifest for an agent. It provides essential metadata including the agent's identity, capabilities, 
+//  * A self-describing manifest for an agent. It provides essential metadata including the agent's identity, capabilities,
 //  * skills, supported communication methods, and security requirements.
 //  * @see Section 4.4.1
 //  */
@@ -72,8 +72,8 @@
 //    */
 //   defaultOutputModes: string[];
 
-//   /** 
-//    * Skills represent an ability of an agent. It is largely a descriptive concept but represents a more focused set 
+//   /**
+//    * Skills represent an ability of an agent. It is largely a descriptive concept but represents a more focused set
 //    * of behaviors that the agent is likely to succeed at.
 //    */
 //   skills: AgentSkill[];
@@ -161,13 +161,13 @@
 //   examples?: string[];
 
 //   /**
-//    * The set of supported input media types for this skill, 
+//    * The set of supported input media types for this skill,
 //    * overriding the agent's defaults.
 //    */
 //   inputModes?: string[];
 
 //   /**
-//    * The set of supported output media types for this skill, 
+//    * The set of supported output media types for this skill,
 //    * overriding the agent's defaults.
 //    */
 //   outputModes?: string[];
@@ -179,7 +179,7 @@
 // }
 
 // /**
-//  * Declares a combination of a target URL, transport and protocol version for interacting with the agent. 
+//  * Declares a combination of a target URL, transport and protocol version for interacting with the agent.
 //  * This allows agents to expose the same functionality over multiple protocol binding mechanisms.
 //  *
 //  * @see Section 4.4.6
@@ -188,18 +188,18 @@
 //   /** The URL where this interface is available. Must be a valid absolute HTTPS URL in production. */
 //   url: string;
 
-//   /** The protocol binding supported at this URL. This is an open form string, to be easily extended for other protocol bindings. 
+//   /** The protocol binding supported at this URL. This is an open form string, to be easily extended for other protocol bindings.
 //    * The core ones officially supported are JSONRPC, GRPC and HTTP+JSON.
 //    */
 //   protocolBinding: string;
 
-//   /** 
+//   /**
 //    * Tenant to be set in the request when calling the agent.
 //    */
 //   tenant?: string;
 
 //   /**
-//    * The version of the A2A protocol this interface exposes. 
+//    * The version of the A2A protocol this interface exposes.
 //    * Use the latest supported minor version per major version
 //    */
 //   protocolVersion: string;
@@ -233,9 +233,9 @@
 // // =============================================================================
 
 // /**
-//  * Defines a security scheme that can be used to secure an agent's endpoints. 
+//  * Defines a security scheme that can be used to secure an agent's endpoints.
 //  * This is a discriminated union type based on the OpenAPI 3.2 Security Scheme Object.
-//  * A SecurityScheme MUST contain exactly one of the following: 
+//  * A SecurityScheme MUST contain exactly one of the following:
 //  * apiKeySecurityScheme, httpAuthSecurityScheme, oauth2SecurityScheme, openIdConnectSecurityScheme, mtlsSecurityScheme
 //  *
 //  * @see Section 4.5.1
@@ -275,13 +275,13 @@
 //   /** An optional description for the security scheme. */
 //   description?: string;
 
-//   /** The name of the HTTP Authentication scheme to be used in the Authorization header, as defined in RFC7235 (e.g., "Bearer"). 
-//    * This value should be registered in the IANA Authentication Scheme registry. 
+//   /** The name of the HTTP Authentication scheme to be used in the Authorization header, as defined in RFC7235 (e.g., "Bearer").
+//    * This value should be registered in the IANA Authentication Scheme registry.
 //    */
 //   scheme: string;
 
-//   /** A hint to the client to identify how the bearer token is formatted (e.g., "JWT"). 
-//    * This is primarily for documentation purposes. 
+//   /** A hint to the client to identify how the bearer token is formatted (e.g., "JWT").
+//    * This is primarily for documentation purposes.
 //    */
 //   bearerFormat?: string;
 
@@ -301,7 +301,7 @@
 //   flows: OAuthFlows;
 
 //   /**
-//    * URL to the oauth2 authorization server metadata RFC8414 (https://datatracker.ietf.org/doc/html/rfc8414). 
+//    * URL to the oauth2 authorization server metadata RFC8414 (https://datatracker.ietf.org/doc/html/rfc8414).
 //    * TLS is required.
 //    */
 //   oauth2MetadataUrl?: string;
@@ -318,8 +318,8 @@
 //   /** An optional description for the security scheme. */
 //   description?: string;
 
-//   /** The OpenID Connect Discovery URL for the OIDC provider's metadata. 
-//    * See: https://openid.net/specs/openid-connect-discovery-1_0.html 
+//   /** The OpenID Connect Discovery URL for the OIDC provider's metadata.
+//    * See: https://openid.net/specs/openid-connect-discovery-1_0.html
 //    */
 //   openIdConnectUrl: string;
 
@@ -338,13 +338,13 @@
 // /**
 //  * Container for OAuth 2.0 flow definitions.
 //  * There are two types not included here (types not defined in spec)
-//  * implicit: ImplicitOAuthFlow 
+//  * implicit: ImplicitOAuthFlow
 //  * password: PasswordOAuthFlow
 //  * OAuthFlows MUST contain exactly one of the following: authorizationCode, clientCredentials, implicit, password, deviceCode
 //  *
 //  * @see Section 4.5.7
 //  */
-// export type OAuthFlows =   
+// export type OAuthFlows =
 //   | { authorizationCode: AuthorizationCodeOAuthFlow }
 //   | { clientCredentials: ClientCredentialsOAuthFlow }
 //   | { deviceCode: DeviceCodeOAuthFlow };
@@ -368,7 +368,7 @@
 //   scopes: Record<string, string>;
 
 //   /**
-//    * Indicates if PKCE (RFC 7636) is required for this flow. 
+//    * Indicates if PKCE (RFC 7636) is required for this flow.
 //    * PKCE should always be used for public clients and is recommended for all clients.
 //    */
 //   pkceRequired?: boolean;

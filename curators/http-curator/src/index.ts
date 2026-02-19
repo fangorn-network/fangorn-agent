@@ -11,4 +11,8 @@ app.get('/music', (req, res) => {
   res.status(402).json({ price: 420.99, owner: 'djmoneystax' });
 });
 
+app.get('./well-known/agent-card.json', (req, res) => {
+  res.status(200).json()
+});
+
 app.listen(3000, () => console.log('Server running on port 3000'));
