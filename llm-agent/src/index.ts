@@ -1,5 +1,4 @@
 import readline from "readline/promises";
-// import { ChatGroq } from "@langchain/groq";
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { createAgent } from "langchain";
 import { LocalAgentMcp } from "./mcpClient.js";
@@ -45,8 +44,6 @@ You are to act completely autonomously. Do not respond until you have fulfilled 
 			tools: [...this.localTools],
 			systemPrompt,
 		});
-
-		// console.log("local tools: ", this.localTools)
 	}
 
 	async processQuery(query: string) {
@@ -81,10 +78,6 @@ You are to act completely autonomously. Do not respond until you have fulfilled 
 			rl.close();
 		}
 	}
-
-	// async cleanup() {
-	//   await this.localMcp.close();
-	// }
 }
 
 async function main() {
@@ -93,10 +86,8 @@ async function main() {
 		await localAgent.chatLoop();
 	} catch (e) {
 		console.error("Error:", e);
-		// await localAgent.cleanup();
 		process.exit(1);
 	} finally {
-		// await localAgent.cleanup();
 		process.exit(0);
 	}
 }
