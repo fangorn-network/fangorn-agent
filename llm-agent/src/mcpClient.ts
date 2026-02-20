@@ -50,7 +50,6 @@ export class LocalAgentMcp {
 		let agent0Sdk: SDK;
 
 		if (config.chain.id === 421614) {
-			console.log("Using arbitrum sepolia");
 			const registryOverrides = {
 				421614: {
 					IDENTITY: "0x8004A818BFB912233c491871b3d84c89A494BD9e",
@@ -98,15 +97,12 @@ export class LocalAgentMcp {
 	private buildTools(): DynamicStructuredTool[] {
 		const searchAgents = tool(
 			async ({ agentName }) => {
-				console.log(`agent called searchAgents using agent name: ${agentName}`);
-
+				console.log(`console.log - agent called searchAgents tool using agent name: ${agentName}`);
 				try {
 					const agentResults = await this.agent0Sdk.searchAgents({
 						name: agentName,
 						chains: [421614],
 					});
-					console.log("agentResults: ");
-					console.log(JSON.stringify(agentResults, null, 2));
 					return JSON.stringify(agentResults);
 				} catch (error) {
 					console.log("Something went wrong: ", error);
@@ -129,7 +125,7 @@ export class LocalAgentMcp {
 
 		const getAgentCard = tool(
 			async ({ a2aEndpoint }) => {
-				console.log(`a2aEndpoint: ${a2aEndpoint}`);
+				console.log(`console.log - agent called getAgentCard tool with a2aEndpoint: ${a2aEndpoint}`);
 				const result = await fetch(
 					`${a2aEndpoint}/.well-known/agent-card.json`,
 				);
@@ -151,11 +147,8 @@ export class LocalAgentMcp {
 
 		const callx402fAgent = tool(
 			async ({ id, tag, agentCardUrl, owner }) => {
-				console.log("Agent called callx402fAgent tool");
-				console.log(
-					`agentId: ${id}, file tag: ${tag}, urlbeingcalled: ${agentCardUrl}`,
-				);
-
+				console.log(`console.log - Agent called callx402fAgent tool with args: agentId: ${id}, file tag: ${tag}, urlbeingcalled: ${agentCardUrl}`);
+				
 				if (agentCardUrl.startsWith("ipfs")) {
 					return "It appears you passed in an ipfs URI. The required URL should have come from the agent card itself.";
 				}
@@ -169,15 +162,12 @@ export class LocalAgentMcp {
 					owner: hexId,
 				});
 				if (result.success) {
-					console.log("It was a success");
 					return JSON.stringify({
 						status: 200,
 						filename: tag,
 						filecontents: atob(result.dataString!),
 					});
 				} else {
-					console.log("Something went wrong");
-					console.log(result);
 					return JSON.stringify({ status: "500" });
 				}
 			},

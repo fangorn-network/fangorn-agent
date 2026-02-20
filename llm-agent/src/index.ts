@@ -37,8 +37,9 @@ You have access to ${numOfLocalTools} tools:
 ${toolDescriptions}
 
 You are to act completely autonomously. Do not respond until you have fulfilled the user's request.`;
-
-		console.log("SystemPrompt: ", systemPrompt);
+console.log("---------------------------SystemPrompt given to agent--------------------------\n")
+console.log( systemPrompt);
+console.log("\n-------------------------------------------------------------------------------")
 		this.agent = createAgent({
 			model,
 			tools: [...this.localTools],
