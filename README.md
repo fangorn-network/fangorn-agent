@@ -11,13 +11,13 @@ They can then publish the encrypted data publicly without worrying about anyone,
 ## To run
 
 0. Ensure ollama is installed `curl -fsSL https://ollama.com/install.sh | sh` and that the "glm-4.7-flash" model is installed `ollama pull glm-4.7-flash`
+    - Note: The standard flow also works with the "qwen3:8b" model which is significantly lighter. However, it is more prone to mistakes and may behave unexpectedly such as: describing how to compelte the flow, using the wrong data, and hallucinating that it has performed an action.
 1. Build `llm-agent` by running `npm run build` in its root directory.
 2. Use `node build/index.js` to initialize the local MCP server, intialize the LLM model, and prompt the user to "Query" the agent
 3. In a new terminal window, navigate to the curators directory
     - To run the `curator-mcp` first build the curator by running `npm run build` in the curator-mcp directory then run `node build/index.js`
     - To run the `curator-http` (for x402) simply navigate to the curator-http directory and run `node src/index.ts`
-4. You can now interact with the agent via the command line. It sometimes has trouble with tool usage since the curator agents overlap in their domains. One agent type sells data while the other agent type just returns data via MCP tools.
-
+4. You can now interact with the agent via the command line. 
 ## Components
 
 ### llm-agent
