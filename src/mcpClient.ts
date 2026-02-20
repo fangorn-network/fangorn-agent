@@ -6,6 +6,7 @@ import { privateKeyToAccount } from "viem/accounts";
 import { FangornConfig } from "fangorn-sdk";
 import { createFangornMiddleware, FangornX402Middleware } from "x402f";
 import { SDK } from "agent0-sdk";
+import fs from 'fs';
 
 dotenv.config();
 
@@ -168,10 +169,11 @@ export class LocalAgentMcp {
           owner: hexId,
         });
         if (result.success) {
+          const dataContents = atob(result.dataString!)
+          fs.writeFileSync(`./${tag}`, dataContents, 'binary')
           return JSON.stringify({
             status: 200,
-            filename: tag,
-            filecontents: atob(result.dataString!),
+            result: `Please notify the user that the request file has been downloaded to ${tag}`
           });
         } else {
           return JSON.stringify({ status: "500" });
@@ -193,7 +195,7 @@ export class LocalAgentMcp {
             .describe("This is the URL that is advertised in the agent card"),
           owner: z
             .string()
-            .describe("This is the owner of the datasource agent"),
+            .describe("This is the owner of the datasource agent")
         }),
       },
     );
