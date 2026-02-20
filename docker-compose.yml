@@ -1,0 +1,36 @@
+services:
+  mcp-client:
+    build:
+      context: ../
+      dockerfile: fangorn-agent/mcp-client/Dockerfile
+    env_file: .env
+    environment:
+      MCP_PORT: 3001
+    # No ports exposed to host — only the llm-agent needs to reach it
+    networks:
+      - agent-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 15s
+
+  llm-agent:
+    build:
+      context: ./llm
+    environment:
+      MCP_URL: http://mcp-client:3001/mcp
+      MCP_HEALTH_URL: http://mcp-client:3001/health
+    depends_on:
+      mcp-client:
+        condition: service_healthy   # ← waits for the healthcheck to pass
+    stdin_open: true   # keeps stdin open for the chat loop
+    tty: true
+    networks:
+      - agent-net
+
+networks:
+  agent-net:
+    driver: bridge
