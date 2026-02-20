@@ -3,7 +3,7 @@ import { z } from "zod";
 import dotenv from "dotenv";
 import { Chain, createWalletClient, Hex, http, WalletClient } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { FangornConfig } from "fangorn/lib/config.js";
+import { FangornConfig } from "fangorn-sdk";
 import { createFangornMiddleware, FangornX402Middleware } from "x402f";
 import { SDK } from "agent0-sdk";
 
@@ -150,9 +150,9 @@ export class LocalAgentMcp {
     );
 
     const callx402fAgent = tool(
-      async ({ id, tag, agentCardUrl, owner }) => {
+      async ({ agentName, tag, agentCardUrl, owner }) => {
         console.log(
-          `console.log - Agent called callx402fAgent tool with args: agentId: ${id}, file tag: ${tag}, urlbeingcalled: ${agentCardUrl}`,
+          `console.log - Agent called callx402fAgent tool with args: agentName: ${agentName}, file tag: ${tag}, urlbeingcalled: ${agentCardUrl}`,
         );
 
         if (agentCardUrl.startsWith("ipfs")) {
@@ -162,7 +162,7 @@ export class LocalAgentMcp {
         const hexId = owner as Hex;
 
         const result = await this.x402fClient.fetchResource({
-          datasourceName: id,
+          datasourceName: agentName,
           tag,
           baseUrl: agentCardUrl,
           owner: hexId,
@@ -182,9 +182,9 @@ export class LocalAgentMcp {
         description:
           "This tool calls an x402f enabled agent using information from their agent card, NOT from their. Use this tool if you need to call an x402f based datasource agent. A status of 200 means that the file has been obtained. Any other status means the request couldnt be fulfilled.",
         schema: z.object({
-          id: z
+          agentName: z
             .string()
-            .describe("This is the id of the agent that provides the data"),
+            .describe("This is the name of the agent that provides the data"),
           tag: z
             .string()
             .describe("This is the name of the file the user is looking for"),
