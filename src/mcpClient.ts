@@ -176,13 +176,13 @@ export class LocalAgentMcp {
             result: `Please notify the user that the request file has been downloaded to ${tag}`
           });
         } else {
-          return JSON.stringify({ status: "500" });
+          return JSON.stringify({ status: 500 });
         }
       },
       {
         name: "call_x402f_agent",
         description:
-          "This tool calls an x402f enabled agent using information from their agent card, NOT from their. Use this tool if you need to call an x402f based datasource agent. A status of 200 means that the file has been obtained. Any other status means the request couldnt be fulfilled.",
+          "This tool calls an x402f enabled agent using information from their agent card. Use this tool if you need to call an x402f based agent. A status of 200 means that the file has been obtained. Any other status means the request could not be fulfilled.",
         schema: z.object({
           agentName: z
             .string()
