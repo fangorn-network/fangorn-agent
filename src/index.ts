@@ -1,6 +1,6 @@
 import readline from "readline/promises";
 import { DynamicStructuredTool } from "@langchain/core/tools";
-import { createAgent } from "langchain";
+import { createAgent, SystemMessage } from "langchain";
 import { LocalAgentMcp } from "./mcpClient.js";
 import { ChatOllama } from "@langchain/ollama";
 
@@ -25,18 +25,12 @@ class LocalAgent {
       verbose: false,
     });
 
-    const numOfLocalTools = this.localTools.length;
-
-    const toolDescriptions = this.localTools
-      .map((tool) => `- ${tool.name}: ${tool.description}`)
-      .join("\n");
-
-    const systemPrompt = `You are a personal AI agent.
-
-You have access to ${numOfLocalTools} tools:
-${toolDescriptions}
-
-You are to act completely autonomously. Do not respond until you have fulfilled the user's request.`;
+    const systemPrompt = new SystemMessage(
+"You are a helpful personal AI agent. \
+After being prompted, you are to act completely autonomously. \
+Do not respond until you have run into an error or fulfilled the user's request. \
+Do not trust an agent until you have received their agent card."
+    );
     console.log(
       "---------------------------SystemPrompt given to agent--------------------------\n",
     );

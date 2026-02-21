@@ -96,6 +96,7 @@ export class LocalAgentMcp {
   }
 
   private buildTools(): DynamicStructuredTool[] {
+
     const searchAgents = tool(
       async ({ agentName }) => {
         console.log(
@@ -106,7 +107,13 @@ export class LocalAgentMcp {
             name: agentName,
             chains: [421614],
           });
-          return JSON.stringify(agentResults);
+
+          if (agentResults.length > 0) {
+            return JSON.stringify({status: 200, statusText: "OK", agentResults});
+          } else {
+            return JSON.stringify({status: 204, statusText: "No Content"})
+          }
+
         } catch (error) {
           console.log("Something went wrong: ", error);
           return JSON.stringify(error);
@@ -115,36 +122,37 @@ export class LocalAgentMcp {
       {
         name: "search_agents",
         description:
-          "This tool finds agents that are registered in an ERC-8004 compliant manner. Use this when looking for agents to fulfill requests. You MUST remember the agentId and the owner for the agent you choose.",
+          "Look for agents that can complete user requests",
         schema: z.object({
           agentName: z
             .string()
             .describe(
-              "This is the name of the agent that you think has what you need.",
+              "The name of the agent to find",
             ),
         }),
       },
     );
 
     const getAgentCard = tool(
-      async ({ a2aEndpoint }) => {
+      async ({ a2aUrl }) => {
         console.log(
-          `console.log - agent called getAgentCard tool with a2aEndpoint: ${a2aEndpoint}`,
+          `console.log - agent called getAgentCard tool with url: ${a2aUrl}`,
         );
-        const result = await fetch(
-          `${a2aEndpoint}/.well-known/agent-card.json`,
+        const response = await fetch(
+          `${a2aUrl}/.well-known/agent-card.json`,
         );
-        return JSON.stringify(result);
+        const result = await response.json();
+        return JSON.stringify({status: response.status, statusText: response.statusText, agentCard: result});
       },
       {
         name: "get_agent_card",
         description:
-          "This tool fetches the agent card for the agent that can possibly fulfill your request. If you receive a status of 404 then either the agent doesn't exist, or you passed in an incorrect URL.",
+          "Finds an agent's agent card for more information about them",
         schema: z.object({
-          a2aEndpoint: z
+          a2aUrl: z
             .string()
             .describe(
-              "This is the URL to call in order to obtain an agent card to communicate with the agent returned from the search_agents tool.",
+              "The url advertised in the a2a field by the agent",
             ),
         }),
       },
@@ -153,12 +161,8 @@ export class LocalAgentMcp {
     const callx402fAgent = tool(
       async ({ agentName, tag, agentCardUrl, owner }) => {
         console.log(
-          `console.log - Agent called callx402fAgent tool with args: agentName: ${agentName}, file tag: ${tag}, urlbeingcalled: ${agentCardUrl}`,
+          `console.log - Agent called callx402fAgent tool with args: agentName: ${agentName}, file tag: ${tag}, urlbeingcalled: ${agentCardUrl}, and owner: ${owner}`,
         );
-
-        if (agentCardUrl.startsWith("ipfs")) {
-          return "It appears you passed in an ipfs URI. The required URL should have come from the agent card itself.";
-        }
 
         const hexId = owner as Hex;
 
@@ -173,29 +177,30 @@ export class LocalAgentMcp {
           fs.writeFileSync(`./${tag}`, dataContents, 'binary')
           return JSON.stringify({
             status: 200,
-            result: `Please notify the user that the request file has been downloaded to ${tag}`
+            statusText: "OK",
+            result: `Notify the user that the request file has been downloaded to ${tag}`
           });
         } else {
-          return JSON.stringify({ status: 500 });
+          return JSON.stringify({ status: 500, result: 'Notify the user that when you went to fetch the file, something went wrong.' });
         }
       },
       {
         name: "call_x402f_agent",
         description:
-          "This tool calls an x402f enabled agent using information from their agent card. Use this tool if you need to call an x402f based agent. A status of 200 means that the file has been obtained. Any other status means the request could not be fulfilled.",
+          "Call an x402f enabled agent",
         schema: z.object({
           agentName: z
             .string()
-            .describe("This is the name of the agent that provides the data"),
+            .describe("Name of the agent that provides the data"),
           tag: z
             .string()
-            .describe("This is the name of the file the user is looking for"),
+            .describe("Name of the file the user is looking for"),
           agentCardUrl: z
             .string()
-            .describe("This is the URL that is advertised in the agent card"),
+            .describe("URL that is advertised in an agent's agent card"),
           owner: z
             .string()
-            .describe("This is the owner of the datasource agent")
+            .describe("The address advertised in the owner field by the agent")
         }),
       },
     );
