@@ -174,11 +174,11 @@ export class LocalAgentMcp {
         });
         if (result.success) {
           const dataContents = atob(result.dataString!)
-          fs.writeFileSync(`./${tag}`, dataContents, 'binary')
+          fs.writeFileSync(`./Downloads/${tag}`, dataContents, 'binary')
           return JSON.stringify({
             status: 200,
             statusText: "OK",
-            result: `Notify the user that the request file has been downloaded to ${tag}`
+            result: `Notify the user that the request file has been downloaded to Downloads/${tag}`
           });
         } else {
           return JSON.stringify({ status: 500, result: 'Notify the user that when you went to fetch the file, something went wrong.' });
