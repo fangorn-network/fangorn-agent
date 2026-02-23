@@ -4,8 +4,9 @@
 
 ## Pre-reqs:
 1. Ensure ollama is installed `curl -fsSL https://ollama.com/install.sh | sh` and that the `glm-4.7-flash` model is installed `ollama pull glm-4.7-flash`
-2. Ensure you have `pnpm` installed
-3. Ensure the facilitator and resource server in the x402f project are running
+3. Ensure you have `pnpm` installed
+4. Have the x402f library as a sibling directory to the fangorn agent and build it by running `npm run build` in its root directory
+5. Ensure the facilitator and resource server in the x402f project are running
 
 ## To run
 1. Run `cp .env.example .env` and fill in the information
