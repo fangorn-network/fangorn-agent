@@ -17,6 +17,9 @@ importers:
       '@langchain/groq':
         specifier: ^1.0.3
         version: 1.1.0(@langchain/core@1.1.24)(encoding@0.1.13)
+      '@langchain/langgraph':
+        specifier: ^1.2.0
+        version: 1.2.0(@langchain/core@1.1.24)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod-to-json-schema@3.25.1(zod@4.3.6))(zod@4.3.6)
       '@langchain/ollama':
         specifier: ^1.2.2
         version: 1.2.2(@langchain/core@1.1.24)
@@ -847,8 +850,8 @@ packages:
     peerDependencies:
       '@langchain/core': ^1.0.1
 
-  '@langchain/langgraph-sdk@1.6.2':
-    resolution: {integrity: sha512-UzRZsnDqdTmeitf/K5yZnVdl+V+7bDj/hQUXm+Y8TwWUuKtWUDocIReKgAmPQLoIz0AN8bOUt0QGnIISmCZyuA==}
+  '@langchain/langgraph-sdk@1.6.5':
+    resolution: {integrity: sha512-JjprmbhgCnoNJ9DUKcvrEU+C9FfKsNGyT3ooqWxAY5Cx2qofhXmDJOpTCqqbxfDHPKG0RjTs5HgVK3WW5M6Big==}
     peerDependencies:
       '@langchain/core': ^1.1.16
       react: ^18 || ^19
@@ -861,8 +864,8 @@ packages:
       react-dom:
         optional: true
 
-  '@langchain/langgraph@1.1.4':
-    resolution: {integrity: sha512-9OhRF+7Zvcpure8TLtBrxfJDo0PAoHZhfzcPL6M3CsGXiYqLWm5tQe+FYqn9zRIV7IwphqVEl1QDNbOkVgo+kw==}
+  '@langchain/langgraph@1.2.0':
+    resolution: {integrity: sha512-wyqKIzXTAfXX3L1d8R7icM+HmRQBTbuNLWtUlpRJ/JP/ux1ei/sOSt6p8f90ARoOP2iJVlM70wOBYWaGErdBlA==}
     engines: {node: '>=18'}
     peerDependencies:
       '@langchain/core': ^1.1.16
@@ -2924,6 +2927,12 @@ packages:
 
   fangorn-sdk@0.0.5:
     resolution: {integrity: sha512-3QFXvFNpFVjdVZRn8J1J9oEdEsZoAuxtJD1QVZFGbG5woJyYoz1ISaWhpFRmvIq0c/i6zhbCJLMW11W4KCtE3A==}
+    engines: {node: '>=20.19.0'}
+    peerDependencies:
+      viem: ^2.41.2
+
+  fangorn-sdk@file:../fangorn:
+    resolution: {directory: ../fangorn, type: directory}
     engines: {node: '>=20.19.0'}
     peerDependencies:
       viem: ^2.41.2
@@ -6001,7 +6010,7 @@ snapshots:
       '@langchain/core': 1.1.24
       uuid: 10.0.0
 
-  '@langchain/langgraph-sdk@1.6.2(@langchain/core@1.1.24)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+  '@langchain/langgraph-sdk@1.6.5(@langchain/core@1.1.24)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@types/json-schema': 7.0.15
       p-queue: 9.1.0
@@ -6012,11 +6021,11 @@ snapshots:
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
 
-  '@langchain/langgraph@1.1.4(@langchain/core@1.1.24)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod-to-json-schema@3.25.1(zod@4.3.6))(zod@4.3.6)':
+  '@langchain/langgraph@1.2.0(@langchain/core@1.1.24)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod-to-json-schema@3.25.1(zod@4.3.6))(zod@4.3.6)':
     dependencies:
       '@langchain/core': 1.1.24
       '@langchain/langgraph-checkpoint': 1.0.0(@langchain/core@1.1.24)
-      '@langchain/langgraph-sdk': 1.6.2(@langchain/core@1.1.24)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@langchain/langgraph-sdk': 1.6.5(@langchain/core@1.1.24)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@standard-schema/spec': 1.1.0
       uuid: 10.0.0
       zod: 4.3.6
@@ -9021,6 +9030,76 @@ snapshots:
       - yaml
       - zod
 
+  fangorn-sdk@file:../fangorn(@sinclair/typebox@0.34.48)(@types/node@25.2.3)(bufferutil@4.1.0)(encoding@0.1.13)(express@5.2.1)(graphql@16.12.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.57.1)(tslib@2.8.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))(zod@4.3.6):
+    dependencies:
+      '@a2a-js/sdk': 0.3.10(express@5.2.1)
+      '@aztec/bb.js': 3.0.0-rc.2
+      '@clack/prompts': 1.0.1
+      '@lit-protocol/access-control-conditions': 8.0.2(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
+      '@lit-protocol/auth': 8.2.3(@sinclair/typebox@0.34.48)(bufferutil@4.1.0)(encoding@0.1.13)(react@19.2.4)(tslib@2.8.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))
+      '@lit-protocol/auth-helpers': 8.2.1(bufferutil@4.1.0)(react@19.2.4)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))
+      '@lit-protocol/lit-client': 8.3.1(@sinclair/typebox@0.34.48)(bufferutil@4.1.0)(encoding@0.1.13)(react@19.2.4)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))
+      '@lit-protocol/networks': 8.4.1(@sinclair/typebox@0.34.48)(bufferutil@4.1.0)(react@19.2.4)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))
+      '@noble/hashes': 2.0.1
+      '@noir-lang/acvm_js': 1.0.0-beta.16
+      '@noir-lang/backend_barretenberg': 0.36.0
+      '@noir-lang/noir_js': 1.0.0-beta.15
+      '@noir-lang/noir_wasm': 1.0.0-beta.16
+      '@noir-lang/noirc_abi': 1.0.0-beta.16
+      '@rolldown/binding-linux-x64-gnu': 1.0.0-beta.59
+      '@x402/core': 2.3.1
+      '@x402/evm': 2.3.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)
+      agent0-sdk: 1.5.3(bufferutil@4.1.0)(encoding@0.1.13)(graphql@16.12.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)
+      buffer: 6.0.3
+      cid: https://codeload.github.com/multiformats/cid/tar.gz/edb1c5294ad2d8257812d7ded4941c3e0fafccf3
+      commander: 14.0.3
+      dotenv: 17.3.1
+      ethers: 6.16.0(bufferutil@4.1.0)(utf-8-validate@5.0.10)
+      imurmurhash: 0.1.4
+      multiformats: 13.4.2
+      node-localstorage: 3.0.5
+      pinata: 2.5.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      solc: 0.8.33
+      types: link:@x402/core/types
+      viem: 2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6)
+      vite: 7.3.1(@types/node@25.2.3)
+      vite-plugin-node-polyfills: 0.17.0(rollup@4.57.1)(vite@7.3.1(@types/node@25.2.3))
+    transitivePeerDependencies:
+      - '@bufbuild/protobuf'
+      - '@grpc/grpc-js'
+      - '@sinclair/typebox'
+      - '@tanstack/query-core'
+      - '@types/node'
+      - '@types/react'
+      - arktype
+      - bufferutil
+      - debug
+      - encoding
+      - express
+      - graphql
+      - immer
+      - jiti
+      - less
+      - lightningcss
+      - openapi-types
+      - react
+      - react-dom
+      - rollup
+      - sass
+      - sass-embedded
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+      - tslib
+      - tsx
+      - typescript
+      - use-sync-external-store
+      - utf-8-validate
+      - valibot
+      - yaml
+      - zod
+
   fast-deep-equal@3.1.3: {}
 
   fast-fifo@1.3.2: {}
@@ -9723,7 +9802,7 @@ snapshots:
   langchain@1.2.24(@langchain/core@1.1.24)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod-to-json-schema@3.25.1(zod@4.3.6)):
     dependencies:
       '@langchain/core': 1.1.24
-      '@langchain/langgraph': 1.1.4(@langchain/core@1.1.24)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod-to-json-schema@3.25.1(zod@4.3.6))(zod@4.3.6)
+      '@langchain/langgraph': 1.2.0(@langchain/core@1.1.24)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod-to-json-schema@3.25.1(zod@4.3.6))(zod@4.3.6)
       '@langchain/langgraph-checkpoint': 1.0.0(@langchain/core@1.1.24)
       langsmith: 0.5.4
       uuid: 10.0.0
@@ -11269,7 +11348,7 @@ snapshots:
       chalk: 5.6.2
       cors: 2.8.6
       express: 5.2.1
-      fangorn-sdk: 0.0.5(@sinclair/typebox@0.34.48)(@types/node@25.2.3)(bufferutil@4.1.0)(encoding@0.1.13)(express@5.2.1)(graphql@16.12.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.57.1)(tslib@2.8.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))(zod@4.3.6)
+      fangorn-sdk: file:../fangorn(@sinclair/typebox@0.34.48)(@types/node@25.2.3)(bufferutil@4.1.0)(encoding@0.1.13)(express@5.2.1)(graphql@16.12.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.57.1)(tslib@2.8.1)(typescript@5.9.3)(utf-8-validate@5.0.10)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@4.3.6))(zod@4.3.6)
       fetch: 1.1.0
       pinata: 2.5.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       signer: link:@x402/evm/signer
