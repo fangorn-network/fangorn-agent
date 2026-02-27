@@ -31,7 +31,7 @@ export class ToolBay {
     constructor(toolboxes: Toolbox[]) {
         toolboxes.forEach(tb => {
             this.toolboxes.set(tb.name, tb);
-            this.tools.set(tb.name, tb.getToolboxTool());
+            this.tools.set(tb.name, tb.getToolboxAsTool());
         })
     }
 
@@ -77,7 +77,7 @@ export class ToolBay {
     resetToolBay() {
         console.log("console.log - reset toolbay")
         this.tools.clear()
-        this.toolboxes.forEach(tb => this.tools.set(tb.name, tb.getToolboxTool()))
+        this.toolboxes.forEach(tb => this.tools.set(tb.name, tb.getToolboxAsTool()))
         this.dirty = true;
     }
 }

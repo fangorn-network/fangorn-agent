@@ -209,7 +209,7 @@ export class FangornAgentToolbox implements Toolbox{
   }
 
 
-public getToolboxTool(): DynamicStructuredTool {
+public getToolboxAsTool(): DynamicStructuredTool {
 
   const fangornAgentToolboxTool = tool(
     async () => {

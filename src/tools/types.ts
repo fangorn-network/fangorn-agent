@@ -3,7 +3,7 @@ import { DynamicStructuredTool } from "@langchain/core/tools";
 export interface Toolbox {
     name: string
     getTools(): DynamicStructuredTool[];
-    getToolboxTool(): DynamicStructuredTool;
+    getToolboxAsTool(): DynamicStructuredTool;
 }
 
 export interface AsyncFactory<T> {
