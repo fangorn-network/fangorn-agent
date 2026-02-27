@@ -1,4 +1,5 @@
 import { gmail_v1 } from "googleapis";
+import { gmailConfig } from '../../../config.js'
 
 export function parseEmail(message: gmail_v1.Schema$Message) {
 
@@ -49,6 +50,7 @@ export function encodeEmail(to: string, subject: string, body: string, replyToMe
   }
 
   lines.push('', body);
+  lines.push(`\n-- ${gmailConfig.agentSignoff}`)
 
   return Buffer.from(lines.join('\n')).toString('base64url');
 }

@@ -33,8 +33,6 @@ export class GmailToolbox implements Toolbox {
       async ({recipient, subject, message}) => {
         console.log("console.log - agent called fangornAgentToolboxTool tool");
 
-        message.concat('\n-Coleman\'s Fangorn Agent')
-
         const res = await this.gmailClient.users.messages.send({
             userId: 'me',
             requestBody: {raw: encodeEmail(recipient, subject, message)}

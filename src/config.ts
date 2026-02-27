@@ -35,9 +35,12 @@ const gmailClientSecret = process.env.GMAIL_CLIENT_SECRET
 if (!gmailClientSecret) throw new Error("No gmail client secret found")
 const gmailRefreshToken = process.env.GMAIL_REFRESH_TOKEN
 if (!gmailRefreshToken) throw new Error("No gmail refresh token found")
+const agentSignoff = process.env.AGENT_SIGNOFF;
+if (!agentSignoff) throw new Error("No agent signoff found")
 
 export const gmailConfig = {
     gmailClientId,
     gmailClientSecret,
-    gmailRefreshToken
+    gmailRefreshToken,
+    agentSignoff
 }
