@@ -26,6 +26,7 @@
     "agent0-sdk": "^1.5.3",
     "dotenv": "^17.2.4",
     "fangorn-sdk": "0.0.5",
+    "googleapis": "^171.4.0",
     "langchain": "^1.2.14",
     "viem": "^2.45.0",
     "x402f": "file:../x402f",
