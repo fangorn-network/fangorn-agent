@@ -8,7 +8,7 @@ import fs from "fs";
 import { Toolbox } from "../../types.js";
 import { arbitrumSepoliaChainId } from "../../../constants.js";
 import { x402fToolboxConfig } from "../../../config.js";
-import {getAgent0Sdk} from "./utils.js";
+import { getAgent0Sdk } from "./utils.js";
 
 export class FangornAgentToolbox implements Toolbox {
   private agent0Sdk: SDK;
