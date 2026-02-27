@@ -1,8 +1,11 @@
 import readline from "readline/promises";
-import {systemPrompt, systemPromptFooter, systemPromptHeader} from "./constants.js";
+import {
+  systemPrompt,
+  systemPromptFooter,
+  systemPromptHeader,
+} from "./constants.js";
 import { ChatOllama } from "@langchain/ollama";
 import { ToolBay } from "./tools/toolbay.js";
-
 
 export class FangornAgent {
   private model: ChatOllama;
@@ -30,10 +33,7 @@ export class FangornAgent {
     // messages is initially just the user query + system message,
     // but later it will also collect the model's
     // outputs in order to continue decision making.
-    const messages: any[] = [
-      systemPrompt,
-      { role: "user", content: query },
-    ];
+    const messages: any[] = [systemPrompt, { role: "user", content: query }];
 
     console.log("Query received");
     let modelWithTools = this.model.bindTools(this.toolbay.consumeDirty());
