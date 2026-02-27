@@ -96,7 +96,7 @@ const fangornAgentToolboxTool = tool(
     );
 ```
 
-You can see that it doesn't actually *do* anything other than let the agent know that it has new tools. The magic really occurs because the tools have already been updated, the toolbay is marked as dirty, and this response is returned causing the agent loop to start from the beginning with the dirty toolbay.
+You can see that it doesn't actually *do* anything other than let the agent know that it has new tools. By the time the agent has received this response, the magic really already occurred because the tools have already been updated, the toolbay has been marked as dirty, and agent has been prompted to start the agent loop from the beginning with the dirty toolbay (and thus new tools).
 
 #### Tools
 
