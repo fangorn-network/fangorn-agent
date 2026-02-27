@@ -5,15 +5,10 @@ import { privateKeyToAccount } from "viem/accounts";
 import { createFangornMiddleware, FangornX402Middleware } from "x402f";
 import { SDK } from "agent0-sdk";
 import fs from "fs";
-import { Toolbox } from "../types.js";
-import {
-  arbitrumSepoliaChainId,
-  arbitrumSepoliaRegistryOverrides,
-  arbitrumSepoliaRpcUrl,
-  arbitrumSepoliaSubgraphOverrides,
-  arbitrumSepoliaSubgraphUrl,
-} from "../../constants.js";
-import { x402fToolboxConfig } from "../../config.js";
+import { Toolbox } from "../../types.js";
+import { arbitrumSepoliaChainId } from "../../../constants.js";
+import { x402fToolboxConfig } from "../../../config.js";
+import {getAgent0Sdk} from "./utils.js";
 
 export class FangornAgentToolbox implements Toolbox {
   private agent0Sdk: SDK;
@@ -27,9 +22,8 @@ export class FangornAgentToolbox implements Toolbox {
     const pinataGateway = x402fToolboxConfig.pinataGateway;
     const domain = x402fToolboxConfig.domain;
 
-    const account = privateKeyToAccount(key as Hex);
     const walletClient = createWalletClient({
-      account,
+      account: privateKeyToAccount(key as Hex),
       chain: config.chain as Chain | undefined,
       transport: http(config.rpcUrl),
     });
@@ -42,28 +36,7 @@ export class FangornAgentToolbox implements Toolbox {
       pinataGateway,
     );
 
-    let agent0Sdk: SDK;
-
-    if (config.chain.id === arbitrumSepoliaChainId) {
-      agent0Sdk = new SDK({
-        chainId: arbitrumSepoliaChainId,
-        rpcUrl: arbitrumSepoliaRpcUrl,
-        subgraphUrl: arbitrumSepoliaSubgraphUrl,
-        registryOverrides: arbitrumSepoliaRegistryOverrides,
-        subgraphOverrides: arbitrumSepoliaSubgraphOverrides,
-        ipfs: "pinata",
-        pinataJwt,
-        privateKey: key,
-      });
-    } else {
-      agent0Sdk = new SDK({
-        chainId: config.chain.id,
-        rpcUrl: config.chain.rpcUrls.default.http[0],
-        ipfs: "pinata",
-        pinataJwt,
-        privateKey: key,
-      });
-    }
+    const agent0Sdk: SDK = getAgent0Sdk(config, key, pinataJwt);
 
     return new FangornAgentToolbox(x402fClient, agent0Sdk);
   }
@@ -71,6 +44,28 @@ export class FangornAgentToolbox implements Toolbox {
   constructor(x402fClient: FangornX402Middleware, agent0Sdk: SDK) {
     this.agent0Sdk = agent0Sdk;
     this.x402fClient = x402fClient;
+  }
+
+  public getToolboxAsTool(): DynamicStructuredTool {
+    const fangornAgentToolboxTool = tool(
+      async () => {
+        console.log("console.log - agent called fangornAgentToolboxTool tool");
+
+        return JSON.stringify({
+          status: 200,
+          statusText: "OK",
+          result:
+            "Agent tools are now available. You now have access to: search_agents, get_agent_card, call_x402f_agent. Re-plan and use them to complete the task.",
+        });
+      },
+      {
+        name: this.name,
+        description:
+          "Access agent tools for searching agents, retrieving agent cards, and calling x402f-enabled agents. Call this first before attempting any agent related tasks.",
+        schema: z.object({}),
+      },
+    );
+    return fangornAgentToolboxTool;
   }
 
   public getTools(): DynamicStructuredTool[] {
@@ -182,27 +177,5 @@ export class FangornAgentToolbox implements Toolbox {
     );
 
     return [searchAgents, getAgentCard, callx402fAgent];
-  }
-
-  public getToolboxAsTool(): DynamicStructuredTool {
-    const fangornAgentToolboxTool = tool(
-      async () => {
-        console.log("console.log - agent called fangornAgentToolboxTool tool");
-
-        return JSON.stringify({
-          status: 200,
-          statusText: "OK",
-          message:
-            "Agent tools are now available. You now have access to: search_agents, get_agent_card, call_x402f_agent. Re-plan and use them to complete the task.",
-        });
-      },
-      {
-        name: this.name,
-        description:
-          "Access agent tools for searching agents, retrieving agent cards, and calling x402f-enabled agents. Call this first before attempting any agent related tasks.",
-        schema: z.object({}),
-      },
-    );
-    return fangornAgentToolboxTool;
   }
 }
