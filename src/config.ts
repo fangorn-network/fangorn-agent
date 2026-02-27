@@ -18,13 +18,13 @@ if (!pinataJwt) throw new Error("No pinataJWT provided");
 const pinataGateway = process.env.PINATA_GATEWAY;
 if (!pinataGateway) throw new Error("No pinataGateway provided");
 
-const domain = process.env.DOMAIN ? process.env.DOMAIN : 'localhost';  
+const domain = process.env.DOMAIN ? process.env.DOMAIN : "localhost";
 
 export const x402fToolboxConfig = {
-    key,
-    envChain,
-    fangornConfig: config,
-    pinataJwt,
-    pinataGateway,
-    domain
-}
+  key,
+  envChain,
+  fangornConfig: config,
+  pinataJwt,
+  pinataGateway,
+  domain,
+};

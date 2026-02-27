@@ -6,8 +6,14 @@ import { createFangornMiddleware, FangornX402Middleware } from "x402f";
 import { SDK } from "agent0-sdk";
 import fs from "fs";
 import { Toolbox } from "../../types.js";
-import {arbitrumSepoliaChainId, arbitrumSepoliaRegistryOverrides, arbitrumSepoliaRpcUrl, arbitrumSepoliaSubgraphOverrides, arbitrumSepoliaSubgraphUrl} from "./constants.js"
-import { x402fToolboxConfig } from "../../../config.js"
+import {
+  arbitrumSepoliaChainId,
+  arbitrumSepoliaRegistryOverrides,
+  arbitrumSepoliaRpcUrl,
+  arbitrumSepoliaSubgraphOverrides,
+  arbitrumSepoliaSubgraphUrl,
+} from "./constants.js";
+import { x402fToolboxConfig } from "../../../config.js";
 
 export class FangornAgentToolbox implements Toolbox {
   private agent0Sdk: SDK;
@@ -15,13 +21,11 @@ export class FangornAgentToolbox implements Toolbox {
   public name: string = "x402f_toolbox";
 
   static async init(): Promise<FangornAgentToolbox> {
-
     const key = x402fToolboxConfig.key;
     const config = x402fToolboxConfig.fangornConfig;
     const pinataJwt = x402fToolboxConfig.pinataJwt;
     const pinataGateway = x402fToolboxConfig.pinataGateway;
     const domain = x402fToolboxConfig.domain;
-   
 
     const account = privateKeyToAccount(key as Hex);
     const walletClient = createWalletClient({
@@ -44,7 +48,7 @@ export class FangornAgentToolbox implements Toolbox {
       agent0Sdk = new SDK({
         chainId: arbitrumSepoliaChainId,
         rpcUrl: arbitrumSepoliaRpcUrl,
-        subgraphUrl:arbitrumSepoliaSubgraphUrl,
+        subgraphUrl: arbitrumSepoliaSubgraphUrl,
         registryOverrides: arbitrumSepoliaRegistryOverrides,
         subgraphOverrides: arbitrumSepoliaSubgraphOverrides,
         ipfs: "pinata",
