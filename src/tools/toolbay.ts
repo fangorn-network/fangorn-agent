@@ -1,5 +1,5 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
-import { FangornAgentToolbox } from "./toolboxes/x402f/x402fToolbox.js";
+import { FangornAgentToolbox } from "./toolboxes/x402fToolbox.js";
 import { initializeToolbox, Toolbox } from "./types.js";
 
 // Examples of a toolbox:

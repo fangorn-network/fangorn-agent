@@ -5,15 +5,15 @@ import { privateKeyToAccount } from "viem/accounts";
 import { createFangornMiddleware, FangornX402Middleware } from "x402f";
 import { SDK } from "agent0-sdk";
 import fs from "fs";
-import { Toolbox } from "../../types.js";
+import { Toolbox } from "../types.js";
 import {
   arbitrumSepoliaChainId,
   arbitrumSepoliaRegistryOverrides,
   arbitrumSepoliaRpcUrl,
   arbitrumSepoliaSubgraphOverrides,
   arbitrumSepoliaSubgraphUrl,
-} from "./constants.js";
-import { x402fToolboxConfig } from "../../../config.js";
+} from "../../constants.js";
+import { x402fToolboxConfig } from "../../config.js";
 
 export class FangornAgentToolbox implements Toolbox {
   private agent0Sdk: SDK;
@@ -82,7 +82,7 @@ export class FangornAgentToolbox implements Toolbox {
         try {
           const agentResults = await this.agent0Sdk.searchAgents({
             name: agentName,
-            chains: [421614],
+            chains: [arbitrumSepoliaChainId],
           });
 
           if (agentResults.length > 0) {
