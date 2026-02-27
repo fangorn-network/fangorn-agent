@@ -8,7 +8,7 @@
 
 ## To run
 
-1. Run `cp .env.example .env` and fill in the information
+1. Run `cp env.example .env` and fill in the information
 1. Run `pnpm i` at the root of the project
 1. Run `npm run dev`
 
