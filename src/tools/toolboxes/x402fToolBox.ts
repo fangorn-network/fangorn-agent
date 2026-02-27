@@ -7,15 +7,19 @@ import { FangornConfig } from "fangorn-sdk";
 import { createFangornMiddleware, FangornX402Middleware } from "x402f";
 import { SDK } from "agent0-sdk";
 import fs from 'fs';
+import { Toolbox } from '../types.js'
 
 dotenv.config();
 
-export class LocalAgentMcp {
+export class AgentsToolbox implements Toolbox{
+
   private agent0Sdk: SDK;
-  private localTools: DynamicStructuredTool[];
+//   private tools: DynamicStructuredTool[];
   private x402fClient: FangornX402Middleware;
 
-  static async create(): Promise<LocalAgentMcp> {
+  public name: string;
+
+  static async init(): Promise<AgentsToolbox> {
     const key = process.env.ETH_PRIVATE_KEY;
     if (!key) throw new Error("No private key found");
     const envChain = process.env.CHAIN;
@@ -82,20 +86,16 @@ export class LocalAgentMcp {
       });
     }
 
-    return new LocalAgentMcp(x402fClient, agent0Sdk);
+    return new AgentsToolbox(x402fClient, agent0Sdk);
   }
 
   constructor(x402fClient: FangornX402Middleware, agent0Sdk: SDK) {
-    this.localTools = this.buildTools();
     this.agent0Sdk = agent0Sdk;
     this.x402fClient = x402fClient;
+    this.name = "agents_toolbox"
   }
 
-  getLocalTools(): DynamicStructuredTool[] {
-    return this.localTools;
-  }
-
-  private buildTools(): DynamicStructuredTool[] {
+  public getTools(): DynamicStructuredTool[] {
 
     const searchAgents = tool(
       async ({ agentName }) => {
@@ -207,4 +207,26 @@ export class LocalAgentMcp {
 
     return [searchAgents, getAgentCard, callx402fAgent];
   }
+
+
+public getToolboxTool(): DynamicStructuredTool {
+
+  const x402fCategoryTool = tool(
+    async () => {
+      console.log("console.log - agent called agent_tools category tool");
+
+      return JSON.stringify({
+        status: 200,
+        statusText: "OK",
+        message: "agent tools are now available. You now have access to: search_agents, get_agent_card, call_x402f_agent. Re-plan and use them to complete the task.",
+      });
+    },
+    {
+      name: "agents_toolbox",
+      description: "Access agent tools for searching agents, retrieving agent cards, and calling x402f-enabled agents. Call this first before attempting any agent related tasks.",
+      schema: z.object({}),
+    }
+  );
+  return x402fCategoryTool;
+}
 }

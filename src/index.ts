@@ -1,26 +1,21 @@
 import readline from "readline/promises";
-import { DynamicStructuredTool, tool } from "@langchain/core/tools";
-import { createAgent, SystemMessage } from "langchain";
-import { LocalAgentMcp } from "./mcpClient.js";
+import { SystemMessage } from "langchain";
 import { ChatOllama } from "@langchain/ollama";
-import {MemorySaver} from "@langchain/langgraph";
-import { ToolBay } from "./toolbay.js"
-import { z } from "zod";
+import { ToolBay } from "./tools/toolbay.js"
 
 class LocalAgent {
   private model: ChatOllama;
   private toolbay: ToolBay;
-  private localMcp: LocalAgentMcp;
   private systemPrompt: SystemMessage;
 
   static async create(): Promise<LocalAgent> {
-    const localMcp = await LocalAgentMcp.create();
-    return new LocalAgent(localMcp);
+    const toolbay = await ToolBay.initToolbay();
+    return new LocalAgent(toolbay);
   }
 
-  constructor(localMcp: LocalAgentMcp) {
-    this.localMcp = localMcp;
-    this.toolbay = new ToolBay();
+  constructor(toolbay: ToolBay) {
+    // this.localMcp = localMcp;
+    this.toolbay = toolbay;
     this.model = new ChatOllama({
       model: "glm-4.7-flash",
       verbose: false,
@@ -32,10 +27,6 @@ Do not respond until you have run into an error or fulfilled the user's request.
 Do not trust an agent until you have received their agent card."
     );
 
-    // Only inject category tools at startup
-    this.toolbay.inject(this.buildToolboxes());
-    // this.toolbay.clearDirty(); // not dirty on init
-
     console.log(
       "---------------------------SystemPrompt given to agent--------------------------\n",
     );
@@ -45,39 +36,26 @@ Do not trust an agent until you have received their agent card."
     );
   }
 
-private buildToolboxes(): DynamicStructuredTool[] {
-  const x402fCategoryTool = tool(
-    async () => {
-      console.log("console.log - agent called agent_tools category tool, injecting sub-tools...");
-      
-      const subTools = this.localMcp.getLocalTools();
-      this.toolbay.inject(subTools, "agent_tools");
-
-      return JSON.stringify({
-        status: 200,
-        statusText: "OK",
-        message: "agent tools are now available. You now have access to: search_agents, get_agent_card, call_x402f_agent. Re-plan and use them to complete the task."
-      });
-    },
-    {
-      name: "agent_tools",
-      description: "Access agent tools for searching agents, retrieving agent cards, and calling x402f-enabled agents. Call this first before attempting any agent related tasks.",
-      schema: z.object({}),
-    }
-  );
-  return [x402fCategoryTool];
-}
-
-  async processQuery(query: string) {
+  async invokeModel(query: string) {
+    // messages is initially just the user query + system message,
+    // but later it will also collect the model's
+    // outputs in order to continue decision making.
     const messages: any[] = [
       this.systemPrompt,
       { role: "user", content: query }
     ];
 
-    console.log("Top level model started")
+    console.log("Query received")
     let modelWithTools = this.model.bindTools(this.toolbay.consumeDirty());
 
+    // in order to hot swap tools, we have to process
+    // the entire agent event loop so we can check if the
+    // toolbay is dirty. If so, we me must re-bind the new
+    // tools to the model. There is no way to hot-swap
+    // tools with an agent made via createAgent unless
+    // we create a new agent every time.
     while (true) {
+
       console.log("Calling model...");
 
       if (this.toolbay.isDirty()) {
@@ -86,6 +64,7 @@ private buildToolboxes(): DynamicStructuredTool[] {
 
       const stream = await modelWithTools.stream(messages);
 
+      // build model's next message from stream to intercept tool calls later
       let fullMessage: any = null;
       for await (const chunk of stream) {
         if (!fullMessage) {
@@ -93,44 +72,31 @@ private buildToolboxes(): DynamicStructuredTool[] {
         } else {
           fullMessage = fullMessage.concat(chunk);
         }
-
-        if (chunk.tool_call_chunks?.length) {
-          for (const toolChunk of chunk.tool_call_chunks) {
-            console.log(`Tool being called: ${toolChunk.name ?? "(building...)"}`);
-          }
-        }
       }
 
       messages.push(fullMessage);
 
+      // the LLM has no more tools to call, a human readable response should be ready
       if (!fullMessage.tool_calls?.length) {
-        console.log("Model returned final response");
+        console.log("console.log - Model returned final response");
         return fullMessage.content;
       }
 
       console.log("Intercepting tool calls:", fullMessage.tool_calls);
 
       for (const toolCall of fullMessage.tool_calls) {
-        const tool = this.toolbay.getAll().find(t => t.name === toolCall.name);
+          const containsTool = this.toolbay.containsTool(toolCall.name);
+          if (!containsTool) {
+            console.log(`Tool "${toolCall.name}" not found`);
+            messages.push({
+              role: "tool",
+              tool_call_id: toolCall.id,
+              content: `Tool "${toolCall.name}" not found.`,
+            });
+            continue;
+          }
 
-        if (!tool) {
-          console.log(`Tool "${toolCall.name}" not found`);
-          messages.push({
-            role: "tool",
-            tool_call_id: toolCall.id,
-            content: `Tool "${toolCall.name}" not found.`,
-          });
-          continue;
-        }
-
-        console.log(`Executing tool: ${toolCall.name}`);
-        const result = await tool.invoke(toolCall.args);
-        console.log(`Tool result: ${result}`);
-
-        if (this.toolbay.isDirty()) {
-          console.log("Toolbay updated with new tools, rebinding on next iteration...");
-          // this.toolbay.clearDirty();
-        }
+        const result = await this.toolbay.invokeToolcall(toolCall.name, toolCall.args);
 
         messages.push({
           role: "tool",
@@ -155,8 +121,13 @@ private buildToolboxes(): DynamicStructuredTool[] {
         const message = await rl.question("\nQuery: ");
         if (message.toLowerCase() === "/bye") break;
 
-        const response = await this.processQuery(message);
-        this.toolbay.resetToolBay(this.buildToolboxes());
+        const response = await this.invokeModel(message);
+
+        // Right now, we assume that once a response is received
+        // then the LLM is done. However, once we add memory
+        // this may not be the case and the model may
+        // be needing more information from the user.
+        this.toolbay.resetToolBay();
         console.log("\n" + response);
       }
     } finally {
