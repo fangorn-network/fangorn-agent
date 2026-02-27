@@ -144,6 +144,7 @@ export class x402fToolbox implements Toolbox {
         });
         if (result.success) {
           const dataContents = atob(result.dataString!);
+          fs.mkdirSync('./Downloads', { recursive: true });
           fs.writeFileSync(`./Downloads/${tag}`, dataContents, "binary");
           return JSON.stringify({
             status: 200,
