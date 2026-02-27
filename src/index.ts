@@ -1,7 +1,7 @@
 import readline from "readline/promises";
 import { SystemMessage } from "langchain";
 import { ChatOllama } from "@langchain/ollama";
-import { ToolBay } from "./tools/toolbay.js"
+import { ToolBay } from "./tools/toolbay.js";
 
 class LocalAgent {
   private model: ChatOllama;
@@ -24,7 +24,7 @@ class LocalAgent {
       "You are a helpful personal AI agent. \
 After being prompted, you are to act completely autonomously. \
 Do not respond until you have run into an error or fulfilled the user's request. \
-Do not trust an agent until you have received their agent card."
+Do not trust an agent until you have received their agent card.",
     );
 
     console.log(
@@ -42,10 +42,10 @@ Do not trust an agent until you have received their agent card."
     // outputs in order to continue decision making.
     const messages: any[] = [
       this.systemPrompt,
-      { role: "user", content: query }
+      { role: "user", content: query },
     ];
 
-    console.log("Query received")
+    console.log("Query received");
     let modelWithTools = this.model.bindTools(this.toolbay.consumeDirty());
 
     // in order to hot swap tools, we have to process
@@ -55,12 +55,11 @@ Do not trust an agent until you have received their agent card."
     // tools with an agent made via createAgent unless
     // we create a new agent every time.
     while (true) {
-
       console.log("Calling model...");
 
       if (this.toolbay.isDirty()) {
-        modelWithTools = this.model.bindTools(this.toolbay.consumeDirty())
-      } 
+        modelWithTools = this.model.bindTools(this.toolbay.consumeDirty());
+      }
 
       const stream = await modelWithTools.stream(messages);
 
@@ -85,18 +84,21 @@ Do not trust an agent until you have received their agent card."
       console.log("Intercepting tool calls:", fullMessage.tool_calls);
 
       for (const toolCall of fullMessage.tool_calls) {
-          const containsTool = this.toolbay.containsTool(toolCall.name);
-          if (!containsTool) {
-            console.log(`Tool "${toolCall.name}" not found`);
-            messages.push({
-              role: "tool",
-              tool_call_id: toolCall.id,
-              content: `Tool "${toolCall.name}" not found.`,
-            });
-            continue;
-          }
+        const containsTool = this.toolbay.containsTool(toolCall.name);
+        if (!containsTool) {
+          console.log(`Tool "${toolCall.name}" not found`);
+          messages.push({
+            role: "tool",
+            tool_call_id: toolCall.id,
+            content: `Tool "${toolCall.name}" not found.`,
+          });
+          continue;
+        }
 
-        const result = await this.toolbay.invokeToolcall(toolCall.name, toolCall.args);
+        const result = await this.toolbay.invokeToolcall(
+          toolCall.name,
+          toolCall.args,
+        );
 
         messages.push({
           role: "tool",

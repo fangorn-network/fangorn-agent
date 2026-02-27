@@ -6,17 +6,14 @@ import { privateKeyToAccount } from "viem/accounts";
 import { FangornConfig } from "fangorn-sdk";
 import { createFangornMiddleware, FangornX402Middleware } from "x402f";
 import { SDK } from "agent0-sdk";
-import fs from 'fs';
-import { Toolbox } from '../types.js'
+import fs from "fs";
+import { Toolbox } from "../types.js";
 
 dotenv.config();
 
-export class FangornAgentToolbox implements Toolbox{
-
+export class FangornAgentToolbox implements Toolbox {
   private agent0Sdk: SDK;
-//   private tools: DynamicStructuredTool[];
   private x402fClient: FangornX402Middleware;
-
   public name: string;
 
   static async init(): Promise<FangornAgentToolbox> {
@@ -92,11 +89,10 @@ export class FangornAgentToolbox implements Toolbox{
   constructor(x402fClient: FangornX402Middleware, agent0Sdk: SDK) {
     this.agent0Sdk = agent0Sdk;
     this.x402fClient = x402fClient;
-    this.name = "fangorn_agent_toolbox"
+    this.name = "fangorn_agent_toolbox";
   }
 
   public getTools(): DynamicStructuredTool[] {
-
     const searchAgents = tool(
       async ({ agentName }) => {
         console.log(
@@ -109,11 +105,14 @@ export class FangornAgentToolbox implements Toolbox{
           });
 
           if (agentResults.length > 0) {
-            return JSON.stringify({status: 200, statusText: "OK", agentResults});
+            return JSON.stringify({
+              status: 200,
+              statusText: "OK",
+              agentResults,
+            });
           } else {
-            return JSON.stringify({status: 204, statusText: "No Content"})
+            return JSON.stringify({ status: 204, statusText: "No Content" });
           }
-
         } catch (error) {
           console.log("Something went wrong: ", error);
           return JSON.stringify(error);
@@ -121,14 +120,9 @@ export class FangornAgentToolbox implements Toolbox{
       },
       {
         name: "search_agents",
-        description:
-          "Look for agents that can complete user requests",
+        description: "Look for agents that can complete user requests",
         schema: z.object({
-          agentName: z
-            .string()
-            .describe(
-              "The name of the agent to find",
-            ),
+          agentName: z.string().describe("The name of the agent to find"),
         }),
       },
     );
@@ -138,11 +132,13 @@ export class FangornAgentToolbox implements Toolbox{
         console.log(
           `console.log - agent called getAgentCard tool with url: ${a2aUrl}`,
         );
-        const response = await fetch(
-          `${a2aUrl}/.well-known/agent-card.json`,
-        );
+        const response = await fetch(`${a2aUrl}/.well-known/agent-card.json`);
         const result = await response.json();
-        return JSON.stringify({status: response.status, statusText: response.statusText, agentCard: result});
+        return JSON.stringify({
+          status: response.status,
+          statusText: response.statusText,
+          agentCard: result,
+        });
       },
       {
         name: "get_agent_card",
@@ -151,9 +147,7 @@ export class FangornAgentToolbox implements Toolbox{
         schema: z.object({
           a2aUrl: z
             .string()
-            .describe(
-              "The url advertised in the a2a field by the agent",
-            ),
+            .describe("The url advertised in the a2a field by the agent"),
         }),
       },
     );
@@ -173,34 +167,35 @@ export class FangornAgentToolbox implements Toolbox{
           owner: hexId,
         });
         if (result.success) {
-          const dataContents = atob(result.dataString!)
-          fs.writeFileSync(`./Downloads/${tag}`, dataContents, 'binary')
+          const dataContents = atob(result.dataString!);
+          fs.writeFileSync(`./Downloads/${tag}`, dataContents, "binary");
           return JSON.stringify({
             status: 200,
             statusText: "OK",
-            result: `Notify the user that the request file has been downloaded to Downloads/${tag}`
+            result: `Notify the user that the request file has been downloaded to Downloads/${tag}`,
           });
         } else {
-          return JSON.stringify({ status: 500, result: 'Notify the user that when you went to fetch the file, something went wrong.' });
+          return JSON.stringify({
+            status: 500,
+            result:
+              "Notify the user that when you went to fetch the file, something went wrong.",
+          });
         }
       },
       {
         name: "call_x402f_agent",
-        description:
-          "Call an x402f enabled agent",
+        description: "Call an x402f enabled agent",
         schema: z.object({
           agentName: z
             .string()
             .describe("Name of the agent that provides the data"),
-          tag: z
-            .string()
-            .describe("Name of the file the user is looking for"),
+          tag: z.string().describe("Name of the file the user is looking for"),
           agentCardUrl: z
             .string()
             .describe("URL that is advertised in an agent's agent card"),
           owner: z
             .string()
-            .describe("The address advertised in the owner field by the agent")
+            .describe("The address advertised in the owner field by the agent"),
         }),
       },
     );
@@ -208,25 +203,25 @@ export class FangornAgentToolbox implements Toolbox{
     return [searchAgents, getAgentCard, callx402fAgent];
   }
 
+  public getToolboxAsTool(): DynamicStructuredTool {
+    const fangornAgentToolboxTool = tool(
+      async () => {
+        console.log("console.log - agent called fangornAgentToolboxTool tool");
 
-public getToolboxAsTool(): DynamicStructuredTool {
-
-  const fangornAgentToolboxTool = tool(
-    async () => {
-      console.log("console.log - agent called fangornAgentToolboxTool tool");
-
-      return JSON.stringify({
-        status: 200,
-        statusText: "OK",
-        message: "Agent tools are now available. You now have access to: search_agents, get_agent_card, call_x402f_agent. Re-plan and use them to complete the task.",
-      });
-    },
-    {
-      name: "fangorn_agent_toolbox",
-      description: "Access agent tools for searching agents, retrieving agent cards, and calling x402f-enabled agents. Call this first before attempting any agent related tasks.",
-      schema: z.object({}),
-    }
-  );
-  return fangornAgentToolboxTool;
-}
+        return JSON.stringify({
+          status: 200,
+          statusText: "OK",
+          message:
+            "Agent tools are now available. You now have access to: search_agents, get_agent_card, call_x402f_agent. Re-plan and use them to complete the task.",
+        });
+      },
+      {
+        name: "fangorn_agent_toolbox",
+        description:
+          "Access agent tools for searching agents, retrieving agent cards, and calling x402f-enabled agents. Call this first before attempting any agent related tasks.",
+        schema: z.object({}),
+      },
+    );
+    return fangornAgentToolboxTool;
+  }
 }
