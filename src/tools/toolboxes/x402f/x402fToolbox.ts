@@ -1,36 +1,27 @@
 import { DynamicStructuredTool, tool } from "@langchain/core/tools";
 import { z } from "zod";
-import dotenv from "dotenv";
 import { Chain, createWalletClient, Hex, http, WalletClient } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { FangornConfig } from "fangorn-sdk";
 import { createFangornMiddleware, FangornX402Middleware } from "x402f";
 import { SDK } from "agent0-sdk";
 import fs from "fs";
-import { Toolbox } from "../types.js";
-
-dotenv.config();
+import { Toolbox } from "../../types.js";
+import {arbitrumSepoliaChainId, arbitrumSepoliaRegistryOverrides, arbitrumSepoliaRpcUrl, arbitrumSepoliaSubgraphOverrides, arbitrumSepoliaSubgraphUrl} from "./constants.js"
+import { x402fToolboxConfig } from "../../../config.js"
 
 export class FangornAgentToolbox implements Toolbox {
   private agent0Sdk: SDK;
   private x402fClient: FangornX402Middleware;
-  public name: string;
+  public name: string = "x402f_toolbox";
 
   static async init(): Promise<FangornAgentToolbox> {
-    const key = process.env.ETH_PRIVATE_KEY;
-    if (!key) throw new Error("No private key found");
-    const envChain = process.env.CHAIN;
-    console.log("chain: ", envChain);
-    if (!envChain) throw new Error("No chain specified");
-    const config =
-      envChain == "arbitrumSepolia"
-        ? FangornConfig.ArbitrumSepolia
-        : FangornConfig.BaseSepolia;
 
-    const pinataJwt = process.env.PINATA_JWT;
-    if (!pinataJwt) throw new Error("No pinataJWT provided");
-    const pinataGateway = process.env.PINATA_GATEWAY;
-    if (!pinataGateway) throw new Error("No pinataGateway provided");
+    const key = x402fToolboxConfig.key;
+    const config = x402fToolboxConfig.fangornConfig;
+    const pinataJwt = x402fToolboxConfig.pinataJwt;
+    const pinataGateway = x402fToolboxConfig.pinataGateway;
+    const domain = x402fToolboxConfig.domain;
+   
 
     const account = privateKeyToAccount(key as Hex);
     const walletClient = createWalletClient({
@@ -38,8 +29,6 @@ export class FangornAgentToolbox implements Toolbox {
       chain: config.chain as Chain | undefined,
       transport: http(config.rpcUrl),
     });
-
-    const domain = "localhost";
 
     const x402fClient = await createFangornMiddleware(
       walletClient,
@@ -51,24 +40,13 @@ export class FangornAgentToolbox implements Toolbox {
 
     let agent0Sdk: SDK;
 
-    if (config.chain.id === 421614) {
-      const registryOverrides = {
-        421614: {
-          IDENTITY: "0x8004A818BFB912233c491871b3d84c89A494BD9e",
-          REPUTATION: "0x8004B663056A597Dffe9eCcC1965A193B7388713",
-        },
-      };
-      const subgraphOverrides = {
-        421614:
-          "https://api.studio.thegraph.com/query/1742225/erc-8004-arbitrum-sepolia/version/latest",
-      };
+    if (config.chain.id === arbitrumSepoliaChainId) {
       agent0Sdk = new SDK({
-        chainId: 421614,
-        rpcUrl: "https://sepolia-rollup.arbitrum.io/rpc",
-        subgraphUrl:
-          "https://api.studio.thegraph.com/query/1742225/erc-8004-arbitrum-sepolia/version/latest",
-        registryOverrides,
-        subgraphOverrides,
+        chainId: arbitrumSepoliaChainId,
+        rpcUrl: arbitrumSepoliaRpcUrl,
+        subgraphUrl:arbitrumSepoliaSubgraphUrl,
+        registryOverrides: arbitrumSepoliaRegistryOverrides,
+        subgraphOverrides: arbitrumSepoliaSubgraphOverrides,
         ipfs: "pinata",
         pinataJwt,
         privateKey: key,
@@ -89,7 +67,6 @@ export class FangornAgentToolbox implements Toolbox {
   constructor(x402fClient: FangornX402Middleware, agent0Sdk: SDK) {
     this.agent0Sdk = agent0Sdk;
     this.x402fClient = x402fClient;
-    this.name = "fangorn_agent_toolbox";
   }
 
   public getTools(): DynamicStructuredTool[] {
@@ -216,7 +193,7 @@ export class FangornAgentToolbox implements Toolbox {
         });
       },
       {
-        name: "fangorn_agent_toolbox",
+        name: this.name,
         description:
           "Access agent tools for searching agents, retrieving agent cards, and calling x402f-enabled agents. Call this first before attempting any agent related tasks.",
         schema: z.object({}),
