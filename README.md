@@ -121,3 +121,4 @@ Agent lookup on Arbitrum Sepolia via the agent-0 sdk
 1. When an agent calls a toolbox, it gets back ALL of the tools in the toolbox. We should investigate a way to minimize the amount of tools returned by a toolbox. One idea may be that the agent requests a specific tool from the toolbox instead of getting them all.
 2. The LLM currently runs in the same environment as the tools themselves. Although we do not give direct filesystem access, it would be best if we could further isolate the model in a docker container to minimize exposing sensitive info that may be on the computer.
 3. Integrate MCP server/client architecture into the toolbay. This will allow for an agent to connect to a remote MCP server and use the tools provided by it.
+4. Right now all of our toolboxes are included. We should consider using `clack` to allow for a user to select what toolboxes they would like to include before starting the agent.
