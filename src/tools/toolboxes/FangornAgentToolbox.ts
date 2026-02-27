@@ -11,7 +11,7 @@ import { Toolbox } from '../types.js'
 
 dotenv.config();
 
-export class AgentsToolbox implements Toolbox{
+export class FangornAgentToolbox implements Toolbox{
 
   private agent0Sdk: SDK;
 //   private tools: DynamicStructuredTool[];
@@ -19,7 +19,7 @@ export class AgentsToolbox implements Toolbox{
 
   public name: string;
 
-  static async init(): Promise<AgentsToolbox> {
+  static async init(): Promise<FangornAgentToolbox> {
     const key = process.env.ETH_PRIVATE_KEY;
     if (!key) throw new Error("No private key found");
     const envChain = process.env.CHAIN;
@@ -86,13 +86,13 @@ export class AgentsToolbox implements Toolbox{
       });
     }
 
-    return new AgentsToolbox(x402fClient, agent0Sdk);
+    return new FangornAgentToolbox(x402fClient, agent0Sdk);
   }
 
   constructor(x402fClient: FangornX402Middleware, agent0Sdk: SDK) {
     this.agent0Sdk = agent0Sdk;
     this.x402fClient = x402fClient;
-    this.name = "agents_toolbox"
+    this.name = "fangorn_agent_toolbox"
   }
 
   public getTools(): DynamicStructuredTool[] {
@@ -211,22 +211,22 @@ export class AgentsToolbox implements Toolbox{
 
 public getToolboxTool(): DynamicStructuredTool {
 
-  const x402fCategoryTool = tool(
+  const fangornAgentToolboxTool = tool(
     async () => {
-      console.log("console.log - agent called agent_tools category tool");
+      console.log("console.log - agent called fangornAgentToolboxTool tool");
 
       return JSON.stringify({
         status: 200,
         statusText: "OK",
-        message: "agent tools are now available. You now have access to: search_agents, get_agent_card, call_x402f_agent. Re-plan and use them to complete the task.",
+        message: "Agent tools are now available. You now have access to: search_agents, get_agent_card, call_x402f_agent. Re-plan and use them to complete the task.",
       });
     },
     {
-      name: "agents_toolbox",
+      name: "fangorn_agent_toolbox",
       description: "Access agent tools for searching agents, retrieving agent cards, and calling x402f-enabled agents. Call this first before attempting any agent related tasks.",
       schema: z.object({}),
     }
   );
-  return x402fCategoryTool;
+  return fangornAgentToolboxTool;
 }
 }

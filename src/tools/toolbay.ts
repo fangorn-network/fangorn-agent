@@ -1,5 +1,5 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
-import { AgentsToolbox } from "./toolboxes/x402fToolBox.js"
+import { FangornAgentToolbox } from "./toolboxes/FangornAgentToolbox.js"
 import { initializeToolbox, Toolbox } from "./types.js";
 
 // Examples of a toolbox:
@@ -20,8 +20,7 @@ export class ToolBay {
     static async initToolbay(): Promise<ToolBay> {
 
         const toolboxes = []
-        const x402fToolboxInstance = await initializeToolbox(AgentsToolbox);
-
+        const x402fToolboxInstance = await initializeToolbox(FangornAgentToolbox);
         toolboxes.push(x402fToolboxInstance)
 
         return new ToolBay(toolboxes);
