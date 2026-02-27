@@ -1,5 +1,5 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
-import { FangornAgentToolbox } from "./toolboxes/x402fToolbox/x402fToolbox.js";
+import { x402fToolbox } from "./toolboxes/x402fToolbox/x402fToolbox.js";
 import { GmailToolbox } from "./toolboxes/gmailToolbox/GmailToolbox.js";
 import { initializeToolbox, Toolbox } from "./types.js";
 
@@ -10,7 +10,7 @@ import { initializeToolbox, Toolbox } from "./types.js";
 // etc.
 // Toolboxes are a collection of tools that are local to the agent.
 export class ToolBay {
-  private tools: Map<string, DynamicStructuredTool> = new Map();
+  private currentTools: Map<string, DynamicStructuredTool> = new Map();
   private toolboxes: Map<string, Toolbox> = new Map();
 
   // The toolbay is always dirty after initialization. This will guarantee
@@ -19,7 +19,7 @@ export class ToolBay {
 
   static async initToolbay(): Promise<ToolBay> {
     const toolboxes = [];
-    const x402fToolboxInstance = await initializeToolbox(FangornAgentToolbox);
+    const x402fToolboxInstance = await initializeToolbox(x402fToolbox);
     toolboxes.push(x402fToolboxInstance);
     const gmailToolbox = await initializeToolbox(GmailToolbox)
     toolboxes.push(gmailToolbox);
@@ -31,12 +31,12 @@ export class ToolBay {
   constructor(toolboxes: Toolbox[]) {
     toolboxes.forEach((tb) => {
       this.toolboxes.set(tb.name, tb);
-      this.tools.set(tb.name, tb.getToolboxAsTool());
+      this.currentTools.set(tb.name, tb.getToolboxAsTool());
     });
   }
 
   async invokeToolcall(toolName: string, toolArgs: any[]): Promise<any> {
-    const tool = this.tools.get(toolName);
+    const tool = this.currentTools.get(toolName);
 
     if (this.toolboxes.has(toolName)) {
       const toolbox = this.toolboxes.get(toolName);
@@ -51,22 +51,22 @@ export class ToolBay {
   }
 
   inject(newTools: DynamicStructuredTool[], toolToRemove?: string) {
-    newTools.forEach((t) => this.tools.set(t.name, t));
+    newTools.forEach((t) => this.currentTools.set(t.name, t));
 
     if (toolToRemove) {
       console.log("removing toolbox from avaialable tools");
-      this.tools.delete(toolToRemove);
+      this.currentTools.delete(toolToRemove);
     }
     this.dirty = true;
   }
 
   containsTool(toolName: string) {
-    return this.tools.has(toolName);
+    return this.currentTools.has(toolName);
   }
 
   consumeDirty() {
     this.dirty = false;
-    return Array.from(this.tools.values());
+    return Array.from(this.currentTools.values());
   }
 
   isDirty() {
@@ -75,9 +75,9 @@ export class ToolBay {
 
   resetToolBay() {
     console.log("console.log - reset toolbay");
-    this.tools.clear();
+    this.currentTools.clear();
     this.toolboxes.forEach((tb) =>
-      this.tools.set(tb.name, tb.getToolboxAsTool()),
+      this.currentTools.set(tb.name, tb.getToolboxAsTool()),
     );
     this.dirty = true;
   }

@@ -10,12 +10,12 @@ import { arbitrumSepoliaChainId } from "../../../constants.js";
 import { x402fToolboxConfig } from "../../../config.js";
 import { getAgent0Sdk } from "./utils.js";
 
-export class FangornAgentToolbox implements Toolbox {
+export class x402fToolbox implements Toolbox {
   private agent0Sdk: SDK;
   private x402fClient: FangornX402Middleware;
   public name: string = "x402f_toolbox";
 
-  static async init(): Promise<FangornAgentToolbox> {
+  static async init(): Promise<x402fToolbox> {
     const key = x402fToolboxConfig.key;
     const config = x402fToolboxConfig.fangornConfig;
     const pinataJwt = x402fToolboxConfig.pinataJwt;
@@ -38,7 +38,7 @@ export class FangornAgentToolbox implements Toolbox {
 
     const agent0Sdk: SDK = getAgent0Sdk(config, key, pinataJwt);
 
-    return new FangornAgentToolbox(x402fClient, agent0Sdk);
+    return new x402fToolbox(x402fClient, agent0Sdk);
   }
 
   constructor(x402fClient: FangornX402Middleware, agent0Sdk: SDK) {
