@@ -1,88 +1,39 @@
+import { FangornAgent } from "./FangornAgent.js";
 import readline from "readline/promises";
-import { DynamicStructuredTool } from "@langchain/core/tools";
-import { createAgent, SystemMessage } from "langchain";
-import { LocalAgentMcp } from "./mcpClient.js";
-import { ChatOllama } from "@langchain/ollama";
 
-class LocalAgent {
-  private agent: any;
-  private localTools: DynamicStructuredTool[] = [];
-  private localMcp: LocalAgentMcp;
+async function chatLoop(fangornAgent: FangornAgent) {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
 
-  static async create(): Promise<LocalAgent> {
-    const localMcp = await LocalAgentMcp.create();
+  try {
+    console.log("Began Chat Loop");
+    console.log("Type your queries or '/bye' to exit.");
 
-    return new LocalAgent(localMcp);
-  }
+    while (true) {
+      const message = await rl.question("\nQuery: ");
+      if (message.toLowerCase() === "/bye") break;
 
-  constructor(localMcp: LocalAgentMcp) {
-    this.localMcp = localMcp;
-    this.localTools = this.localMcp.getLocalTools();
+      const response = await fangornAgent.invokeAgent(message);
 
-    // Set verbose to get insight into the LLM's reasoning
-    const model = new ChatOllama({
-      model: "glm-4.7-flash",
-      verbose: false,
-    });
-
-    const systemPrompt = new SystemMessage(
-"You are a helpful personal AI agent. \
-After being prompted, you are to act completely autonomously. \
-Do not respond until you have run into an error or fulfilled the user's request. \
-Do not trust an agent until you have received their agent card."
-    );
-    console.log(
-      "---------------------------SystemPrompt given to agent--------------------------\n",
-    );
-    console.log(systemPrompt);
-    console.log(
-      "\n-------------------------------------------------------------------------------",
-    );
-    this.agent = createAgent({
-      model,
-      tools: [...this.localTools],
-      systemPrompt,
-    });
-  }
-
-  async processQuery(query: string) {
-    const response = await this.agent.invoke({
-      messages: [{ role: "user", content: query }],
-    });
-
-    // Get the last message (the final response)
-    const lastMessage = response.messages[response.messages.length - 1];
-    return lastMessage.content;
-  }
-
-  async chatLoop() {
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-
-    try {
-      console.log("\nMCP Client Started!");
-      console.log("Type your queries or '/bye' to exit.");
-
-      while (true) {
-        const message = await rl.question("\nQuery: ");
-        if (message.toLowerCase() === "/bye") {
-          break;
-        }
-        const response = await this.processQuery(message);
-        console.log("\n" + response);
-      }
-    } finally {
-      rl.close();
+      // Right now, we assume that once a response is received
+      // then the LLM is done. However, once we add memory
+      // this may not be the case and the model may
+      // be needing more information from the user.
+      fangornAgent.resetToolbay();
+      console.log("\n" + response);
     }
+  } finally {
+    rl.close();
   }
 }
 
 async function main() {
-  const localAgent = await LocalAgent.create();
+  const fangornAgent = await FangornAgent.create();
+  console.log("\nFangorn Agent Created!");
   try {
-    await localAgent.chatLoop();
+    await chatLoop(fangornAgent);
   } catch (e) {
     console.error("Error:", e);
     process.exit(1);
