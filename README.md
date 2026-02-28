@@ -116,9 +116,43 @@ This toolbox is currently just a wrapper around one tool, but will later impleme
 Agent lookup on Arbitrum Sepolia via the agent-0 sdk
 `npm run search`
 
+## To run with a dockerized LLM:
+We recommend going the extra mile and isolating the LLM from the system it is running on by using Docker.
+
+### Pre-reqs
+1. Have Docker installed
+2. Install the Ollama docker [image](https://hub.docker.com/r/ollama/ollama)
+    - If you have an NVIDIA GPU you would like to use, note that there are specific instructions you must follow to allow for it to be used in a Docker environment.
+3. Make run_agent.sh and executable `chmod +x run_agent.sh`
+4. Run the ollama container then download the `qwen3:8b` model `docker exec -it ollama ollama pull qwen3:8b`.
+
+#### run_agent.sh
+This runs the LLM within the Docker container, builds the agent, then prompts for user input once everything is running.
+
+> **Note:** If you have an issue with port 11434 being taken, verify that Ollama (not the container) isn't starting on system startup and taking that port.
+
+#### Useful commands
+- **Running the container (with GPU support)**: `docker run -d --gpus=all -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama`
+- **Running the container (CPU only)**: `docker run -d -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama`
+- **Download model (container already running):** `docker exec -it ollama ollama pull your-desired-model`
+- **Models already downloaded to the container**: `curl http://localhost:11434/api/tags`
+- **Remove model:** `docker exec -it ollama ollama rm your-desired-model`
+- **Currently running models and their memory usage**: `curl http://localhost:11434/api/ps`
+- **Stopping the container:** `docker stop ollama`
+- **Force stopping the container:** `docker kill ollama`
+- **Removing the container:** `docker rm ollama`
+
+#### Debugging port being taken (Linux)
+- Find what's using the port `sudo lsof -i :11434`
+- If it is ollama, you can check if it's running as a system service `systemctl status ollama`
+- If that's it you can stop it with: `sudo systemctl stop ollama`
+- You can also stop it from being auto-started on boot if you'd like: `sudo systemctl disable ollama`
+
+If you'd like to see what models are offered by Ollama that support tool calling, you can check [here](https://ollama.com/search?c=tools)
+
 
 # TODOs:
 1. When an agent calls a toolbox, it gets back ALL of the tools in the toolbox. We should investigate a way to minimize the amount of tools returned by a toolbox. One idea may be that the agent requests a specific tool from the toolbox instead of getting them all.
-2. The LLM currently runs in the same environment as the tools themselves. Although we do not give direct filesystem access, it would be best if we could further isolate the model in a docker container to minimize exposing sensitive info that may be on the computer.
+2. The LLM now runs within a container, but the `run_agent.sh` script should allow for more options (CPU only, GPU, what model, etc.)
 3. Integrate MCP server/client architecture into the toolbay. This will allow for an agent to connect to a remote MCP server and use the tools provided by it.
 4. Right now all of our toolboxes are included. We should consider using `clack` to allow for a user to select what toolboxes they would like to include before starting the agent.

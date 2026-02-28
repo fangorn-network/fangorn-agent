@@ -18,9 +18,13 @@ export class FangornAgent {
 
   constructor(toolbay: ToolBay) {
     this.toolbay = toolbay;
+    const ollamaPort = process.env.OLLAMA_PORT || 11434; // fallback to default if not set
+    const model = process.env.MODEL || "qwen3:8b"
+    const baseUrl = `http://localhost:${ollamaPort}`;
     this.model = new ChatOllama({
-      model: "glm-4.7-flash",
+      model,
       verbose: false,
+      baseUrl
     });
 
     // Display systemPrompt info
