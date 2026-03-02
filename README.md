@@ -32,9 +32,11 @@ Also note that the `qwen3.5:4b` model also reliably executes the available tool 
 1. Have [Docker](https://docs.docker.com/) installed
 2. Install the Ollama docker [image](https://hub.docker.com/r/ollama/ollama)
     - If you have an NVIDIA GPU you would like to use, note that there are specific instructions you must follow to allow for it to be used in a Docker environment.
-3. Make run_agent.sh an executable `chmod +x run_agent.sh`
+3. Make run_agent.sh and run_web.sh executable `chmod +x run_agent.sh` and `chmod +x run_web.sh`.
 4. Run the ollama container then download the `qwen3.5:9b` (or `qwen3.5:4b`) model `docker exec -it ollama ollama pull qwen3.5:9b`.
 5. Ensure you have `pnpm` installed
+6. Run `pnpm i` at the root of the agent project
+7. If you wish to use the web UI, run `pnpm i` at the root of the web-app directory
 (For agent calling functionality)
 6. Ensure the facilitator and resource server in the x402f project are running
 (For email functionality)
@@ -43,7 +45,8 @@ Also note that the `qwen3.5:4b` model also reliably executes the available tool 
 
 ## To run
 
-1. Run `./run_agent.sh` at the root of the project
+1. Run `./run_agent.sh` at the root of the project if you wish to interact via the command line
+2. Run `./run_web.sh` at the root of the project if you wish to interact via a web browser (uses default `localhost:3000` for UI)
 
 ## Components
 
