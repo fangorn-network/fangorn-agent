@@ -55,13 +55,13 @@ export class x402fToolbox implements Toolbox {
           status: 200,
           statusText: "OK",
           result:
-            "Agent tools are now available. You now have access to: search_agents, get_agent_card, call_x402f_agent. Re-plan and use them to complete the task.",
+            "Agent tools are now available. You now have access to: search_agents_erc_8004, get_agent_card, call_x402f_agent. Re-plan and use them to complete the task.",
         });
       },
       {
         name: this.name,
         description:
-          "Access agent tools for searching agents, retrieving agent cards, and calling x402f-enabled agents. Call this first before attempting any agent related tasks.",
+          "Access agent tools for searching agents, retrieving agent cards, and calling x402f-enabled agents. Call this before attempting any agent related tasks.",
         schema: z.object({}),
       },
     );
@@ -69,22 +69,22 @@ export class x402fToolbox implements Toolbox {
   }
 
   public getTools(): DynamicStructuredTool[] {
-    const searchAgents = tool(
+    const searchAgentsErc8004 = tool(
       async ({ agentName }) => {
         console.log(
-          `console.log - agent called searchAgents tool using agent name: ${agentName}`,
+          `console.log - agent called searchAgentsErc8004 tool using agent name: ${agentName}`,
         );
         try {
-          const agentResults = await this.agent0Sdk.searchAgents({
+          const erc8004Entry = await this.agent0Sdk.searchAgents({
             name: agentName,
             chains: [arbitrumSepoliaChainId],
           });
 
-          if (agentResults.length > 0) {
+          if (erc8004Entry.length > 0) {
             return JSON.stringify({
               status: 200,
               statusText: "OK",
-              agentResults,
+              erc8004Entry,
             });
           } else {
             return JSON.stringify({ status: 204, statusText: "No Content" });
@@ -95,10 +95,10 @@ export class x402fToolbox implements Toolbox {
         }
       },
       {
-        name: "search_agents",
-        description: "Look for agents that can complete user requests",
+        name: "search_agents_erc_8004",
+        description: "Finds agents that can complete user requests and retrieves their ERC-8004 entry.",
         schema: z.object({
-          agentName: z.string().describe("The name of the agent to find"),
+          agentName: z.string().describe("The name of the agent to find."),
         }),
       },
     );
@@ -119,11 +119,11 @@ export class x402fToolbox implements Toolbox {
       {
         name: "get_agent_card",
         description:
-          "Finds an agent's agent card for more information about them",
+          "Finds an agent's agent card, after obtaining their ERC-8004 entry, for more information about them. Always use this after using the search_agents_erc_8004 tool.",
         schema: z.object({
           a2aUrl: z
             .string()
-            .describe("The url advertised in the a2a field by the agent"),
+            .describe("The https url advertised in the a2a field of the ERC-8004 entry."),
         }),
       },
     );
@@ -149,7 +149,7 @@ export class x402fToolbox implements Toolbox {
           return JSON.stringify({
             status: 200,
             statusText: "OK",
-            result: `Notify the user that the request file has been downloaded to Downloads/${tag}`,
+            result: `Notify the user that the request file has been downloaded to Downloads/${tag}.`,
           });
         } else {
           return JSON.stringify({
@@ -161,22 +161,22 @@ export class x402fToolbox implements Toolbox {
       },
       {
         name: "call_x402f_agent",
-        description: "Call an x402f enabled agent",
+        description: "Call an x402f enabled agent.",
         schema: z.object({
           agentName: z
             .string()
-            .describe("Name of the agent that provides the data"),
-          tag: z.string().describe("Name of the file the user is looking for"),
+            .describe("Name of the agent that provides the data."),
+          tag: z.string().describe("Name of the file the user is looking for."),
           agentCardUrl: z
             .string()
-            .describe("URL that is advertised in an agent's agent card"),
+            .describe("The https URL that is advertised in the agent's agent card."),
           owner: z
             .string()
-            .describe("The address advertised in the owner field by the agent"),
+            .describe("The address advertised in the owner field by the agent's ERC-8004 entry."),
         }),
       },
     );
 
-    return [searchAgents, getAgentCard, callx402fAgent];
+    return [searchAgentsErc8004, getAgentCard, callx402fAgent];
   }
 }

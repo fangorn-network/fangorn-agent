@@ -1,4 +1,3 @@
-import readline from "readline/promises";
 import {
   systemPrompt,
   systemPromptFooter,
@@ -18,9 +17,14 @@ export class FangornAgent {
 
   constructor(toolbay: ToolBay) {
     this.toolbay = toolbay;
+    const ollamaPort = process.env.OLLAMA_PORT || 11434; // fallback to default if not set
+    const model = process.env.MODEL || "qwen3.5:4b"
+    console.log(`running ${model} model`)
+    const baseUrl = `http://localhost:${ollamaPort}`;
     this.model = new ChatOllama({
-      model: "glm-4.7-flash",
+      model,
       verbose: false,
+      baseUrl
     });
 
     // Display systemPrompt info
@@ -37,6 +41,7 @@ export class FangornAgent {
 
     console.log("Query received");
     let modelWithTools = this.model.bindTools(this.toolbay.consumeDirty());
+    console.log("Beginning agent loop...");
 
     // in order to hot swap tools, we have to process
     // the entire agent event loop so we can check if the
@@ -45,7 +50,6 @@ export class FangornAgent {
     // tools with an agent made via createAgent unless
     // we create a new agent every time.
     while (true) {
-      console.log("Calling model...");
 
       if (this.toolbay.isDirty()) {
         modelWithTools = this.model.bindTools(this.toolbay.consumeDirty());
