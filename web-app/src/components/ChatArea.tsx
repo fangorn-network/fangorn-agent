@@ -52,11 +52,11 @@ export default function ChatArea({
   sidebarOpen,
   onToggleSidebar,
   isNewChat,
-}) {
+}: any) {
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef(null);
-  const textareaRef = useRef(null);
+  const messagesEndRef = useRef<any | null>(null);
+  const textareaRef = useRef<any | null>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -79,7 +79,7 @@ export default function ChatArea({
     }
   };
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: any) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
@@ -110,7 +110,7 @@ export default function ChatArea({
           <NewChatView />
         ) : (
           <div className="max-w-3xl mx-auto px-4 py-6">
-            {messages.map((msg, i) => (
+            {messages.map((msg: any, i: any) => (
               <Message key={i} message={msg} />
             ))}
             {isTyping && <TypingIndicator />}
@@ -198,7 +198,7 @@ function NewChatView() {
   );
 }
 
-function Message({ message }) {
+function Message({ message }: any) {
   const isAssistant = message.role === 'assistant';
 
   return (
