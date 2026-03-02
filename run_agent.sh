@@ -6,7 +6,7 @@
 CONTAINER_NAME="ollama"
 HOST_PORT=11434
 CONTAINER_PORT=11434
-MODEL="qwen3:8b"          # model to ensure is available
+MODEL="qwen3.5:9b"          # model to ensure is available. qwen3.5:9b and qwen3.5:4b have both been tested.
 WAIT_TIMEOUT=30         # seconds to wait for Ollama to be ready
 
 # ─────────────────────────────────────────────

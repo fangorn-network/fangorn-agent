@@ -13,9 +13,10 @@ To learn more about the initial development and the context in which it was buil
 - LangChain
 - Ollama
 - Typescript
+- Docker
 
 ### Computer Spec information:
-This agent is intended to be run on consumer grade hardware, but even so the current `glm-4.7-flash` model is quite heavy. These are the specs of a computer that can run the agent with that model:
+This agent is intended to be run on consumer grade hardware, but even so the current `qwen3.5:9b` model is somewhat heavy (~8GB of VRAM if using an NVIDIA GPU). These are the specs of a computer that can run the agent:
 
 - Form factor: Full Tower
 - OS: Ubuntu 24.04.3 LTS
@@ -25,19 +26,24 @@ This agent is intended to be run on consumer grade hardware, but even so the cur
 - RAM: 32 GB DDR5
 - Storage: Samsung 970 EVO NVMe SSD 500 GB
 
+Also note that the `qwen3.5:4b` model also reliably executes the available tool flows and only uses ~6GB of VRAM.
 ## Pre-reqs:
 
-1. Ensure ollama is installed `curl -fsSL https://ollama.com/install.sh | sh` and that the `glm-4.7-flash` model is installed `ollama pull glm-4.7-flash`
-    - A lighter model that can be used, but may be unreliable is `qwen3:8b`
-2. Ensure you have `pnpm` installed
-3. Ensure the facilitator and resource server in the x402f project are running
-4. Ensure you have OAuth2.0 tokens created for the gmail address you wish to use
-5. Run `cp env.example .env` and fill in the information
+1. Have [Docker](https://docs.docker.com/) installed
+2. Install the Ollama docker [image](https://hub.docker.com/r/ollama/ollama)
+    - If you have an NVIDIA GPU you would like to use, note that there are specific instructions you must follow to allow for it to be used in a Docker environment.
+3. Make run_agent.sh an executable `chmod +x run_agent.sh`
+4. Run the ollama container then download the `qwen3.5:9b` (or `qwen3.5:4b`) model `docker exec -it ollama ollama pull qwen3.5:9b`.
+5. Ensure you have `pnpm` installed
+(For agent calling functionality)
+6. Ensure the facilitator and resource server in the x402f project are running
+(For email functionality)
+7. Ensure you have OAuth2.0 tokens created for the gmail address you wish to use
+8. Run `cp env.example .env` and fill in the information
 
 ## To run
 
-1. Run `pnpm i` at the root of the project
-2. Run `npm run dev`
+1. Run `./run_agent.sh` at the root of the project
 
 ## Components
 
@@ -116,22 +122,12 @@ This toolbox is currently just a wrapper around one tool, but will later impleme
 Agent lookup on Arbitrum Sepolia via the agent-0 sdk
 `npm run search`
 
-## To run with a dockerized LLM:
-We recommend going the extra mile and isolating the LLM from the system it is running on by using Docker.
-
-### Pre-reqs
-1. Have Docker installed
-2. Install the Ollama docker [image](https://hub.docker.com/r/ollama/ollama)
-    - If you have an NVIDIA GPU you would like to use, note that there are specific instructions you must follow to allow for it to be used in a Docker environment.
-3. Make run_agent.sh and executable `chmod +x run_agent.sh`
-4. Run the ollama container then download the `qwen3:8b` model `docker exec -it ollama ollama pull qwen3:8b`.
-
 #### run_agent.sh
-This runs the LLM within the Docker container, builds the agent, then prompts for user input once everything is running.
+This runs the LLM within the Docker container, builds and starts the agent, then prompts for user input once everything is ready.
 
 > **Note:** If you have an issue with port 11434 being taken, verify that Ollama (not the container) isn't starting on system startup and taking that port.
 
-#### Useful commands
+## Useful commands
 - **Running the container (with GPU support)**: `docker run -d --gpus=all -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama`
 - **Running the container (CPU only)**: `docker run -d -v ollama:/root/.ollama -p 11434:11434 --name ollama ollama/ollama`
 - **Download model (container already running):** `docker exec -it ollama ollama pull your-desired-model`
@@ -142,7 +138,7 @@ This runs the LLM within the Docker container, builds the agent, then prompts fo
 - **Force stopping the container:** `docker kill ollama`
 - **Removing the container:** `docker rm ollama`
 
-#### Debugging port being taken (Linux)
+### Debugging port being taken (Linux)
 - Find what's using the port `sudo lsof -i :11434`
 - If it is ollama, you can check if it's running as a system service `systemctl status ollama`
 - If that's it you can stop it with: `sudo systemctl stop ollama`
