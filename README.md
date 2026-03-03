@@ -153,6 +153,11 @@ If you'd like to see what models are offered by Ollama that support tool calling
 
 # TODOs:
 1. When an agent calls a toolbox, it gets back ALL of the tools in the toolbox. We should investigate a way to minimize the amount of tools returned by a toolbox. One idea may be that the agent requests a specific tool from the toolbox instead of getting them all.
-2. The LLM now runs within a container, but the `run_agent.sh` script should allow for more options (CPU only, GPU, what model, etc.)
+2. The LLM now runs within a container, but the `run_agent.sh` and `run_web.sh` scripts should allow for more options (CPU only, GPU, what model, etc.)
 3. Integrate MCP server/client architecture into the toolbay. This will allow for an agent to connect to a remote MCP server and use the tools provided by it.
 4. Right now all of our toolboxes are included. We should consider using `clack` to allow for a user to select what toolboxes they would like to include before starting the agent.
+  - The web browser version may also be able to control what tools the agent has access to
+5. QDrant implementation is not refined, but it has been added in order to have some form of RAG and long term memory
+  - [Retrieval-Augmented Generation](https://aws.amazon.com/what-is/retrieval-augmented-generation/) (RAG) is the process of optimizing the output of a large language model, so it references an authoritative knowledge base outside of its training data sources before generating a response
+6. Look into storing summaries about past conversations (or maybe just the whole message string itself) similar to how Claude allows for you to continue other conversations later.
+7. Short term memory is a disaster waiting to happen since we do not check if it is approaching the maximum allowed context window. We need to check for this occurring and have the agent summarize all of the interactions, then it should clear the short term memory and store 1. the original system prompt + any relevant long term memory info and the previous user query.
