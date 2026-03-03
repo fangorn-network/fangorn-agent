@@ -12,7 +12,6 @@ export class FangornAgent {
   private model: ChatOllama;
   private toolbay: ToolBay;
   private shortTermMemory: BaseMessage[];
-  // private longTermMemory: VectorStore;
   private memoryManager: MemoryManager;
 
   static async create(): Promise<FangornAgent> {
@@ -55,17 +54,8 @@ export class FangornAgent {
     const systemMessage = new SystemMessage(systemPrompt.content + memoryBlock);
     const userMessage = new HumanMessage(query);
 
-    // console.log("memoryContext: ", memoryContext)
-
-    // const augmentedSystemPrompt = new SystemMessage(`${systemPrompt.content}\n\nRelevant context from past conversations:\n${memoryContext}`)
-    // messages is initially just the user query + system message,
-    // but later it will also collect the model's
-    // outputs in order to continue decision making.
-    // const messages = [augmentedSystemPrompt, ...this.shortTermMemory, userMessage]
-    // this.shortTermMemory.push(userMessage);
-
-    // this.shortTermMemory.push(userMessage)
-
+    // The messages that the agent should have to perserve conversations
+    // within the same session
     const messages: BaseMessage[] = [
       systemMessage, ...this.shortTermMemory, userMessage
     ]
@@ -102,11 +92,7 @@ export class FangornAgent {
 
       // the LLM has no more tools to call, a human readable response should be ready
       if (!fullMessage.tool_calls?.length) {
-        console.log("console.log - Model returned final response");
-        console.log("fullMessage: ", fullMessage.content)
-        console.log("messages: ", messages)
         this.shortTermMemory.push(...messages)
-        console.log("ShortTerm MemorY: ", this.shortTermMemory)
         await this.extractMemories(query, fullMessage.content);
         return fullMessage.content;
       }
