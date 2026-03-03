@@ -38,11 +38,9 @@ Also note that the `qwen3.5:4b` model also reliably executes the available tool 
 5. Ensure you have `pnpm` installed
 6. Run `pnpm i` at the root of the agent project
 7. If you wish to use the web UI, run `pnpm i` at the root of the web-app directory
-(For agent calling functionality)
-6. Ensure the facilitator and resource server in the x402f project are running
-(For email functionality)
-7. Ensure you have OAuth2.0 tokens created for the gmail address you wish to use
-8. Run `cp env.example .env` and fill in the information
+8. (For agent calling functionality) Ensure the facilitator and resource server in the x402f project are running 
+9. (For email functionality) Ensure you have OAuth2.0 tokens created for the gmail address you wish to use
+10. Run `cp env.example .env` and fill in the information
 
 ## To run
 
