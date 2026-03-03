@@ -22,6 +22,7 @@
     "@langchain/core": "^1.1.17",
     "@langchain/langgraph": "^1.2.0",
     "@langchain/ollama": "^1.2.2",
+    "@langchain/qdrant": "^1.0.1",
     "@modelcontextprotocol/sdk": "^1.26.0",
     "agent0-sdk": "^1.5.3",
     "cors": "^2.8.6",

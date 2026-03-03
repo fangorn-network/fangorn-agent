@@ -2,6 +2,8 @@ import { DynamicStructuredTool } from "@langchain/core/tools";
 import { x402fToolbox } from "./toolboxes/x402fToolbox/x402fToolbox.js";
 import { GmailToolbox } from "./toolboxes/gmailToolbox/GmailToolbox.js";
 import { initializeToolbox, Toolbox } from "./types.js";
+import { ToolCall } from "langchain";
+import { DirectToolOutput } from "@langchain/core/messages";
 
 // Examples of a toolbox:
 // Web3 toolbox: wallets, signing, funds, etc.

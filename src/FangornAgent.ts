@@ -5,27 +5,39 @@ import {
 } from "./constants.js";
 import { ChatOllama } from "@langchain/ollama";
 import { ToolBay } from "./tools/toolbay.js";
+import { BaseMessage, HumanMessage, SystemMessage, ToolMessage } from "langchain";
+import { MemoryManager } from "./memory/memoryManager.js";
 
 export class FangornAgent {
   private model: ChatOllama;
   private toolbay: ToolBay;
+  private shortTermMemory: BaseMessage[];
+  // private longTermMemory: VectorStore;
+  private memoryManager: MemoryManager;
 
   static async create(): Promise<FangornAgent> {
     const toolbay = await ToolBay.initToolbay();
-    return new FangornAgent(toolbay);
+    const ollamaPort = process.env.OLLAMA_PORT || 11434; // fallback to default if not set
+    const ollamaUrl = `http://localhost:${ollamaPort}`;
+    const qdrantPort = process.env.QDRANT_PORT || 6333;
+    const qdrantUrl = `http://localhost:${qdrantPort}`
+    const memoryManager = await MemoryManager.init(ollamaUrl, qdrantUrl);
+    return new FangornAgent(ollamaUrl, toolbay, memoryManager);
   }
 
-  constructor(toolbay: ToolBay) {
+  constructor(baseUrl: string, toolbay: ToolBay, memoryManager: MemoryManager) {
     this.toolbay = toolbay;
-    const ollamaPort = process.env.OLLAMA_PORT || 11434; // fallback to default if not set
     const model = process.env.MODEL || "qwen3.5:4b"
     console.log(`running ${model} model`)
-    const baseUrl = `http://localhost:${ollamaPort}`;
     this.model = new ChatOllama({
       model,
       verbose: false,
       baseUrl
     });
+
+    this.shortTermMemory = [];
+
+    this.memoryManager = memoryManager;
 
     // Display systemPrompt info
     console.log(systemPromptHeader);
@@ -34,10 +46,29 @@ export class FangornAgent {
   }
 
   async invokeAgent(query: string) {
+
+    const memories = await this.memoryManager.recall(query);
+    const memoryBlock = memories.length
+      ? `\nRelevant context from past conversations:\n${memories.join("\n")}`
+      : "";
+
+    const systemMessage = new SystemMessage(systemPrompt.content + memoryBlock);
+    const userMessage = new HumanMessage(query);
+
+    // console.log("memoryContext: ", memoryContext)
+
+    // const augmentedSystemPrompt = new SystemMessage(`${systemPrompt.content}\n\nRelevant context from past conversations:\n${memoryContext}`)
     // messages is initially just the user query + system message,
     // but later it will also collect the model's
     // outputs in order to continue decision making.
-    const messages: any[] = [systemPrompt, { role: "user", content: query }];
+    // const messages = [augmentedSystemPrompt, ...this.shortTermMemory, userMessage]
+    // this.shortTermMemory.push(userMessage);
+
+    // this.shortTermMemory.push(userMessage)
+
+    const messages: BaseMessage[] = [
+      systemMessage, ...this.shortTermMemory, userMessage
+    ]
 
     console.log("Query received");
     let modelWithTools = this.model.bindTools(this.toolbay.consumeDirty());
@@ -72,6 +103,11 @@ export class FangornAgent {
       // the LLM has no more tools to call, a human readable response should be ready
       if (!fullMessage.tool_calls?.length) {
         console.log("console.log - Model returned final response");
+        console.log("fullMessage: ", fullMessage.content)
+        console.log("messages: ", messages)
+        this.shortTermMemory.push(...messages)
+        console.log("ShortTerm MemorY: ", this.shortTermMemory)
+        await this.extractMemories(query, fullMessage.content);
         return fullMessage.content;
       }
 
@@ -81,11 +117,8 @@ export class FangornAgent {
         const containsTool = this.toolbay.containsTool(toolCall.name);
         if (!containsTool) {
           console.log(`Tool "${toolCall.name}" not found`);
-          messages.push({
-            role: "tool",
-            tool_call_id: toolCall.id,
-            content: `Tool "${toolCall.name}" not found.`,
-          });
+          const toolMessage = new ToolMessage({tool_call_id: toolCall.id, content: `Tool "${toolCall.name}" not found.`})
+          messages.push(toolMessage);
           continue;
         }
 
@@ -94,12 +127,27 @@ export class FangornAgent {
           toolCall.args,
         );
 
-        messages.push({
-          role: "tool",
-          tool_call_id: toolCall.id,
-          content: typeof result === "string" ? result : JSON.stringify(result),
-        });
+        const toolMessage = new ToolMessage({tool_call_id: toolCall.id, content: typeof result === "string" ? result : JSON.stringify(result)})
+
+        messages.push(toolMessage);
       }
+    }
+  }
+
+  private async extractMemories(query: string, response: string) {
+    const systemMessage = new SystemMessage({content: "Extract key facts, user preferences, or important decisions from this exchange as bullet points. Only include things worth remembering across conversations. If nothing notable, respond with exactly: NONE",})
+    const humanMessage = new HumanMessage({content: `User: ${query}\nAssistant: ${response}`})
+    const extraction = await this.model.invoke([systemMessage, humanMessage]);
+    const content =
+      typeof extraction.content === "string"
+        ? extraction.content
+        : JSON.stringify(extraction.content);
+
+    if (!content.includes("NONE")) {
+      console.log("Agent decided it should extract memories")
+      await this.memoryManager.remember(content);
+    } else {
+      console.log("Agent decided it should NOT extract memories")
     }
   }
 

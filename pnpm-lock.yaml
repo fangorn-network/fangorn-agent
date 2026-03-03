@@ -13,13 +13,16 @@ importers:
         version: 0.3.10(express@5.2.1)
       '@langchain/core':
         specifier: ^1.1.17
-        version: 1.1.24
+        version: 1.1.24(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6))
       '@langchain/langgraph':
         specifier: ^1.2.0
-        version: 1.2.0(@langchain/core@1.1.24)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod-to-json-schema@3.25.1(zod@4.3.6))(zod@4.3.6)
+        version: 1.2.0(@langchain/core@1.1.24(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6)))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod-to-json-schema@3.25.1(zod@4.3.6))(zod@4.3.6)
       '@langchain/ollama':
         specifier: ^1.2.2
-        version: 1.2.2(@langchain/core@1.1.24)
+        version: 1.2.2(@langchain/core@1.1.24(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6)))
+      '@langchain/qdrant':
+        specifier: ^1.0.1
+        version: 1.0.1(@langchain/core@1.1.24(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6)))(typescript@5.9.3)
       '@modelcontextprotocol/sdk':
         specifier: ^1.26.0
         version: 1.26.0(@cfworker/json-schema@4.1.1)(zod@4.3.6)
@@ -37,19 +40,19 @@ importers:
         version: 5.2.1
       fangorn-sdk:
         specifier: 0.0.5
-        version: 0.0.5(@sinclair/typebox@0.34.48)(@types/node@25.2.3)(bufferutil@4.1.0)(encoding@0.1.13)(express@5.2.1)(graphql@16.12.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.57.1)(tslib@2.8.1)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))(zod@4.3.6)
+        version: 0.0.5(@sinclair/typebox@0.34.48)(@types/node@25.2.3)(bufferutil@4.1.0)(encoding@0.1.13)(express@5.2.1)(graphql@16.12.0)(openapi-types@12.1.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.57.1)(tslib@2.8.1)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))(yaml@2.8.2)(zod@4.3.6)
       googleapis:
         specifier: ^171.4.0
         version: 171.4.0
       langchain:
         specifier: ^1.2.14
-        version: 1.2.24(@langchain/core@1.1.24)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod-to-json-schema@3.25.1(zod@4.3.6))
+        version: 1.2.24(@langchain/core@1.1.24(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6)))(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod-to-json-schema@3.25.1(zod@4.3.6))
       viem:
         specifier: ^2.45.0
         version: 2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6)
       x402f:
         specifier: file:../x402f
-        version: file:../x402f(@sinclair/typebox@0.34.48)(@types/node@25.2.3)(bufferutil@4.1.0)(encoding@0.1.13)(ethers@6.16.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(fastestsmallesttextencoderdecoder@1.0.22)(graphql@16.12.0)(next@16.1.6(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.57.1)(tslib@2.8.1)(typescript@5.9.3)(utf-8-validate@6.0.6)(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6)
+        version: file:../x402f(@sinclair/typebox@0.34.48)(@types/node@25.2.3)(bufferutil@4.1.0)(encoding@0.1.13)(ethers@6.16.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(fastestsmallesttextencoderdecoder@1.0.22)(graphql@16.12.0)(next@16.1.6(@babel/core@7.29.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(openapi-types@12.1.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.57.1)(tslib@2.8.1)(typescript@5.9.3)(utf-8-validate@6.0.6)(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(yaml@2.8.2)(zod@4.3.6)
       zod:
         specifier: ^4.3.6
         version: 4.3.6
@@ -891,6 +894,12 @@ packages:
     peerDependencies:
       '@langchain/core': ^1.0.0
 
+  '@langchain/qdrant@1.0.1':
+    resolution: {integrity: sha512-y3QK+KXgA++ZXAE9ofKjT5u6yh4FQqTF5CpdWIynKV2Zz926SSFq3ELbPhvMfUGu61Ils7p6jd1DIbXpZNAkgQ==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@langchain/core': ^1.0.0
+
   '@leichtgewicht/ip-codec@2.0.5':
     resolution: {integrity: sha512-Vo+PSpZG2/fmgmiNzYK9qWRh8h/CHrwD0mo1h1DzL4yzHNSfWYujGTYsWGreD000gcgmZ7K4Ys6Tx9TxtsKdDw==}
 
@@ -1225,6 +1234,11 @@ packages:
     resolution: {integrity: sha512-QNqXyfVS2wm9hweSYD2O7F0G06uurj9kZ96TRQE5Y9hU7+tgdZwIkbAKc5Ocy1HxEY2kuDQa6cQ1WRs/O5LFKA==}
     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
 
+  '@playwright/test@1.58.2':
+    resolution: {integrity: sha512-akea+6bHYBBfA9uQqSYmlJXn61cTa+jbO87xVLCWbTqbWadRVmhxlXATaOjOgcBaWU4ePo0wB41KMFv3o35IXA==}
+    engines: {node: '>=18'}
+    hasBin: true
+
   '@protobufjs/aspromise@1.1.2':
     resolution: {integrity: sha512-j+gKExEuLmKwvz3OgROXtrJ2UG2x8Ch2YZUxahh+s1F2HZ+wAceUNLkvy6zKCPVRkU++ZWQrdxsUeQXmcg4uoQ==}
 
@@ -1254,6 +1268,16 @@ packages:
 
   '@protobufjs/utf8@1.1.0':
     resolution: {integrity: sha512-Vvn3zZrhQZkkBE8LSuW3em98c0FwgO4nxzv6OdSxPKJIEKY2bGbHn+mhGIPerzI4twdxaP8/0+06HBpwf345Lw==}
+
+  '@qdrant/js-client-rest@1.17.0':
+    resolution: {integrity: sha512-aZFQeirWVqWAa1a8vJ957LMzcXkFHGbsoRhzc8AkGfg6V0jtK8PlG8/eyyc2xhYsR961FDDx1Tx6nyE0K7lS+A==}
+    engines: {node: '>=18.17.0', pnpm: '>=8'}
+    peerDependencies:
+      typescript: '>=4.7'
+
+  '@qdrant/openapi-typescript-fetch@1.2.6':
+    resolution: {integrity: sha512-oQG/FejNpItrxRHoyctYvT3rwGZOnK4jr3JdppO/c78ktDvkWiPXPHNsrDf33K9sZdRb6PR7gi4noIapu5q4HA==}
+    engines: {node: '>=18.0.0', pnpm: '>=8'}
 
   '@rolldown/binding-linux-x64-gnu@1.0.0-beta.59':
     resolution: {integrity: sha512-VlfwJ/HCskPmQi8R0JuAFndySKVFX7yPhE658o27cjSDWWbXVtGkSbwaxstii7Q+3Rz87ZXN+HLnb1kd4R9Img==}
@@ -3112,6 +3136,11 @@ packages:
   fs.realpath@1.0.0:
     resolution: {integrity: sha512-OO0pH2lK6a0hZnAdau5ItzHPI6pUlvI7jMVnxUQRtw4owF2wk8lOSabtGDCTP4Ggrg2MbGnWO9X8K1t4+fGMDw==}
 
+  fsevents@2.3.2:
+    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
+    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
+    os: [darwin]
+
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
@@ -3975,6 +4004,21 @@ packages:
   once@1.4.0:
     resolution: {integrity: sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==}
 
+  openai@6.25.0:
+    resolution: {integrity: sha512-mEh6VZ2ds2AGGokWARo18aPISI1OhlgdEIC1ewhkZr8pSIT31dec0ecr9Nhxx0JlybyOgoAT1sWeKtwPZzJyww==}
+    hasBin: true
+    peerDependencies:
+      ws: ^8.18.0
+      zod: ^3.25 || ^4.0
+    peerDependenciesMeta:
+      ws:
+        optional: true
+      zod:
+        optional: true
+
+  openapi-types@12.1.3:
+    resolution: {integrity: sha512-N4YtSYJqghVu4iek2ZUvcN/0aqH1kRDuNqzcycDxhOUpg7GdvLa2F3DgS6yBNhInhv2r/6I0Flkn7CqL8+nIcw==}
+
   os-browserify@0.3.0:
     resolution: {integrity: sha512-gjcpUc3clBf9+210TRaDWbf+rZZZEshZ+DlXMRCeAjp0xhTrnQsKHypIy1J3d5hKdUzj69t708EHtU8P6bUn0A==}
 
@@ -4165,6 +4209,16 @@ packages:
   pkg-dir@5.0.0:
     resolution: {integrity: sha512-NPE8TDbzl/3YQYY7CSS228s3g2ollTFnc+Qi3tqmqJp9Vg2ovUpixcJEo2HJScN2Ez+kEaal6y70c0ehqJBJeA==}
     engines: {node: '>=10'}
+
+  playwright-core@1.58.2:
+    resolution: {integrity: sha512-yZkEtftgwS8CsfYo7nm0KE8jsvm6i/PTgVtB8DL726wNf6H2IMsDuxCpJj59KDaxCtSnrWan2AeDqM7JBaultg==}
+    engines: {node: '>=18'}
+    hasBin: true
+
+  playwright@1.58.2:
+    resolution: {integrity: sha512-vA30H8Nvkq/cPBnNw4Q8TWz1EJyqgpuinBcHET0YVJVFldr8JDNiU9LaWAE1KqSkRYazuaBhTpB5ZzShOezQ6A==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   possible-typed-array-names@1.1.0:
     resolution: {integrity: sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg==}
@@ -5089,6 +5143,11 @@ packages:
 
   yallist@4.0.0:
     resolution: {integrity: sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==}
+
+  yaml@2.8.2:
+    resolution: {integrity: sha512-mplynKqc1C2hTVYxd0PU2xQAc22TI1vShAYGksCCfxbn/dFwnHTNi1bvYsBTkhdUNtGIf5xNOg938rrSSYvS9A==}
+    engines: {node: '>= 14.6'}
+    hasBin: true
 
   yargs-parser@20.2.9:
     resolution: {integrity: sha512-y11nGElTIV+CT3Zv9t7VKl+Q3hTQoT9a1Qzezhhl6Rp21gJ/IVTW7Z3y9EWXhuUBC2Shnf+DX0antecpAwSP8w==}
@@ -6164,14 +6223,14 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@langchain/core@1.1.24':
+  '@langchain/core@1.1.24(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6))':
     dependencies:
       '@cfworker/json-schema': 4.1.1
       ansi-styles: 5.2.0
       camelcase: 6.3.0
       decamelize: 1.2.0
       js-tiktoken: 1.0.21
-      langsmith: 0.5.4
+      langsmith: 0.5.4(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6))
       mustache: 4.2.0
       p-queue: 6.6.2
       uuid: 10.0.0
@@ -6182,27 +6241,27 @@ snapshots:
       - '@opentelemetry/sdk-trace-base'
       - openai
 
-  '@langchain/langgraph-checkpoint@1.0.0(@langchain/core@1.1.24)':
+  '@langchain/langgraph-checkpoint@1.0.0(@langchain/core@1.1.24(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6)))':
     dependencies:
-      '@langchain/core': 1.1.24
+      '@langchain/core': 1.1.24(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6))
       uuid: 10.0.0
 
-  '@langchain/langgraph-sdk@1.6.5(@langchain/core@1.1.24)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+  '@langchain/langgraph-sdk@1.6.5(@langchain/core@1.1.24(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6)))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@types/json-schema': 7.0.15
       p-queue: 9.1.0
       p-retry: 7.1.1
       uuid: 13.0.0
     optionalDependencies:
-      '@langchain/core': 1.1.24
+      '@langchain/core': 1.1.24(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6))
       react: 19.2.4
       react-dom: 19.2.4(react@19.2.4)
 
-  '@langchain/langgraph@1.2.0(@langchain/core@1.1.24)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod-to-json-schema@3.25.1(zod@4.3.6))(zod@4.3.6)':
+  '@langchain/langgraph@1.2.0(@langchain/core@1.1.24(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6)))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod-to-json-schema@3.25.1(zod@4.3.6))(zod@4.3.6)':
     dependencies:
-      '@langchain/core': 1.1.24
-      '@langchain/langgraph-checkpoint': 1.0.0(@langchain/core@1.1.24)
-      '@langchain/langgraph-sdk': 1.6.5(@langchain/core@1.1.24)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@langchain/core': 1.1.24(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6))
+      '@langchain/langgraph-checkpoint': 1.0.0(@langchain/core@1.1.24(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6)))
+      '@langchain/langgraph-sdk': 1.6.5(@langchain/core@1.1.24(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6)))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@standard-schema/spec': 1.1.0
       uuid: 10.0.0
       zod: 4.3.6
@@ -6212,11 +6271,19 @@ snapshots:
       - react
       - react-dom
 
-  '@langchain/ollama@1.2.2(@langchain/core@1.1.24)':
+  '@langchain/ollama@1.2.2(@langchain/core@1.1.24(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6)))':
     dependencies:
-      '@langchain/core': 1.1.24
+      '@langchain/core': 1.1.24(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6))
       ollama: 0.6.3
       uuid: 10.0.0
+
+  '@langchain/qdrant@1.0.1(@langchain/core@1.1.24(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6)))(typescript@5.9.3)':
+    dependencies:
+      '@langchain/core': 1.1.24(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6))
+      '@qdrant/js-client-rest': 1.17.0(typescript@5.9.3)
+      uuid: 10.0.0
+    transitivePeerDependencies:
+      - typescript
 
   '@leichtgewicht/ip-codec@2.0.5': {}
 
@@ -6407,7 +6474,7 @@ snapshots:
       - utf-8-validate
       - valibot
 
-  '@lit-protocol/auth@8.2.3(@sinclair/typebox@0.34.48)(bufferutil@4.1.0)(encoding@0.1.13)(react@19.2.4)(tslib@2.8.1)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))':
+  '@lit-protocol/auth@8.2.3(@sinclair/typebox@0.34.48)(bufferutil@4.1.0)(encoding@0.1.13)(openapi-types@12.1.3)(react@19.2.4)(tslib@2.8.1)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))':
     dependencies:
       '@ethersproject/contracts': 5.7.0
       '@ethersproject/providers': 5.7.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)
@@ -6419,10 +6486,10 @@ snapshots:
       '@lit-protocol/constants': 9.0.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)
       '@lit-protocol/contracts': 0.9.1(typescript@5.9.3)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))
       '@lit-protocol/crypto': 8.1.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)
-      '@lit-protocol/lit-client': 8.3.1(@sinclair/typebox@0.34.48)(bufferutil@4.1.0)(encoding@0.1.13)(react@19.2.4)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))
+      '@lit-protocol/lit-client': 8.3.1(@sinclair/typebox@0.34.48)(bufferutil@4.1.0)(encoding@0.1.13)(openapi-types@12.1.3)(react@19.2.4)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))
       '@lit-protocol/logger': 8.0.2
       '@lit-protocol/nacl': 7.1.1
-      '@lit-protocol/networks': 8.4.1(@sinclair/typebox@0.34.48)(bufferutil@4.1.0)(react@19.2.4)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))
+      '@lit-protocol/networks': 8.4.1(@sinclair/typebox@0.34.48)(bufferutil@4.1.0)(openapi-types@12.1.3)(react@19.2.4)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))
       '@lit-protocol/schemas': 8.0.3(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)
       '@lit-protocol/types': 8.0.3(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)
       '@lit-protocol/uint8arrays': 7.1.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)
@@ -6440,7 +6507,7 @@ snapshots:
       bs58: 6.0.0
       cbor-web: 9.0.2
       depd: 2.0.0
-      elysia: 1.2.25(@sinclair/typebox@0.34.48)(typescript@5.9.3)
+      elysia: 1.2.25(@sinclair/typebox@0.34.48)(openapi-types@12.1.3)(typescript@5.9.3)
       ethers: 5.7.2(bufferutil@4.1.0)(utf-8-validate@6.0.6)
       jose: 4.14.4
       pako: 2.1.0
@@ -6605,7 +6672,7 @@ snapshots:
       - utf-8-validate
       - valibot
 
-  '@lit-protocol/lit-client@8.3.1(@sinclair/typebox@0.34.48)(bufferutil@4.1.0)(encoding@0.1.13)(react@19.2.4)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))':
+  '@lit-protocol/lit-client@8.3.1(@sinclair/typebox@0.34.48)(bufferutil@4.1.0)(encoding@0.1.13)(openapi-types@12.1.3)(react@19.2.4)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))':
     dependencies:
       '@ethersproject/contracts': 5.7.0
       '@ethersproject/providers': 5.7.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)
@@ -6619,7 +6686,7 @@ snapshots:
       '@lit-protocol/crypto': 8.1.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)
       '@lit-protocol/logger': 8.0.2
       '@lit-protocol/nacl': 7.1.1
-      '@lit-protocol/networks': 8.4.1(@sinclair/typebox@0.34.48)(bufferutil@4.1.0)(react@19.2.4)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))
+      '@lit-protocol/networks': 8.4.1(@sinclair/typebox@0.34.48)(bufferutil@4.1.0)(openapi-types@12.1.3)(react@19.2.4)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))
       '@lit-protocol/schemas': 8.0.3(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)
       '@lit-protocol/types': 8.0.3(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)
       '@lit-protocol/uint8arrays': 7.1.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)
@@ -6632,7 +6699,7 @@ snapshots:
       '@wagmi/core': 2.22.1(react@19.2.4)(typescript@5.9.3)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))
       ajv: 8.12.0
       bs58: 6.0.0
-      elysia: 1.2.25(@sinclair/typebox@0.34.48)(typescript@5.9.3)
+      elysia: 1.2.25(@sinclair/typebox@0.34.48)(openapi-types@12.1.3)(typescript@5.9.3)
       ethers: 5.7.2(bufferutil@4.1.0)(utf-8-validate@6.0.6)
       pako: 2.1.0
       pino: 9.6.0
@@ -6670,7 +6737,7 @@ snapshots:
     dependencies:
       tslib: 1.14.1
 
-  '@lit-protocol/networks@8.4.1(@sinclair/typebox@0.34.48)(bufferutil@4.1.0)(react@19.2.4)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))':
+  '@lit-protocol/networks@8.4.1(@sinclair/typebox@0.34.48)(bufferutil@4.1.0)(openapi-types@12.1.3)(react@19.2.4)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))':
     dependencies:
       '@ethersproject/contracts': 5.7.0
       '@ethersproject/providers': 5.7.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)
@@ -6696,7 +6763,7 @@ snapshots:
       '@wagmi/core': 2.22.1(react@19.2.4)(typescript@5.9.3)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))
       ajv: 8.12.0
       bs58: 6.0.0
-      elysia: 1.2.25(@sinclair/typebox@0.34.48)(typescript@5.9.3)
+      elysia: 1.2.25(@sinclair/typebox@0.34.48)(openapi-types@12.1.3)(typescript@5.9.3)
       ethers: 5.7.2(bufferutil@4.1.0)(utf-8-validate@6.0.6)
       node-localstorage: 3.0.5
       pako: 2.1.0
@@ -7075,6 +7142,11 @@ snapshots:
 
   '@pkgr/core@0.2.9': {}
 
+  '@playwright/test@1.58.2':
+    dependencies:
+      playwright: 1.58.2
+    optional: true
+
   '@protobufjs/aspromise@1.1.2': {}
 
   '@protobufjs/base64@1.1.2': {}
@@ -7097,6 +7169,14 @@ snapshots:
   '@protobufjs/pool@1.1.0': {}
 
   '@protobufjs/utf8@1.1.0': {}
+
+  '@qdrant/js-client-rest@1.17.0(typescript@5.9.3)':
+    dependencies:
+      '@qdrant/openapi-typescript-fetch': 1.2.6
+      typescript: 5.9.3
+      undici: 6.23.0
+
+  '@qdrant/openapi-typescript-fetch@1.2.6': {}
 
   '@rolldown/binding-linux-x64-gnu@1.0.0-beta.59': {}
 
@@ -8201,13 +8281,13 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.0.3
 
-  '@vitest/mocker@4.0.18(vite@7.3.1(@types/node@25.2.3))':
+  '@vitest/mocker@4.0.18(vite@7.3.1(@types/node@25.2.3)(yaml@2.8.2))':
     dependencies:
       '@vitest/spy': 4.0.18
       estree-walker: 3.0.3
       magic-string: 0.30.21
     optionalDependencies:
-      vite: 7.3.1(@types/node@25.2.3)
+      vite: 7.3.1(@types/node@25.2.3)(yaml@2.8.2)
 
   '@vitest/pretty-format@4.0.18':
     dependencies:
@@ -8319,12 +8399,12 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@x402/next@2.5.0(bufferutil@4.1.0)(encoding@0.1.13)(ethers@6.16.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(fastestsmallesttextencoderdecoder@1.0.22)(next@16.1.6(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)(utf-8-validate@6.0.6)':
+  '@x402/next@2.5.0(bufferutil@4.1.0)(encoding@0.1.13)(ethers@6.16.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(fastestsmallesttextencoderdecoder@1.0.22)(next@16.1.6(@babel/core@7.29.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)(utf-8-validate@6.0.6)':
     dependencies:
       '@coinbase/cdp-sdk': 1.44.1(bufferutil@4.1.0)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)(utf-8-validate@6.0.6)
       '@x402/core': 2.5.0
       '@x402/extensions': 2.5.0(bufferutil@4.1.0)(ethers@6.16.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(typescript@5.9.3)(utf-8-validate@6.0.6)
-      next: 16.1.6(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      next: 16.1.6(@babel/core@7.29.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       zod: 3.25.76
     transitivePeerDependencies:
       - bufferutil
@@ -8991,12 +9071,13 @@ snapshots:
       minimalistic-assert: 1.0.1
       minimalistic-crypto-utils: 1.0.1
 
-  elysia@1.2.25(@sinclair/typebox@0.34.48)(typescript@5.9.3):
+  elysia@1.2.25(@sinclair/typebox@0.34.48)(openapi-types@12.1.3)(typescript@5.9.3):
     dependencies:
       '@sinclair/typebox': 0.34.48
       cookie: 1.1.1
       memoirist: 0.3.1
     optionalDependencies:
+      openapi-types: 12.1.3
       typescript: 5.9.3
 
   emoji-regex@8.0.0: {}
@@ -9210,16 +9291,16 @@ snapshots:
 
   eyes@0.1.8: {}
 
-  fangorn-sdk@0.0.5(@sinclair/typebox@0.34.48)(@types/node@25.2.3)(bufferutil@4.1.0)(encoding@0.1.13)(express@5.2.1)(graphql@16.12.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.57.1)(tslib@2.8.1)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))(zod@4.3.6):
+  fangorn-sdk@0.0.5(@sinclair/typebox@0.34.48)(@types/node@25.2.3)(bufferutil@4.1.0)(encoding@0.1.13)(express@5.2.1)(graphql@16.12.0)(openapi-types@12.1.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.57.1)(tslib@2.8.1)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))(yaml@2.8.2)(zod@4.3.6):
     dependencies:
       '@a2a-js/sdk': 0.3.10(express@5.2.1)
       '@aztec/bb.js': 3.0.0-rc.2
       '@clack/prompts': 1.0.1
       '@lit-protocol/access-control-conditions': 8.0.2(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)
-      '@lit-protocol/auth': 8.2.3(@sinclair/typebox@0.34.48)(bufferutil@4.1.0)(encoding@0.1.13)(react@19.2.4)(tslib@2.8.1)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))
+      '@lit-protocol/auth': 8.2.3(@sinclair/typebox@0.34.48)(bufferutil@4.1.0)(encoding@0.1.13)(openapi-types@12.1.3)(react@19.2.4)(tslib@2.8.1)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))
       '@lit-protocol/auth-helpers': 8.2.1(bufferutil@4.1.0)(react@19.2.4)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))
-      '@lit-protocol/lit-client': 8.3.1(@sinclair/typebox@0.34.48)(bufferutil@4.1.0)(encoding@0.1.13)(react@19.2.4)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))
-      '@lit-protocol/networks': 8.4.1(@sinclair/typebox@0.34.48)(bufferutil@4.1.0)(react@19.2.4)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))
+      '@lit-protocol/lit-client': 8.3.1(@sinclair/typebox@0.34.48)(bufferutil@4.1.0)(encoding@0.1.13)(openapi-types@12.1.3)(react@19.2.4)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))
+      '@lit-protocol/networks': 8.4.1(@sinclair/typebox@0.34.48)(bufferutil@4.1.0)(openapi-types@12.1.3)(react@19.2.4)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))
       '@noble/hashes': 2.0.1
       '@noir-lang/acvm_js': 1.0.0-beta.16
       '@noir-lang/backend_barretenberg': 0.36.0
@@ -9242,8 +9323,8 @@ snapshots:
       solc: 0.8.33
       types: link:@x402/core/types
       viem: 2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6)
-      vite: 7.3.1(@types/node@25.2.3)
-      vite-plugin-node-polyfills: 0.17.0(rollup@4.57.1)(vite@7.3.1(@types/node@25.2.3))
+      vite: 7.3.1(@types/node@25.2.3)(yaml@2.8.2)
+      vite-plugin-node-polyfills: 0.17.0(rollup@4.57.1)(vite@7.3.1(@types/node@25.2.3)(yaml@2.8.2))
     transitivePeerDependencies:
       - '@bufbuild/protobuf'
       - '@grpc/grpc-js'
@@ -9377,6 +9458,9 @@ snapshots:
       universalify: 0.1.2
 
   fs.realpath@1.0.0: {}
+
+  fsevents@2.3.2:
+    optional: true
 
   fsevents@2.3.3:
     optional: true
@@ -10060,12 +10144,12 @@ snapshots:
 
   kind-of@6.0.3: {}
 
-  langchain@1.2.24(@langchain/core@1.1.24)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod-to-json-schema@3.25.1(zod@4.3.6)):
+  langchain@1.2.24(@langchain/core@1.1.24(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6)))(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod-to-json-schema@3.25.1(zod@4.3.6)):
     dependencies:
-      '@langchain/core': 1.1.24
-      '@langchain/langgraph': 1.2.0(@langchain/core@1.1.24)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod-to-json-schema@3.25.1(zod@4.3.6))(zod@4.3.6)
-      '@langchain/langgraph-checkpoint': 1.0.0(@langchain/core@1.1.24)
-      langsmith: 0.5.4
+      '@langchain/core': 1.1.24(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6))
+      '@langchain/langgraph': 1.2.0(@langchain/core@1.1.24(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6)))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(zod-to-json-schema@3.25.1(zod@4.3.6))(zod@4.3.6)
+      '@langchain/langgraph-checkpoint': 1.0.0(@langchain/core@1.1.24(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6)))
+      langsmith: 0.5.4(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6))
       uuid: 10.0.0
       zod: 4.3.6
     transitivePeerDependencies:
@@ -10077,7 +10161,7 @@ snapshots:
       - react-dom
       - zod-to-json-schema
 
-  langsmith@0.5.4:
+  langsmith@0.5.4(openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6)):
     dependencies:
       '@types/uuid': 10.0.0
       chalk: 4.1.2
@@ -10085,6 +10169,8 @@ snapshots:
       p-queue: 6.6.2
       semver: 7.7.4
       uuid: 10.0.0
+    optionalDependencies:
+      openai: 6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6)
 
   lines-and-columns@1.2.4: {}
 
@@ -10293,7 +10379,7 @@ snapshots:
 
   negotiator@1.0.0: {}
 
-  next@16.1.6(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
+  next@16.1.6(@babel/core@7.29.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
     dependencies:
       '@next/env': 16.1.6
       '@swc/helpers': 0.5.15
@@ -10312,6 +10398,7 @@ snapshots:
       '@next/swc-linux-x64-musl': 16.1.6
       '@next/swc-win32-arm64-msvc': 16.1.6
       '@next/swc-win32-x64-msvc': 16.1.6
+      '@playwright/test': 1.58.2
       sharp: 0.34.5
     transitivePeerDependencies:
       - '@babel/core'
@@ -10428,6 +10515,15 @@ snapshots:
   once@1.4.0:
     dependencies:
       wrappy: 1.0.2
+
+  openai@6.25.0(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6):
+    optionalDependencies:
+      ws: 8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6)
+      zod: 4.3.6
+    optional: true
+
+  openapi-types@12.1.3:
+    optional: true
 
   os-browserify@0.3.0: {}
 
@@ -10636,6 +10732,16 @@ snapshots:
   pkg-dir@5.0.0:
     dependencies:
       find-up: 5.0.0
+
+  playwright-core@1.58.2:
+    optional: true
+
+  playwright@1.58.2:
+    dependencies:
+      playwright-core: 1.58.2
+    optionalDependencies:
+      fsevents: 2.3.2
+    optional: true
 
   possible-typed-array-names@1.1.0: {}
 
@@ -11506,17 +11612,17 @@ snapshots:
       - utf-8-validate
       - zod
 
-  vite-plugin-node-polyfills@0.17.0(rollup@4.57.1)(vite@7.3.1(@types/node@25.2.3)):
+  vite-plugin-node-polyfills@0.17.0(rollup@4.57.1)(vite@7.3.1(@types/node@25.2.3)(yaml@2.8.2)):
     dependencies:
       '@rollup/plugin-inject': 5.0.5(rollup@4.57.1)
       buffer-polyfill: buffer@6.0.3
       node-stdlib-browser: 1.3.1
       process: 0.11.10
-      vite: 7.3.1(@types/node@25.2.3)
+      vite: 7.3.1(@types/node@25.2.3)(yaml@2.8.2)
     transitivePeerDependencies:
       - rollup
 
-  vite@7.3.1(@types/node@25.2.3):
+  vite@7.3.1(@types/node@25.2.3)(yaml@2.8.2):
     dependencies:
       esbuild: 0.27.3
       fdir: 6.5.0(picomatch@4.0.3)
@@ -11527,11 +11633,12 @@ snapshots:
     optionalDependencies:
       '@types/node': 25.2.3
       fsevents: 2.3.3
+      yaml: 2.8.2
 
-  vitest@4.0.18(@types/node@25.2.3):
+  vitest@4.0.18(@types/node@25.2.3)(yaml@2.8.2):
     dependencies:
       '@vitest/expect': 4.0.18
-      '@vitest/mocker': 4.0.18(vite@7.3.1(@types/node@25.2.3))
+      '@vitest/mocker': 4.0.18(vite@7.3.1(@types/node@25.2.3)(yaml@2.8.2))
       '@vitest/pretty-format': 4.0.18
       '@vitest/runner': 4.0.18
       '@vitest/snapshot': 4.0.18
@@ -11548,7 +11655,7 @@ snapshots:
       tinyexec: 1.0.2
       tinyglobby: 0.2.15
       tinyrainbow: 3.0.3
-      vite: 7.3.1(@types/node@25.2.3)
+      vite: 7.3.1(@types/node@25.2.3)(yaml@2.8.2)
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 25.2.3
@@ -11655,26 +11762,26 @@ snapshots:
       bufferutil: 4.1.0
       utf-8-validate: 6.0.6
 
-  x402f@file:../x402f(@sinclair/typebox@0.34.48)(@types/node@25.2.3)(bufferutil@4.1.0)(encoding@0.1.13)(ethers@6.16.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(fastestsmallesttextencoderdecoder@1.0.22)(graphql@16.12.0)(next@16.1.6(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.57.1)(tslib@2.8.1)(typescript@5.9.3)(utf-8-validate@6.0.6)(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(zod@4.3.6):
+  x402f@file:../x402f(@sinclair/typebox@0.34.48)(@types/node@25.2.3)(bufferutil@4.1.0)(encoding@0.1.13)(ethers@6.16.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(fastestsmallesttextencoderdecoder@1.0.22)(graphql@16.12.0)(next@16.1.6(@babel/core@7.29.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(openapi-types@12.1.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.57.1)(tslib@2.8.1)(typescript@5.9.3)(utf-8-validate@6.0.6)(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(yaml@2.8.2)(zod@4.3.6):
     dependencies:
       '@lit-protocol/access-control-conditions': 8.0.2(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)
-      '@lit-protocol/lit-client': 8.3.1(@sinclair/typebox@0.34.48)(bufferutil@4.1.0)(encoding@0.1.13)(react@19.2.4)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))
-      '@lit-protocol/networks': 8.4.1(@sinclair/typebox@0.34.48)(bufferutil@4.1.0)(react@19.2.4)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))
+      '@lit-protocol/lit-client': 8.3.1(@sinclair/typebox@0.34.48)(bufferutil@4.1.0)(encoding@0.1.13)(openapi-types@12.1.3)(react@19.2.4)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))
+      '@lit-protocol/networks': 8.4.1(@sinclair/typebox@0.34.48)(bufferutil@4.1.0)(openapi-types@12.1.3)(react@19.2.4)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))
       '@x402/core': 2.5.0
       '@x402/evm': 2.5.0(bufferutil@4.1.0)(ethers@6.16.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(typescript@5.9.3)(utf-8-validate@6.0.6)
       '@x402/express': 2.5.0(bufferutil@4.1.0)(encoding@0.1.13)(ethers@6.16.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(express@5.2.1)(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.3)(utf-8-validate@6.0.6)(ws@8.19.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))
       '@x402/fetch': 2.5.0(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)
-      '@x402/next': 2.5.0(bufferutil@4.1.0)(encoding@0.1.13)(ethers@6.16.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(fastestsmallesttextencoderdecoder@1.0.22)(next@16.1.6(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)(utf-8-validate@6.0.6)
+      '@x402/next': 2.5.0(bufferutil@4.1.0)(encoding@0.1.13)(ethers@6.16.0(bufferutil@4.1.0)(utf-8-validate@6.0.6))(fastestsmallesttextencoderdecoder@1.0.22)(next@16.1.6(@babel/core@7.29.0)(@playwright/test@1.58.2)(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(typescript@5.9.3)(utf-8-validate@6.0.6)
       chalk: 5.6.2
       cors: 2.8.6
       express: 5.2.1
-      fangorn-sdk: 0.0.5(@sinclair/typebox@0.34.48)(@types/node@25.2.3)(bufferutil@4.1.0)(encoding@0.1.13)(express@5.2.1)(graphql@16.12.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.57.1)(tslib@2.8.1)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))(zod@4.3.6)
+      fangorn-sdk: 0.0.5(@sinclair/typebox@0.34.48)(@types/node@25.2.3)(bufferutil@4.1.0)(encoding@0.1.13)(express@5.2.1)(graphql@16.12.0)(openapi-types@12.1.3)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(rollup@4.57.1)(tslib@2.8.1)(typescript@5.9.3)(utf-8-validate@6.0.6)(viem@2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6))(yaml@2.8.2)(zod@4.3.6)
       fetch: 1.1.0
       pinata: 2.5.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       signer: link:@x402/evm/signer
       types: link:@x402/evm/types
       viem: 2.46.1(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.6)(zod@4.3.6)
-      vitest: 4.0.18(@types/node@25.2.3)
+      vitest: 4.0.18(@types/node@25.2.3)(yaml@2.8.2)
     transitivePeerDependencies:
       - '@bufbuild/protobuf'
       - '@edge-runtime/vm'
@@ -11729,6 +11836,9 @@ snapshots:
   yallist@3.1.1: {}
 
   yallist@4.0.0: {}
+
+  yaml@2.8.2:
+    optional: true
 
   yargs-parser@20.2.9: {}
 

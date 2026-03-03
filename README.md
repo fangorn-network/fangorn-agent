@@ -33,7 +33,8 @@ Also note that the `qwen3.5:4b` model also reliably executes the available tool 
 2. Install the Ollama docker [image](https://hub.docker.com/r/ollama/ollama)
     - If you have an NVIDIA GPU you would like to use, note that there are specific instructions you must follow to allow for it to be used in a Docker environment.
 3. Make run_agent.sh and run_web.sh executable `chmod +x run_agent.sh` and `chmod +x run_web.sh`.
-4. Run the ollama container then download the `qwen3.5:9b` (or `qwen3.5:4b`) model `docker exec -it ollama ollama pull qwen3.5:9b`.
+4. Run the ollama container then download the `qwen3.5:9b` (or `qwen3.5:4b`) model `docker exec -it ollama ollama pull qwen3.5:9b` and download the embedding agent for long term memory storage and retrieval `docker exec -it ollama ollama pull nomic-embed-text`
+5. QDrant is used for storing long term memories and will need to be available `docker pull qdrant/qdrant`
 5. Ensure you have `pnpm` installed
 6. Run `pnpm i` at the root of the agent project
 7. If you wish to use the web UI, run `pnpm i` at the root of the web-app directory
