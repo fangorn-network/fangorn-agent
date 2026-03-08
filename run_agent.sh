@@ -11,7 +11,7 @@ QDRANT_HOST_PORT=6333
 QDRANT_CONTAINER_PORT=6333
 QDRANT_CONTAINER_NAME="qdrant"
 
-MODEL="qwen3.5:9b"          # model to ensure is available. qwen3.5:9b and qwen3.5:4b have both been tested.
+MODEL="qwen3:8b"         # model to ensure is available. qwen3.5:9b and qwen3.5:4b have both been tested.
 WAIT_TIMEOUT=30         # seconds to wait for Ollama to be ready
 
 # ─────────────────────────────────────────────

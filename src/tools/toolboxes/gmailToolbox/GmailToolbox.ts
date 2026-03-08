@@ -54,7 +54,7 @@ export class GmailToolbox implements Toolbox {
         schema: z.object({
             recipient: z.string().describe("Who to send the email to"),
             subject: z.string().describe("The subject of the email. If no subject is provided, create your own."),
-            message: z.string().describe("The message to be sent to the recipient.")
+            message: z.string().describe("The message to be sent to the recipient. If no message is provided, create your own based on user input.")
         }),
       },
     );

@@ -44,7 +44,7 @@ export class MemoryManager {
 
     try {
       const results = await this.store.similaritySearch(query, k);
-      return results.map((doc) => doc.pageContent);
+      return results.map((doc: Document) => doc.pageContent);
     } catch {
       return [];
     }
