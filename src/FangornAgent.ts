@@ -4,10 +4,16 @@ import {
   systemPromptHeader,
 } from "./constants.js";
 import { ChatOllama } from "@langchain/ollama";
-import { ToolBay } from "./tools/toolbay.js";
+import { ToolBay, McpUiResult } from "./tools/toolbay.js";
+import { ChatAnthropic } from "@langchain/anthropic"
+
+export interface AgentResponse {
+  text: string;
+  mcpResults: McpUiResult[];
+}
 
 export class FangornAgent {
-  private model: ChatOllama;
+  private model: ChatAnthropic;
   private toolbay: ToolBay;
 
   static async create(): Promise<FangornAgent> {
@@ -21,11 +27,15 @@ export class FangornAgent {
     const model = process.env.MODEL || "qwen3.5:4b"
     console.log(`running ${model} model`)
     const baseUrl = `http://localhost:${ollamaPort}`;
-    this.model = new ChatOllama({
-      model,
-      verbose: false,
-      baseUrl
-    });
+    // this.model = new ChatOllama({
+    //   model,
+    //   verbose: false,
+    //   baseUrl
+    // });
+
+    this.model = new ChatAnthropic(
+      'claude-sonnet-4-6'
+    )
 
     // Display systemPrompt info
     console.log(systemPromptHeader);
@@ -33,7 +43,7 @@ export class FangornAgent {
     console.log(systemPromptFooter);
   }
 
-  async invokeAgent(query: string) {
+  async invokeAgent(query: string): Promise<AgentResponse> {
     // messages is initially just the user query + system message,
     // but later it will also collect the model's
     // outputs in order to continue decision making.
@@ -72,7 +82,22 @@ export class FangornAgent {
       // the LLM has no more tools to call, a human readable response should be ready
       if (!fullMessage.tool_calls?.length) {
         console.log("console.log - Model returned final response");
-        return fullMessage.content;
+
+        // Normalize content to a string (ChatAnthropic may return content blocks)
+        let text: string;
+        if (typeof fullMessage.content === "string") {
+          text = fullMessage.content;
+        } else {
+          text = fullMessage.content
+            .filter((block: any) => block.type === "text")
+            .map((block: any) => block.text)
+            .join("\n");
+        }
+
+        // Collect any MCP results that were stashed during tool execution
+        const mcpResults = this.toolbay.consumeMcpResults();
+
+        return { text, mcpResults };
       }
 
       console.log("Intercepting tool calls:", fullMessage.tool_calls);

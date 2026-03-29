@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import McpResultRenderer from './McpResultRenderer';
 import { FangornLogo } from "../../public/svg/fangorn-logo"
 
 const PenIcon = () => (
@@ -101,7 +102,17 @@ export default function ChatArea({
             </button>
           )}
         </div>
-        <div />
+        <a
+          href="/explore"
+          className="px-3 py-1.5 rounded-lg text-xs transition-colors"
+          style={{
+            color: 'var(--text-secondary)',
+            border: '1px solid var(--border)',
+            fontFamily: 'var(--font-body)',
+          }}
+        >
+          Explore subgraph →
+        </a>
       </header>
 
       {/* Messages area */}
@@ -111,7 +122,7 @@ export default function ChatArea({
         ) : (
           <div className="max-w-3xl mx-auto px-4 py-6">
             {messages.map((msg: any, i: any) => (
-              <Message key={i} message={msg} />
+              <Message key={i} message={msg} onSendMessage={onSendMessage} />
             ))}
             {isTyping && <TypingIndicator />}
             <div ref={messagesEndRef} />
@@ -198,7 +209,7 @@ function NewChatView() {
   );
 }
 
-function Message({ message }: any) {
+function Message({ message, onSendMessage }: any) {
   const isAssistant = message.role === 'assistant';
 
   return (
@@ -236,6 +247,16 @@ function Message({ message }: any) {
               <span style={{ whiteSpace: 'pre-wrap' }}>{message.content}</span>
             )}
           </div>
+
+          {/* Render FangornUI when MCP results are present */}
+          {isAssistant && message.mcpResults && (
+            <div className="mt-3">
+              <McpResultRenderer
+                mcpResults={message.mcpResults}
+                onSendMessage={onSendMessage}
+              />
+            </div>
+          )}
 
           {isAssistant && (
             <div className="flex items-center gap-1 mt-2">

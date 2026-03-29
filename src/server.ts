@@ -17,9 +17,12 @@ async function main() {
     const { message } = req.body;
     if (!message) return res.status(400).json({ error: "No message provided" });
     try {
-      const response = await agent.invokeAgent(message);
+      const { text, mcpResults } = await agent.invokeAgent(message);
       agent.resetToolbay();
-      res.json({ response });
+      res.json({
+        response: text,
+        mcpResults: mcpResults.length > 0 ? mcpResults : undefined,
+      });
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: "Agent error" });
