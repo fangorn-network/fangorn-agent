@@ -1,5 +1,5 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
-import { x402fToolbox } from "./toolboxes/x402fToolbox/x402fToolbox.js";
+// import { x402fToolbox } from "./toolboxes/x402fToolbox/x402fToolbox.js";
 import { GmailToolbox } from "./toolboxes/gmailToolbox/GmailToolbox.js";
 import { initializeToolbox, Toolbox } from "./types.js";
 
@@ -19,8 +19,8 @@ export class ToolBay {
 
   static async initToolbay(): Promise<ToolBay> {
     const toolboxes = [];
-    const x402fToolboxInstance = await initializeToolbox(x402fToolbox);
-    toolboxes.push(x402fToolboxInstance);
+    // const x402fToolboxInstance = await initializeToolbox(x402fToolbox);
+    // toolboxes.push(x402fToolboxInstance);
     const gmailToolbox = await initializeToolbox(GmailToolbox)
     toolboxes.push(gmailToolbox);
 
