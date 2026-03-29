@@ -15,14 +15,17 @@ async function main() {
 
   app.post("/chat", async (req, res) => {
     const { message } = req.body;
+    console.log(`received message: ${message}`)
     if (!message) return res.status(400).json({ error: "No message provided" });
     try {
       const { text, mcpResults } = await agent.invokeAgent(message);
+      console.log(`sending a response with mcpResults: ${JSON.stringify(mcpResults)}`)
       agent.resetToolbay();
       res.json({
         response: text,
-        mcpResults: mcpResults.length > 0 ? mcpResults : undefined,
+        mcpResults: mcpResults ??  undefined,
       });
+      // console.log(`The response got turned into JSON and here it is parsed as a string: ${JSON.stringify(res)}`)
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: "Agent error" });

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 
+
 /* ═══════════════════════════════════════════════════════════════
    Fangorn Subgraph UI
    ═══════════════════════════════════════════════════════════════
@@ -308,10 +309,15 @@ const EncryptedBadge = () => (
   </span>
 );
 
+interface BrowserFlowProps {
+  schemas: Schema[];
+  initialDetail: any;
+  onQuerySchema: any;
+}
 // ═════════════════════════════════════════════════════════════
 // BROWSE SCHEMAS FLOW
 // ═════════════════════════════════════════════════════════════
-const BrowseFlow = ({ schemas = [], initialDetail, onQuerySchema }) => {
+const BrowseFlow = ({ schemas = [], initialDetail, onQuerySchema }: BrowserFlowProps) => {
   const [step, setStep] = useState(0);
   const [typing, setTyping] = useState(false);
   const [selected, setSelected] = useState(initialDetail || null);
@@ -332,8 +338,8 @@ const BrowseFlow = ({ schemas = [], initialDetail, onQuerySchema }) => {
 
   useEffect(scrollDown, [step, typing, selected, scrollDown]);
 
-  const handleSelect = (schema) => {
-    setSelected((prev) => (prev?.name === schema.name ? null : schema));
+  const handleSelect = (schema: Schema) => {
+    setSelected((prev: Schema) => (prev?.name === schema.name ? null : schema));
     if (!selected || selected.name !== schema.name) setStep(3);
   };
 
@@ -384,8 +390,14 @@ const BrowseFlow = ({ schemas = [], initialDetail, onQuerySchema }) => {
   );
 };
 
+interface SchemaCardProps {
+  schema: Schema;
+  fieldCount: number;
+  selected: any;
+  onSelect: any;
+}
 // ─── Schema list card ───────────────────────────────────────
-const SchemaCard = ({ schema, fieldCount, selected, onSelect }) => {
+const SchemaCard = ({ schema, fieldCount, selected, onSelect }: SchemaCardProps) => {
   const [hovered, setHovered] = useState(false);
   return (
     <div
@@ -418,8 +430,11 @@ const SchemaCard = ({ schema, fieldCount, selected, onSelect }) => {
   );
 };
 
+interface SchemaDetailCardProps {
+  schema: Schema
+}
 // ─── Schema detail card ─────────────────────────────────────
-const SchemaDetailCard = ({ schema }) => {
+const SchemaDetailCard = ({ schema }: SchemaDetailCardProps) => {
   const latestVersion = schema.versions?.[schema.versions.length - 1];
   return (
     <Card title="Schema Details">
@@ -456,7 +471,11 @@ const SchemaDetailCard = ({ schema }) => {
     </Card>
   );
 };
-
+interface QueryFlowArgs {
+  dataEntries: FileEntry[];
+  schemaName: String;
+  autoLoad: Boolean;
+}
 // ═════════════════════════════════════════════════════════════
 // QUERY DATA FLOW
 // ═════════════════════════════════════════════════════════════
@@ -464,7 +483,7 @@ const QueryFlow = ({
   dataEntries = [],
   schemaName = "",
   autoLoad = false,
-}) => {
+}: QueryFlowArgs) => {
   const [step, setStep] = useState(0);
   const [typing, setTyping] = useState(false);
   const [expandedFile, setExpandedFile] = useState(null);
@@ -522,19 +541,19 @@ const QueryFlow = ({
   };
 
   // Flatten all files from all entries
-  const allFiles = dataEntries.flatMap((entry) =>
-    (entry.manifest?.files || []).map((file, idx) => ({
-      ...file,
-      owner: entry.owner,
-      _idx: idx,
-      _entrySchema: entry.schema_name,
-    }))
-  );
+  // const allFiles = dataEntries.flatMap((entry) =>
+  //   (entry.manifest?.files || []).map((file, idx) => ({
+  //     ...file,
+  //     owner: entry.owner,
+  //     _idx: idx,
+  //     _entrySchema: entry.schema_name,
+  //   }))
+  // );
 
-  const totalFiles = allFiles.length;
+  const totalFiles = dataEntries.length;
   const totalPages = Math.max(1, Math.ceil(totalFiles / PAGE_SIZE));
   const pageStart = (currentPage - 1) * PAGE_SIZE;
-  const pageFiles = allFiles.slice(pageStart, pageStart + PAGE_SIZE);
+  const pageFiles = dataEntries.slice(pageStart, pageStart + PAGE_SIZE);
 
   // Pre-fetch: when user reaches second-to-last page, request next batch
   const handlePageChange = (page) => {
@@ -699,15 +718,27 @@ const QueryFlow = ({
   );
 };
 
+interface DataRecordCardProps {
+  index: number;
+  file: FileEntry;
+  plainFields: Field[];
+  encFields: Field[];
+  summaryField: any;
+  secondaryField: any;
+  totalEncPrice: number;
+  isExpanded: boolean;
+  onToggle: any;
+
+}
 // ─── Data record card ───────────────────────────────────────
-const DataRecordCard = ({ index, file, plainFields, encFields, summaryField, secondaryField, totalEncPrice, isExpanded, onToggle }) => {
+const DataRecordCard = ({ index, file, plainFields, encFields, summaryField, secondaryField, totalEncPrice, isExpanded, onToggle }: DataRecordCardProps) => {
   const [hovered, setHovered] = useState(false);
 
   const handlePurchase = (e) => {
     e.stopPropagation();
     const label = summaryField ? summaryField.value : `Record ${index + 1}`;
     if (typeof sendPrompt === "function") {
-      sendPrompt(`Purchase encrypted fields for "${label}" from schema "${file._entrySchema}"`);
+      // sendPrompt(`Purchase encrypted fields for "${label}" from schema "${file._entrySchema}"`);
     }
   };
 
@@ -779,7 +810,8 @@ const DataRecordCard = ({ index, file, plainFields, encFields, summaryField, sec
                 </div>
               </div>
               {/* Dedicated price row for encrypted fields */}
-              {f.acc !== "plain" && f.price != null && f.price > 0 && (
+              {f.acc !== "plain" && f.price != null && Number(f.price.price) > 0 && (
+                <div>
                 <div
                   style={{
                     display: "flex", justifyContent: "space-between", alignItems: "center",
@@ -787,17 +819,15 @@ const DataRecordCard = ({ index, file, plainFields, encFields, summaryField, sec
                   }}
                 >
                   <span style={{ color: "var(--color-text-tertiary, #999)" }}>price</span>
-                  <Pill variant="green">${Number(f.price).toFixed(2)} USDC</Pill>
+                  <Pill variant="green">${Number(f.price.price).toFixed(2)} USDC</Pill>
+                </div>
+                  <div style={{ fontSize: 11, color: "var(--color-text-tertiary, #999)", marginTop: 6, fontFamily: "var(--font-mono, monospace)" }}>
+                    source: {truncAddr(f.price.owner)}
+                  </div>
                 </div>
               )}
             </div>
           ))}
-
-          {file.owner && (
-            <div style={{ fontSize: 11, color: "var(--color-text-tertiary, #999)", marginTop: 6, fontFamily: "var(--font-mono, monospace)" }}>
-              source: {truncAddr(file.owner)}
-            </div>
-          )}
 
           {/* Purchase button */}
           {encFields.length > 0 && (
@@ -820,7 +850,15 @@ const DataRecordCard = ({ index, file, plainFields, encFields, summaryField, sec
     </div>
   );
 };
+import {Schema, FileEntry, Field} from "../types/subgraph"
 
+interface FangornUIProps {
+  mode: String,
+  schemas: Schema[],
+  schemaDetail: any,
+  dataEntries: FileEntry[],
+  querySchemaName: string
+}
 // ═════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═════════════════════════════════════════════════════════════
@@ -830,7 +868,7 @@ export default function FangornUI({
   schemaDetail,
   dataEntries,
   querySchemaName,
-}) {
+}: FangornUIProps) {
   const [mode, setMode] = useState(initialMode);
   const [key, setKey] = useState(0);
   const [activeSchemaName, setActiveSchemaName] = useState(querySchemaName || "");
@@ -845,7 +883,7 @@ export default function FangornUI({
   const handleQuerySchema = (name) => {
     setActiveSchemaName(name);
     setAutoLoad(true);
-    setMode("query");
+    // setMode("query");
     setKey((k) => k + 1);
 
     // Actually fetch data from the MCP server

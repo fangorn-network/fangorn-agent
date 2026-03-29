@@ -9,7 +9,7 @@ import { ChatAnthropic } from "@langchain/anthropic"
 
 export interface AgentResponse {
   text: string;
-  mcpResults: McpUiResult[];
+  mcpResults: McpUiResult;
 }
 
 export class FangornAgent {

@@ -1,5 +1,6 @@
 'use client';
 
+import { FileEntry, Schema } from '@/types/subgraph';
 import FangornUI from './FangornUI';
 
 /**
@@ -14,14 +15,17 @@ export default function McpResultRenderer({
   mcpResults,
   onSendMessage,
 }: {
-  mcpResults: { toolName: string; data: any }[];
+  mcpResults: { toolName: string; schemaData: Schema[], fileData: FileEntry[], data: any };
   onSendMessage?: (message: string) => void;
 }) {
-  if (!mcpResults || mcpResults.length === 0) return null;
+  console.log("McpRenderer called")
+  if (!mcpResults ) return null;
 
   // Use the last MCP result to determine which mode to render
-  const lastResult = mcpResults[mcpResults.length - 1];
-  const { toolName, data } = lastResult;
+  // const lastResult = mcpResults[mcpResults.length - 1];
+  // const { toolName, data } = lastResult;
+
+  const {toolName, schemaData, fileData, data} = mcpResults;
 
   // Make sendPrompt available globally for FangornUI's internal calls
   // (QueryFlow, DataRecordCard use `typeof sendPrompt === "function"`)
@@ -31,7 +35,7 @@ export default function McpResultRenderer({
 
   if (toolName === 'subgraph_list_schemas') {
     // The MCP returns schemas — render in Browse mode
-    const schemas = extractSchemas(data);
+    const schemas = schemaData;
     return (
       <FangornUI
         mode="browse"
@@ -42,12 +46,13 @@ export default function McpResultRenderer({
 
   if (toolName === 'subgraph_query_data') {
     // The MCP returns data entries — render in Query mode
-    const { entries, schemaName } = extractDataEntries(data);
+    // const { entries, schemaName } = extractDataEntries(data);
+    const entries = fileData;
     return (
       <FangornUI
         mode="query"
         dataEntries={entries}
-        querySchemaName={schemaName}
+        querySchemaName={entries[0].id}
       />
     );
   }

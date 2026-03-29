@@ -1,15 +1,17 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import FangornUI from '../../components/FangornUI';
+import FangornUI from '@/components/FangornUI';
 import { FangornLogo } from '../../../public/svg/fangorn-logo';
+import { FileEntry, Schema } from '@/types/subgraph';
 
 export default function ExplorePage() {
   const [loading, setLoading] = useState(false);
-  const [schemas, setSchemas] = useState<any[] | null>(null);
-  const [dataEntries, setDataEntries] = useState<any[] | null>(null);
+  const [schemas, setSchemas] = useState<Schema[] | null>(null);
+  const [dataEntries, setDataEntries] = useState<FileEntry[] | null>(null);
   const [querySchemaName, setQuerySchemaName] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [mode, setMode] = useState<string> ("browse")
 
   /**
    * Send a message through the agent and extract MCP results.
@@ -20,6 +22,8 @@ export default function ExplorePage() {
   const sendAgentMessage = useCallback(async (message: string) => {
     setLoading(true);
     setError(null);
+
+    console.log(`sending agent the message: ${message}`)
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_AGENT_URL || 'http://localhost:3001';
@@ -35,20 +39,20 @@ export default function ExplorePage() {
 
       const data = await res.json();
 
-      if (data.mcpResults && data.mcpResults.length > 0) {
-        for (const result of data.mcpResults) {
-          console.log(`[Explore] MCP result for "${result.toolName}":`, JSON.stringify(result.data, null, 2));
+      // console.log(`Received data ${JSON.stringify(data)}`)
 
-          if (result.toolName === 'subgraph_list_schemas') {
-            const parsed = extractSchemas(result.data);
-            console.log('[Explore] Extracted schemas:', parsed.length, parsed);
-            setSchemas(parsed);
-          } else if (result.toolName === 'subgraph_query_data') {
-            const { entries, schemaName } = extractDataEntries(result.data);
-            console.log('[Explore] Extracted entries:', entries.length, entries);
-            setDataEntries(entries);
-            if (schemaName) setQuerySchemaName(schemaName);
-          }
+      if (data.mcpResults) {
+        let result = data.mcpResults;
+        console.log(`[Explore] received MCP results for "${result.toolName}"`);
+        if (result.toolName === 'subgraph_list_schemas') {
+          // console.log(`result: ${JSON.stringify(result)}`)
+          const schemas: Schema[] = result.schemaData
+          setSchemas(schemas);
+        } else if (result.toolName === 'subgraph_query_data') {
+          const dataEntries: FileEntry[] = result.fileData
+          console.log(`[Explore] Extracted ${dataEntries.length} entries` );
+          console.log(`First data entry: ${JSON.stringify(dataEntries[0])}`)
+          setDataEntries(dataEntries);
         }
       }
     } catch (err: any) {
@@ -77,8 +81,16 @@ export default function ExplorePage() {
 
   // Auto-load schemas on first visit
   const handleLoadSchemas = () => {
+    console.log("Called handle load schemas")
     sendAgentMessage('List all registered schemas. Use JSON response format.');
   };
+
+  const handleClearData = () => {
+    setSchemas(null)
+    setDataEntries(null)
+    setQuerySchemaName("")
+    setMode("query")
+  }
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
@@ -113,6 +125,7 @@ export default function ExplorePage() {
             border: '1px solid var(--border)',
             fontFamily: 'var(--font-body)',
           }}
+          onClick={handleClearData}
         >
           ← Back to chat
         </a>
@@ -193,7 +206,7 @@ export default function ExplorePage() {
           {(schemas || dataEntries) && (
             <div className="message-appear">
               <FangornUI
-                mode={dataEntries ? 'query' : 'browse'}
+                mode={mode}
                 schemas={schemas || undefined}
                 dataEntries={dataEntries || undefined}
                 querySchemaName={querySchemaName || undefined}
