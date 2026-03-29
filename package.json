@@ -32,7 +32,6 @@
     "googleapis": "^171.4.0",
     "langchain": "^1.2.14",
     "viem": "^2.45.0",
-    "x402f": "file:../x402f",
     "zod": "^4.3.6"
   },
   "devDependencies": {
