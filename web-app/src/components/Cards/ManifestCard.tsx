@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { ManifestState, FileEntry, Field } from "../types/subgraph";
-import { Pill, EncryptedBadge, truncAddr } from "./primitives";
+import { ManifestState, FileEntry, Field } from "../../types/subgraph";
+import { Pill, EncryptedBadge, truncAddr } from "../primitives";
 
 /* ── File entry row (shown when manifest is expanded) ── */
 

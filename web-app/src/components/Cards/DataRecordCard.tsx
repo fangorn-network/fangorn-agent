@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { FileEntry, Field } from "../types/subgraph";
-import { Pill, EncryptedBadge, ActionBtn, truncAddr } from "./primitives";
+import { FileEntry, Field } from "../../types/subgraph";
+import { Pill, EncryptedBadge, ActionBtn, truncAddr } from "../primitives";
 
 interface DataRecordCardProps {
   index: number;

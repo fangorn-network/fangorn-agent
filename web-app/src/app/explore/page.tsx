@@ -4,6 +4,7 @@ import { useState } from 'react';
 import FangornUI from '@/components/FangornUI';
 import { FangornLogo } from '../../../public/svg/fangorn-logo';
 import { useFangornAgent } from '@/hooks/useFangornAgent';
+import FangornChat from '@/components/FangornChat';
 
 export default function ExplorePage() {
   const { loading, error, schemas, dataEntries, manifestData, sendMessage } = useFangornAgent();
@@ -124,11 +125,10 @@ export default function ExplorePage() {
           )}
 
           {schemas.length > 0 && (
-            <FangornUI
-              mode={mode}
+            <FangornChat
               schemas={schemas}
-              dataEntries={dataEntries}
               manifestData={manifestData}
+              dataEntries={dataEntries}
               sendMessage={sendMessage}
             />
           )}

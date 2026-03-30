@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Schema } from "../types/subgraph";
-import { Pill, Card, FieldRow, truncAddr } from "./primitives";
+import { Schema } from "../../types/subgraph";
+import { Pill, Card, FieldRow, truncAddr } from "../primitives";
 
 interface SchemaCardProps {
   schema: Schema;
