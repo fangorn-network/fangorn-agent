@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import McpResultRenderer from './McpResultRenderer';
 import { FangornLogo } from "../../public/svg/fangorn-logo"
 
 const PenIcon = () => (
@@ -247,16 +246,6 @@ function Message({ message, onSendMessage }: any) {
               <span style={{ whiteSpace: 'pre-wrap' }}>{message.content}</span>
             )}
           </div>
-
-          {/* Render FangornUI when MCP results are present */}
-          {isAssistant && message.mcpResults && (
-            <div className="mt-3">
-              <McpResultRenderer
-                mcpResults={message.mcpResults}
-                onSendMessage={onSendMessage}
-              />
-            </div>
-          )}
 
           {isAssistant && (
             <div className="flex items-center gap-1 mt-2">
