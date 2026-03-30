@@ -1,25 +1,26 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { FileEntry } from "../types/subgraph";
+import { ManifestState } from "../types/subgraph";
 import { PAGE_SIZE, FETCH_BATCH, PREFETCH_BATCH } from "@/constants";
 import { Bubble, TypingDots, ActionBtn, Pagination } from "./primitives";
-import { DataRecordCard } from "./DataRecordCard";
+import { ManifestCard } from "./ManifestCard";
 
 interface QueryFlowProps {
-  dataEntries?: FileEntry[];
+  manifestStates?: ManifestState[];
   schemaName?: string;
   autoLoad?: boolean;
   sendPrompt?: (message: string) => void;
 }
 
 export const QueryFlow = ({
-  dataEntries = [],
+  manifestStates = [],
   schemaName = "",
   autoLoad = false,
   sendPrompt,
 }: QueryFlowProps) => {
   const [step, setStep] = useState(0);
   const [typing, setTyping] = useState(false);
-  const [expandedFile, setExpandedFile] = useState<number | null>(null);
+  const [expandedManifest, setExpandedManifest] = useState<number | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<Record<number, number | null>>({});
   const [filterText, setFilterText] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -33,11 +34,11 @@ export const QueryFlow = ({
   }, []);
 
   useEffect(() => {
-    if (dataEntries.length > 0 && submitted) {
+    if (manifestStates.length > 0 && submitted) {
       setTyping(false);
       setStep(2);
     }
-  }, [dataEntries, submitted]);
+  }, [manifestStates, submitted]);
 
   useEffect(() => {
     if (autoLoad && schemaName) {
@@ -47,7 +48,7 @@ export const QueryFlow = ({
     }
   }, [autoLoad, schemaName]);
 
-  useEffect(scrollDown, [step, typing, expandedFile, currentPage, scrollDown]);
+  useEffect(scrollDown, [step, typing, expandedManifest, selectedFiles, currentPage, scrollDown]);
 
   const handleLoadAll = () => {
     if (!schemaName) return;
@@ -67,25 +68,28 @@ export const QueryFlow = ({
     }
   };
 
-  console.log(`data being returned to QueryFlow.tsx: ${JSON.stringify(dataEntries)}`)
-
-  const totalFiles = dataEntries.length;
-  const totalPages = Math.max(1, Math.ceil(totalFiles / PAGE_SIZE));
+  const totalManifests = manifestStates.length;
+  const totalPages = Math.max(1, Math.ceil(totalManifests / PAGE_SIZE));
   const pageStart = (currentPage - 1) * PAGE_SIZE;
-  const pageFiles = dataEntries.slice(pageStart, pageStart + PAGE_SIZE);
+  const pageManifests = manifestStates.slice(pageStart, pageStart + PAGE_SIZE);
 
   const handlePageChange = (page: number) => {
     if (page < 1 || page > totalPages) return;
     setCurrentPage(page);
-    setExpandedFile(null);
-    if (page >= totalPages - 1 && !prefetchRequested && totalFiles >= FETCH_BATCH) {
+    setExpandedManifest(null);
+    setSelectedFiles({});
+    if (page >= totalPages - 1 && !prefetchRequested && totalManifests >= FETCH_BATCH) {
       setPrefetchRequested(true);
       if (sendPrompt) {
         sendPrompt(
-          `Fetch next ${PREFETCH_BATCH} data entries for schema "${schemaName}" starting from offset ${totalFiles}. Use JSON response format. Append them to the current results.`
+          `Fetch next ${PREFETCH_BATCH} data entries for schema "${schemaName}" starting from offset ${totalManifests}. Use JSON response format. Append them to the current results.`
         );
       }
     }
+  };
+
+  const handleFileSelect = (manifestIndex: number, fileIndex: number | null) => {
+    setSelectedFiles((prev) => ({ ...prev, [manifestIndex]: fileIndex }));
   };
 
   return (
@@ -130,24 +134,25 @@ export const QueryFlow = ({
       {step >= 2 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 8, animation: "fangornFadeIn 0.3s ease-out" }}>
           <Bubble role="claude">
-            {totalFiles === 0 ? "No records found for this query." : <>Found {totalFiles} record{totalFiles !== 1 ? "s" : ""}. Showing page {currentPage} of {totalPages}:</>}
+            {totalManifests === 0
+              ? "No records found for this query."
+              : <>Found {totalManifests} manifest{totalManifests !== 1 ? "s" : ""}. Showing page {currentPage} of {totalPages}:</>}
           </Bubble>
-          {pageFiles.length > 0 && (
+          {pageManifests.length > 0 && (
             <>
               <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 4, width: "100%" }}>
-                {pageFiles.map((file, i) => {
-                  // console.log(`Received File: ${JSON.stringify(file)}`)
+                {pageManifests.map((ms, i) => {
                   const globalIdx = pageStart + i;
-                  const isExpanded = expandedFile === globalIdx;
-                  const plainFields = file.fields.filter((f) => f.acc === "plain");
-                  const encFields = file.fields.filter((f) => f.acc !== "plain");
-                  const summaryField = plainFields[0];
-                  const secondaryField = plainFields.length > 1 ? plainFields[1] : undefined;
-                  const totalEncPrice = encFields.reduce((sum, f) => sum + (f.price != null ? Number(f.price) : 0), 0);
                   return (
-                    <DataRecordCard key={globalIdx} index={globalIdx} file={file} plainFields={plainFields} encFields={encFields}
-                      summaryField={summaryField} secondaryField={secondaryField} totalEncPrice={totalEncPrice}
-                      isExpanded={isExpanded} onToggle={() => setExpandedFile(isExpanded ? null : globalIdx)} />
+                    <ManifestCard
+                      key={ms.id || globalIdx}
+                      index={globalIdx}
+                      manifestState={ms}
+                      isExpanded={expandedManifest === globalIdx}
+                      onToggle={() => setExpandedManifest(expandedManifest === globalIdx ? null : globalIdx)}
+                      selectedFileIndex={selectedFiles[globalIdx] ?? null}
+                      onFileSelect={(fileIdx) => handleFileSelect(globalIdx, fileIdx)}
+                    />
                   );
                 })}
               </div>

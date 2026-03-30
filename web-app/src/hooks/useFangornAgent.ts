@@ -6,7 +6,7 @@ interface AgentState {
   loading: boolean;
   error: string | null;
   schemas: Schema[];
-  dataEntries: FileEntry[];
+  dataEntries: ManifestState[];
 }
 
 export function useFangornAgent() {
@@ -37,15 +37,8 @@ export function useFangornAgent() {
         setState((prev) => ({loading: false, error: null, schemas: result.schemaData, dataEntries: prev.dataEntries}))
         } else if (result.toolName === "subgraph_query_data") {
             const manifestStates = result.fileData;
-            const flatFiles: FileEntry[] = manifestStates.flatMap((ms: ManifestState) =>
-              (ms.manifest?.files || []).map((file: any) => ({
-                ...file,
-                // Carry forward the owner and schema for context
-                _owner: ms.owner,
-                _schemaName: ms.schema_name,
-              }))
-            );
-            setState((prev) => ({ error: null, schemas:prev.schemas, dataEntries: flatFiles, loading: false }));
+            console.log(`manifestStates: ${JSON.stringify(manifestStates, null, 2)}`)
+            setState((prev) => ({ error: null, schemas:prev.schemas, dataEntries: manifestStates, loading: false }));
         }
       } else {
         setState((prev) => ({ ...prev, loading: false }));

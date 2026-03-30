@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Schema, FileEntry, Manifest } from "../types/subgraph";
+import { Schema, FileEntry, Manifest, ManifestState } from "../types/subgraph";
 import { BrowseFlow } from "./BrowseFlow";
 import { QueryFlow } from "./QueryFlow";
 
@@ -9,7 +9,7 @@ interface FangornUIProps {
   mode?: string;
   schemas: Schema[];
   schemaDetail?: Schema | null;
-  dataEntries: FileEntry[];
+  dataEntries: ManifestState[];
   querySchemaName?: string;
   sendMessage: (message: string) => void;
 }
@@ -75,7 +75,7 @@ export default function FangornUI({
         {mode === "browse" ? (
           <BrowseFlow key={`browse-${key}`} schemas={schemas || []} initialDetail={schemaDetail} onQuerySchema={handleQuerySchema} />
         ) : (
-          <QueryFlow key={`query-${key}`} dataEntries={dataEntries || []} schemaName={activeSchemaName || ""} autoLoad={autoLoad} sendPrompt={sendMessage} />
+          <QueryFlow key={`query-${key}`} manifestStates={dataEntries || []} schemaName={activeSchemaName || ""} autoLoad={autoLoad} sendPrompt={sendMessage} />
         )}
       </div>
     </div>

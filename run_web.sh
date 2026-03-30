@@ -3,6 +3,7 @@
 # ─────────────────────────────────────────────
 # Configuration — change these if needed
 # ─────────────────────────────────────────────
+LLM="" # Options: ollama (locally running), anthropic
 CONTAINER_NAME="ollama"
 HOST_PORT=11434
 CONTAINER_PORT=11434
