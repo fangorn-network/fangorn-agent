@@ -1,6 +1,6 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { GmailToolbox } from "./toolboxes/gmailToolbox/GmailToolbox.js";
-import { FileEntry, initializeToolbox, Schema, Toolbox } from "./types.js";
+import { FileEntry, initializeToolbox, ManifestState, Schema, Toolbox } from "./types.js";
 import { McpToolbox } from "./toolboxes/mcpToolbox/mcpToolbox.js";
 import { ToolMessage } from "langchain";
 
@@ -23,6 +23,7 @@ const MCP_UI_TOOLS = new Set([
 export interface McpUiResult {
   toolName?: string;
   schemaData?: Schema[];
+  manifestData?: ManifestState[]
   fileData?: FileEntry[];
   data?: any;
 }
@@ -83,30 +84,35 @@ export class ToolBay {
     // stash the parsed result so the server can forward it to the frontend.
     if (MCP_UI_TOOLS.has(toolName)) {
       try {
-        if (toolName === SUBGRAPH_LIST_SCHEMAS ) {
-          const schemaData: Schema[] = JSON.parse(result);
-          const fileData: FileEntry[] = this.mcpData.fileData ?? []
-          const data: any = this.mcpData.data ?? {}
-          const mcpResults: McpUiResult = { toolName, schemaData, fileData, data }
+        const parsed = JSON.parse(result)
+
+        console.log(`resultType: ${JSON.stringify(parsed.resultType)}`)
+
+        let schemaData: Schema[] = this.mcpData.schemaData ?? []
+        let fileData: FileEntry[] = this.mcpData.fileData ?? []
+        let manifestData: ManifestState[] = this.mcpData. manifestData ?? []
+        let data: any = this.mcpData.data ?? {}
+        if (parsed.resultType === "schemas") {
+          schemaData = parsed.data
           console.log(`Schemas successfully retrieved. There were ${schemaData.length} schemas found.`)
           result = `Tell the user something along the lines of "${schemaData.length} schemas successfully retrieved". No further tool calls are required.`
-          this.mcpData = mcpResults
-        } else if (toolName === SUBGRAPH_QUERY_DATA) {
-          const schemaData: Schema[] = this.mcpData.schemaData ?? []
-          const fileData: FileEntry[] = JSON.parse(result);
-          const data: any = this.mcpData.data ?? {}
-          const mcpResults: McpUiResult = { toolName, schemaData, fileData, data }
-          console.log(`Data successfully retrieved. There were ${fileData.length} entries found.`)
-          result = `Tell the user something along the lines of "${fileData.length} entries successfully retrieved". No further tool calls are required.`
-          this.mcpData = mcpResults
+        } else if (parsed.resultType === "manifest_states") {
+          manifestData = parsed.data;
+          console.log(`Data retrieved: ${manifestData.length} manifests found.`);
+          console.log(`manifest data: ${JSON.stringify(manifestData, null, 2)}`)
+          result = `Tell the user "${manifestData.length} manifests successfully retrieved". No further tool calls are required.`;
+        } else if (parsed.resultType === "file_entries") {
+          fileData = parsed.data;
+          console.log(`Data retrieved: ${fileData.length} file entries found.`);
+          result = `Tell the user "${fileData.length} file entries successfully retrieved". No further tool calls are required.`;
         } else {
-          const data = typeof result === "string" ? JSON.parse(result) : result;
-          const schemaData: Schema[] = this.mcpData.schemaData ?? []
-          const fileData: FileEntry[] = this.mcpData.fileData ?? []
+          data = typeof result === "string" ? JSON.parse(result) : result;
           console.log(`[ToolBay] Stashing MCP UI result for "${toolName}". Type: ${typeof result}. Parsed keys:`, typeof data === "object" ? Object.keys(data) : "not an object");
           result = `Tell the user something along the lines of "Data successfully retrieved". No further tool calls are required.`
-          this.mcpData = { toolName, schemaData, fileData, data};
         }
+
+        this.mcpData = { toolName, manifestData, schemaData, fileData, data};
+
       } catch {
         // If it doesn't parse, skip — the model still gets the string
         console.log(`[ToolBay] Could not parse MCP result for UI forwarding. Raw type: ${typeof result}, preview: ${String(result).slice(0, 200)}`);

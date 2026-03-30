@@ -6,7 +6,8 @@ interface AgentState {
   loading: boolean;
   error: string | null;
   schemas: Schema[];
-  dataEntries: ManifestState[];
+  dataEntries: FileEntry[];
+  manifestData: ManifestState[]
 }
 
 export function useFangornAgent() {
@@ -15,6 +16,7 @@ export function useFangornAgent() {
     error: null,
     schemas: [],
     dataEntries: [],
+    manifestData: []
   });
 
   const sendMessage = useCallback(async (message: string) => {
@@ -33,13 +35,13 @@ export function useFangornAgent() {
 
       if (data.mcpResults) {
         const result = data.mcpResults;
-        if (result.toolName === "subgraph_list_schemas") {
-        setState((prev) => ({loading: false, error: null, schemas: result.schemaData, dataEntries: prev.dataEntries}))
-        } else if (result.toolName === "subgraph_query_data") {
-            const manifestStates = result.fileData;
-            console.log(`manifestStates: ${JSON.stringify(manifestStates, null, 2)}`)
-            setState((prev) => ({ error: null, schemas:prev.schemas, dataEntries: manifestStates, loading: false }));
-        }
+        setState((prev) => ({
+          loading: false,
+          error: null,
+          schemas: result.schemaData?.length ? result.schemaData : prev.schemas,
+          dataEntries: result.fileData?.length ? result.fileData : prev.dataEntries,
+          manifestData: result.manifestData?.length ? result.manifestData : prev.manifestData,
+        }));
       } else {
         setState((prev) => ({ ...prev, loading: false }));
       }

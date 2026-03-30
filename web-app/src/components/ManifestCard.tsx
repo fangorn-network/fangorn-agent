@@ -13,6 +13,13 @@ interface FileEntryRowProps {
 
 const FileEntryRow = ({ file, fileIndex, isSelected, onSelect }: FileEntryRowProps) => {
   const [hovered, setHovered] = useState(false);
+  const [chatInput, setChatInput] = useState("");
+
+  const handleChatSubmit = () => {
+    if (!chatInput.trim()) return;
+    console.log(`[FileEntry #${fileIndex}] chat:`, chatInput);
+    setChatInput("");
+  };
 
   const plainFields = file.fields.filter((f) => f.acc === "plain");
   const encFields = file.fields.filter((f) => f.acc !== "plain");
@@ -154,6 +161,45 @@ const FileEntryRow = ({ file, fileIndex, isSelected, onSelect }: FileEntryRowPro
               )}
             </div>
           ))}
+
+          {/* File-level chat */}
+          <div style={{ marginTop: 6, paddingTop: 6, borderTop: "0.5px solid var(--color-border-tertiary, #1e1e1e)" }}>
+            <div style={{
+              display: "flex", gap: 6, alignItems: "center",
+              background: "var(--color-background-primary, #141414)",
+              border: "0.5px solid var(--color-border-tertiary, #1e1e1e)",
+              borderRadius: 7, padding: 3,
+            }}>
+              <input
+                type="text"
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleChatSubmit()}
+                placeholder="Ask about this file..."
+                style={{
+                  flex: 1, border: "none", outline: "none", fontSize: 11,
+                  padding: "4px 6px", background: "transparent",
+                  color: "var(--color-text-primary, #fafafa)",
+                  fontFamily: "var(--font-body, sans-serif)",
+                }}
+              />
+              <button
+                onClick={handleChatSubmit}
+                disabled={!chatInput.trim()}
+                style={{
+                  border: "none",
+                  background: chatInput.trim() ? "var(--color-text-primary, #fafafa)" : "var(--color-border-tertiary, #1e1e1e)",
+                  color: chatInput.trim() ? "var(--color-background-primary, #141414)" : "var(--color-text-tertiary, #5a5a5a)",
+                  borderRadius: 5, padding: "3px 8px", fontSize: 10, fontWeight: 600,
+                  cursor: chatInput.trim() ? "pointer" : "default",
+                  transition: "background 0.15s, color 0.15s",
+                  fontFamily: "var(--font-body, sans-serif)",
+                }}
+              >
+                ↵
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -183,6 +229,13 @@ export const ManifestCard = ({
 }: ManifestCardProps) => {
   const [hovered, setHovered] = useState(false);
   const [filePage, setFilePage] = useState(1);
+  const [chatInput, setChatInput] = useState("");
+
+  const handleChatSubmit = () => {
+    if (!chatInput.trim()) return;
+    console.log(`[ManifestCard #${index} "${manifestState.schema_name}"] chat:`, chatInput);
+    setChatInput("");
+  };
 
   const files = manifestState.manifest?.files || [];
   const fileCount = files.length;
@@ -254,7 +307,7 @@ export const ManifestCard = ({
 
       {/* Metadata row */}
       <div style={{ fontSize: 11, color: "var(--color-text-tertiary, #999)", marginTop: 3 }}>
-        v{manifestState.version}
+        {manifestState.version}
         {manifestState.manifest_cid && (
           <span> · CID: {truncAddr(manifestState.manifest_cid)}</span>
         )}
@@ -351,6 +404,45 @@ export const ManifestCard = ({
               )}
             </>
           )}
+
+          {/* Manifest-level chat */}
+          <div style={{ marginTop: 8, paddingTop: 8, borderTop: "0.5px solid var(--color-border-tertiary, #1e1e1e)" }}>
+            <div style={{
+              display: "flex", gap: 6, alignItems: "center",
+              background: "var(--color-background-secondary, #0e0e0e)",
+              border: "0.5px solid var(--color-border-tertiary, #1e1e1e)",
+              borderRadius: 8, padding: 4,
+            }}>
+              <input
+                type="text"
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleChatSubmit()}
+                placeholder="Ask about this manifest..."
+                style={{
+                  flex: 1, border: "none", outline: "none", fontSize: 12,
+                  padding: "5px 6px", background: "transparent",
+                  color: "var(--color-text-primary, #fafafa)",
+                  fontFamily: "var(--font-body, sans-serif)",
+                }}
+              />
+              <button
+                onClick={handleChatSubmit}
+                disabled={!chatInput.trim()}
+                style={{
+                  border: "none",
+                  background: chatInput.trim() ? "var(--color-text-primary, #fafafa)" : "var(--color-border-tertiary, #1e1e1e)",
+                  color: chatInput.trim() ? "var(--color-background-primary, #141414)" : "var(--color-text-tertiary, #5a5a5a)",
+                  borderRadius: 6, padding: "4px 10px", fontSize: 11, fontWeight: 600,
+                  cursor: chatInput.trim() ? "pointer" : "default",
+                  transition: "background 0.15s, color 0.15s",
+                  fontFamily: "var(--font-body, sans-serif)",
+                }}
+              >
+                ↵
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

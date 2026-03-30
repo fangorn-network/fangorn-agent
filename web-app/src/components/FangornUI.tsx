@@ -9,7 +9,8 @@ interface FangornUIProps {
   mode?: string;
   schemas: Schema[];
   schemaDetail?: Schema | null;
-  dataEntries: ManifestState[];
+  dataEntries: FileEntry[];
+  manifestData: ManifestState[];
   querySchemaName?: string;
   sendMessage: (message: string) => void;
 }
@@ -19,6 +20,7 @@ export default function FangornUI({
   schemas,
   schemaDetail = null,
   dataEntries,
+  manifestData,
   querySchemaName = "",
   sendMessage,
 }: FangornUIProps) {
@@ -75,7 +77,7 @@ export default function FangornUI({
         {mode === "browse" ? (
           <BrowseFlow key={`browse-${key}`} schemas={schemas || []} initialDetail={schemaDetail} onQuerySchema={handleQuerySchema} />
         ) : (
-          <QueryFlow key={`query-${key}`} manifestStates={dataEntries || []} schemaName={activeSchemaName || ""} autoLoad={autoLoad} sendPrompt={sendMessage} />
+          <QueryFlow key={`query-${key}`} manifestStates={manifestData || []} schemaName={activeSchemaName || ""} autoLoad={autoLoad} sendPrompt={sendMessage} />
         )}
       </div>
     </div>

@@ -6,7 +6,7 @@ import { FangornLogo } from '../../../public/svg/fangorn-logo';
 import { useFangornAgent } from '@/hooks/useFangornAgent';
 
 export default function ExplorePage() {
-  const { loading, error, schemas, dataEntries, sendMessage } = useFangornAgent();
+  const { loading, error, schemas, dataEntries, manifestData, sendMessage } = useFangornAgent();
   const [mode, setMode] = useState("browse");
    // Auto-load schemas on first visit
   const handleLoadSchemas = () => {
@@ -128,6 +128,7 @@ export default function ExplorePage() {
               mode={mode}
               schemas={schemas}
               dataEntries={dataEntries}
+              manifestData={manifestData}
               sendMessage={sendMessage}
             />
           )}
