@@ -19,7 +19,6 @@ async function main() {
     if (!message) return res.status(400).json({ error: "No message provided" });
     try {
       const { text, mcpResults } = await agent.invokeAgent(message);
-      console.log(`sending a response with mcpResults: ${JSON.stringify(mcpResults)}`)
       agent.resetToolbay();
       res.json({
         response: text,

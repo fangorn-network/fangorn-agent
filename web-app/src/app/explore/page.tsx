@@ -1,96 +1,18 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import FangornUI from '@/components/FangornUI';
 import { FangornLogo } from '../../../public/svg/fangorn-logo';
-import { FileEntry, Schema } from '@/types/subgraph';
+import { useFangornAgent } from '@/hooks/useFangornAgent';
 
 export default function ExplorePage() {
-  const [loading, setLoading] = useState(false);
-  const [schemas, setSchemas] = useState<Schema[] | null>(null);
-  const [dataEntries, setDataEntries] = useState<FileEntry[] | null>(null);
-  const [querySchemaName, setQuerySchemaName] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [mode, setMode] = useState<string> ("browse")
-
-  /**
-   * Send a message through the agent and extract MCP results.
-   * This mirrors the chat flow but skips the chat UI — the agent
-   * processes the query, calls MCP tools, and we pull the structured
-   * data from mcpResults to feed into FangornUI.
-   */
-  const sendAgentMessage = useCallback(async (message: string) => {
-    setLoading(true);
-    setError(null);
-
-    console.log(`sending agent the message: ${message}`)
-
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_AGENT_URL || 'http://localhost:3001';
-      const res = await fetch(`${apiUrl}/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message }),
-      });
-
-      if (!res.ok) {
-        throw new Error(`Agent returned ${res.status}`);
-      }
-
-      const data = await res.json();
-
-      // console.log(`Received data ${JSON.stringify(data)}`)
-
-      if (data.mcpResults) {
-        let result = data.mcpResults;
-        console.log(`[Explore] received MCP results for "${result.toolName}"`);
-        if (result.toolName === 'subgraph_list_schemas') {
-          // console.log(`result: ${JSON.stringify(result)}`)
-          const schemas: Schema[] = result.schemaData
-          setSchemas(schemas);
-        } else if (result.toolName === 'subgraph_query_data') {
-          const dataEntries: FileEntry[] = result.fileData
-          console.log(`[Explore] Extracted ${dataEntries.length} entries` );
-          console.log(`First data entry: ${JSON.stringify(dataEntries[0])}`)
-          setDataEntries(dataEntries);
-        }
-      }
-    } catch (err: any) {
-      console.error('Explore page agent error:', err);
-      setError('Unable to reach the Fangorn Agent. Make sure it is running.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  /**
-   * Called by FangornUI's interactive actions (filter, purchase, prefetch).
-   * The component sets window.sendPrompt which routes here.
-   */
-  const handleSendPrompt = useCallback(
-    (message: string) => {
-      sendAgentMessage(message);
-    },
-    [sendAgentMessage],
-  );
-
-  // Wire sendPrompt globally for FangornUI
-  if (typeof window !== 'undefined') {
-    (window as any).sendPrompt = handleSendPrompt;
-  }
-
-  // Auto-load schemas on first visit
+  const { loading, error, schemas, dataEntries, sendMessage } = useFangornAgent();
+  const [mode, setMode] = useState("browse");
+   // Auto-load schemas on first visit
   const handleLoadSchemas = () => {
     console.log("Called handle load schemas")
-    sendAgentMessage('List all registered schemas. Use JSON response format.');
+    sendMessage('List all registered schemas. Use JSON response format.');
   };
-
-  const handleClearData = () => {
-    setSchemas(null)
-    setDataEntries(null)
-    setQuerySchemaName("")
-    setMode("query")
-  }
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
@@ -125,7 +47,6 @@ export default function ExplorePage() {
             border: '1px solid var(--border)',
             fontFamily: 'var(--font-body)',
           }}
-          onClick={handleClearData}
         >
           ← Back to chat
         </a>
@@ -168,7 +89,7 @@ export default function ExplorePage() {
           )}
 
           {/* Empty state — show load button */}
-          {!schemas && !dataEntries && !loading && (
+          {schemas.length === 0 && !loading && (
             <div className="flex flex-col items-center justify-center py-20 message-appear">
               <div
                 className="w-14 h-14 rounded-full flex items-center justify-center p-2.5 mb-6"
@@ -202,16 +123,13 @@ export default function ExplorePage() {
             </div>
           )}
 
-          {/* FangornUI — rendered once we have data */}
-          {(schemas || dataEntries) && (
-            <div className="message-appear">
-              <FangornUI
-                mode={mode}
-                schemas={schemas || undefined}
-                dataEntries={dataEntries || undefined}
-                querySchemaName={querySchemaName || undefined}
-              />
-            </div>
+          {schemas.length > 0 && (
+            <FangornUI
+              mode={mode}
+              schemas={schemas}
+              dataEntries={dataEntries}
+              sendMessage={sendMessage}
+            />
           )}
         </div>
       </main>
