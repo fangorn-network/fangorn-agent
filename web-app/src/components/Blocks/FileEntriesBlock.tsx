@@ -9,6 +9,7 @@ interface FileEntriesBlockProps {
 }
 
 export const FileEntriesBlock = ({ entries }: FileEntriesBlockProps) => {
+  if (!entries.length) return null
   const [expanded, setExpanded] = useState<number | null>(null);
   const [page, setPage] = useState(1);
 

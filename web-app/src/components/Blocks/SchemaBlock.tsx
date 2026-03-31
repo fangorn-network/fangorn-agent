@@ -11,6 +11,7 @@ interface SchemaBlockProps {
 }
 
 export const SchemaBlock = ({ schemas, sendMessage }: SchemaBlockProps) => {
+  if (!schemas.length) return null
   const [selected, setSelected] = useState<Schema | null>(null);
   const [page, setPage] = useState(1);
 
@@ -36,11 +37,6 @@ export const SchemaBlock = ({ schemas, sendMessage }: SchemaBlockProps) => {
               {isSelected && (
                 <div style={{ animation: "fangornFadeIn 0.3s ease-out", marginTop: 8 }}>
                   <SchemaDetailCard schema={s} />
-                  <div style={{ marginTop: 10, display: "flex", gap: 8 }}>
-                    <ActionBtn onClick={() => sendMessage(`Query the first 40 manifest states that declare they conform to the schema "${s.name}". Use JSON response format.`)}>
-                      Query data for this schema
-                    </ActionBtn>
-                  </div>
                 </div>
               )}
             </div>

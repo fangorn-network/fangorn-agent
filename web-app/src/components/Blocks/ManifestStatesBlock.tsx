@@ -7,10 +7,10 @@ import { FilterBar, applyFilters, ActiveFilter } from "../FilterBar";
 
 interface ManifestStatesBlockProps {
   manifests: ManifestState[];
-  sendMessage: (m: string) => void;
 }
 
-export const ManifestStatesBlock = ({ manifests, sendMessage }: ManifestStatesBlockProps) => {
+export const ManifestStatesBlock = ({ manifests }: ManifestStatesBlockProps) => {
+  if (!manifests.length) return null;
   const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [expanded, setExpanded] = useState<number | null>(null);

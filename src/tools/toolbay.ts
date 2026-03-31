@@ -116,10 +116,10 @@ export class ToolBay {
           `Summary: ${summary}`,
           `The full data is being displayed to the user in the UI.`,
           `You can use the summary above to form a response.`,
+          `Do not include raw JSON in your response.`,
           this.hasEntityContext
             ? `If the user's question requires additional data, you may make further tool calls.`
-            : `Do not make additional tool calls unless the user explicitly asks for different data. ` +
-              "Do not include raw JSON in your response.",
+            : `Do not make additional tool calls unless the user explicitly asks for different data. `
            ].join("\n");
         } else {
           console.log("It was non-standard")

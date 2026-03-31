@@ -113,7 +113,12 @@ export const Bubble = ({ role, children, contextLabel, contextType }: BubbleProp
             paddingLeft: 12,
           } : {}),
           ...(isUser
-            ? { background: "var(--accent, #fafafa)", color: "#0f2a4a", borderBottomRightRadius: 4 }
+            ? {
+                background: "rgba(255, 255, 255, 0.06)",
+                border: "0.5px solid var(--color-border-primary, #3a3a3a)",
+                color: "var(--color-text-primary, #fafafa)",
+                borderBottomRightRadius: 4,
+              }
             : {
                 background: "var(--color-background-primary, #141414)",
                 border: `0.5px solid var(--color-border-tertiary, #1e1e1e)`,

@@ -14,11 +14,26 @@ import {
 import { ChatEntry } from "@/hooks/useFangornAgent";
 import { ChatProvider } from "./ChatContext";
 
+// Duplicated here so we can color the input badge — keep in sync with Bubble
+const CONTEXT_COLORS: Record<string, string> = {
+  schema: "#6e8efb",
+  manifest: "#a78bfa",
+  file: "#34d399",
+  field: "#fbbf24",
+};
+
+interface ReplyContext {
+  contextLabel: string;
+  contextType: "schema" | "manifest" | "file" | "field";
+  /** The original context message from the ChatEntry, so we can re-send it as prefix */
+  contextPrefix?: string;
+}
+
 interface FangornChatProps {
   chatHistory: ChatEntry[];
   loading: boolean;
   error: string | null;
-  sendMessage: (message: string, options?: { silent?: boolean; contextLabel?: string; contextType?: string }) => void;
+  sendMessage: (message: string, options?: { silent?: boolean; contextLabel?: string; contextType?: string; displayMessage?: string }) => void;
 }
 
 export default function FangornChat({
@@ -28,6 +43,7 @@ export default function FangornChat({
   sendMessage,
 }: FangornChatProps) {
   const [input, setInput] = useState("");
+  const [replyContext, setReplyContext] = useState<ReplyContext | null>(null);
   const threadRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -45,10 +61,52 @@ export default function FangornChat({
     scrollToBottom();
   }, [chatHistory, loading, scrollToBottom]);
 
+  const handleReply = (entry: ChatEntry) => {
+    if (!entry.contextLabel || !entry.contextType) return;
+
+    // Find the original user message that started this context thread
+    // by looking backwards for the most recent user message with the same contextLabel
+    const originalUserEntry = [...chatHistory]
+      .reverse()
+      .find(
+        (e) =>
+          e.role === "user" &&
+          e.contextLabel === entry.contextLabel &&
+          e.contextType === entry.contextType
+      );
+
+    setReplyContext({
+      contextLabel: entry.contextLabel,
+      contextType: entry.contextType as ReplyContext["contextType"],
+      // Carry forward the original context prefix from the user message
+      contextPrefix: originalUserEntry?.message?.split(": ").slice(0, -1).join(": "),
+    });
+
+    // Focus the input
+    inputRef.current?.focus();
+  };
+
+  const clearReplyContext = () => {
+    setReplyContext(null);
+  };
+
   const handleSubmit = () => {
     const trimmed = input.trim();
     if (!trimmed || loading) return;
-    sendMessage(trimmed);
+
+    if (replyContext) {
+      // Build context-enriched message using the original prefix
+      const prefix = replyContext.contextPrefix || `Continuing conversation about ${replyContext.contextLabel}`;
+      sendMessage(`${prefix}: ${trimmed}`, {
+        contextLabel: replyContext.contextLabel,
+        contextType: replyContext.contextType,
+        displayMessage: trimmed,
+      });
+      setReplyContext(null);
+    } else {
+      sendMessage(trimmed);
+    }
+
     setInput("");
     if (inputRef.current) {
       inputRef.current.style.height = "auto";
@@ -59,6 +117,10 @@ export default function FangornChat({
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
+    }
+    // Escape clears reply context
+    if (e.key === "Escape" && replyContext) {
+      clearReplyContext();
     }
   };
 
@@ -74,10 +136,34 @@ export default function FangornChat({
 
     if (entry.role === "claude") {
       return (
-        <Bubble key={entry.id} role="claude"
-          contextLabel={entry.contextLabel} contextType={entry.contextType}>
-          {entry.message}
-        </Bubble>
+        <div key={entry.id} style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 4 }}>
+          <Bubble role="claude"
+            contextLabel={entry.contextLabel} contextType={entry.contextType}>
+            {entry.message}
+          </Bubble>
+          {/* Reply button — only on context-tagged claude messages */}
+          {entry.contextLabel && entry.contextType && (
+            <button
+              onClick={() => handleReply(entry)}
+              style={{
+                border: "none",
+                background: "none",
+                cursor: "pointer",
+                fontSize: 10,
+                fontWeight: 500,
+                color: CONTEXT_COLORS[entry.contextType] || "var(--color-text-tertiary, #5a5a5a)",
+                fontFamily: "var(--font-mono, monospace)",
+                padding: "2px 4px",
+                opacity: 0.7,
+                transition: "opacity 0.15s",
+              }}
+              onMouseEnter={(e) => { (e.target as HTMLElement).style.opacity = "1"; }}
+              onMouseLeave={(e) => { (e.target as HTMLElement).style.opacity = "0.7"; }}
+            >
+              ↩ Reply
+            </button>
+          )}
+        </div>
       );
     }
 
@@ -88,29 +174,25 @@ export default function FangornChat({
     switch (entry.resultType) {
       case "schemas":
         return <SchemaBlock key={entry.id} schemas={Array.isArray(entry.data) ? entry.data : [entry.data]} sendMessage={sendMessage} />;
-
       case "schema_entries":
         return <SchemaEntriesBlock key={entry.id} entries={entry.data as any[]} />;
-
       case "manifest_states":
         return <ManifestStatesBlock key={entry.id} manifests={entry.data as ManifestState[]} sendMessage={sendMessage} />;
-
       case "manifests":
         return <ManifestsBlock key={entry.id} manifests={Array.isArray(entry.data) ? entry.data : [entry.data]} />;
-
       case "file_entries":
         return <FileEntriesBlock key={entry.id} entries={entry.data as FileEntry[]} />;
-
       case "fields":
         return <FieldsBlock key={entry.id} fields={entry.data as Field[]} />;
-
       default:
-        if (entry.data && entry.resultType !== "non-standard") {
+        if (entry.data) {
           return <Bubble key={entry.id} role="system">Received data (type: {entry.resultType || "unknown"}).</Bubble>;
         }
         return null;
     }
   };
+
+  const replyBorderColor = replyContext ? CONTEXT_COLORS[replyContext.contextType] || "var(--color-border-primary, #3a3a3a)" : undefined;
 
   return (
     <ChatProvider value={{ sendMessage }}>
@@ -188,13 +270,67 @@ export default function FangornChat({
               borderRadius: "0 0 20px 20px",
             }}
           >
+            {/* Reply context badge */}
+            {replyContext && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "6px 10px",
+                  marginBottom: 8,
+                  borderRadius: 8,
+                  borderLeft: `3px solid ${replyBorderColor}`,
+                  background: "rgba(255, 255, 255, 0.03)",
+                  animation: "fangornFadeIn 0.2s ease-out",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <span
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: "50%",
+                      backgroundColor: replyBorderColor,
+                      display: "inline-block",
+                      flexShrink: 0,
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 500,
+                      color: replyBorderColor,
+                      fontFamily: "var(--font-mono, monospace)",
+                    }}
+                  >
+                    {replyContext.contextLabel}
+                  </span>
+                </div>
+                <button
+                  onClick={clearReplyContext}
+                  style={{
+                    border: "none",
+                    background: "none",
+                    cursor: "pointer",
+                    color: "var(--color-text-tertiary, #5a5a5a)",
+                    fontSize: 14,
+                    lineHeight: 1,
+                    padding: "0 2px",
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            )}
+
             <div
               style={{
                 display: "flex",
                 gap: 8,
                 alignItems: "flex-end",
                 background: "var(--color-background-primary, #141414)",
-                border: "0.5px solid var(--color-border-tertiary, #1e1e1e)",
+                border: `0.5px solid ${replyContext ? replyBorderColor : "var(--color-border-tertiary, #1e1e1e)"}`,
                 borderRadius: 12,
                 padding: "8px 12px",
                 transition: "border-color 0.15s",
@@ -209,7 +345,7 @@ export default function FangornChat({
                   e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
                 }}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask something..."
+                placeholder={replyContext ? `Reply to ${replyContext.contextLabel}...` : "Ask something..."}
                 rows={1}
                 disabled={loading}
                 style={{
@@ -233,7 +369,7 @@ export default function FangornChat({
                 style={{
                   border: "none",
                   background: input.trim() && !loading
-                    ? "var(--color-text-primary, #fafafa)"
+                    ? (replyContext ? replyBorderColor : "var(--color-text-primary, #fafafa)")
                     : "var(--color-border-tertiary, #1e1e1e)",
                   color: input.trim() && !loading
                     ? "var(--color-background-primary, #141414)"
@@ -259,7 +395,9 @@ export default function FangornChat({
                 paddingLeft: 4,
               }}
             >
-              Press Enter to send · Shift+Enter for new line
+              {replyContext
+                ? "Press Enter to reply · Escape to cancel"
+                : "Press Enter to send · Shift+Enter for new line"}
             </div>
           </div>
         </div>

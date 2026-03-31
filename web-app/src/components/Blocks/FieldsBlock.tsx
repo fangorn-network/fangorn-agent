@@ -10,6 +10,7 @@ interface FieldsBlockProps {
 }
 
 export const FieldsBlock = ({ fields }: FieldsBlockProps) => {
+  if (!fields.length) return null
   const [expanded, setExpanded] = useState<number | null>(null);
   const [page, setPage] = useState(1);
 
