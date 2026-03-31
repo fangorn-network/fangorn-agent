@@ -3,10 +3,22 @@ import { useState, useCallback } from "react";
 
 export interface ChatEntry {
   id: number;
-  role: "user" | "claude" | "system" | "mcp-response";
+  role: "user" | "claude" | "system" | "mcp-result";
   message?: string;
+  displayMessage?: string;
   resultType?: "schemas" | "schema_entries" | "manifest_states" | "manifests" | "file_entries" | "fields";
   data?: any;
+  /** Short label shown above contextual messages, e.g. "Re: fangorn.music.v1" */
+  contextLabel?: string;
+  /** Entity type for color-coding the context border */
+  contextType?: "schema" | "manifest" | "file" | "field";
+}
+
+interface SendOptions {
+  silent?: boolean;
+  contextLabel?: string;
+  displayMessage?: string;
+  contextType?: "schema" | "manifest" | "file" | "field";
 }
 
 interface AgentState {
@@ -24,14 +36,20 @@ export function useFangornAgent() {
     chatHistory: [],
   });
 
-  const sendMessage = useCallback(async (message: string, options?: { silent?: boolean }) => {
+  const sendMessage = useCallback(async (message: string, options?: SendOptions) => {
     const silent = options?.silent ?? false;
+    const contextLabel = options?.contextLabel;
+    const contextType = options?.contextType;
+    const displayMessage = options?.displayMessage;
 
     if (!silent) {
       const userEntry: ChatEntry = {
         id: ++entryId,
         role: "user",
         message,
+        displayMessage: displayMessage,
+        contextLabel,
+        contextType,
       };
 
       setState((prev) => ({
@@ -49,7 +67,10 @@ export function useFangornAgent() {
       const res = await fetch(`${apiUrl}/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ 
+          message,
+          hasEntityContext: !!contextType,  // true when sent from a card
+        }),
       });
 
       if (!res.ok) throw new Error(`Agent returned ${res.status}`);
@@ -63,6 +84,8 @@ export function useFangornAgent() {
           id: ++entryId,
           role: "claude",
           message: data.response,
+          contextLabel,
+          contextType,
         });
       }
 
@@ -71,9 +94,11 @@ export function useFangornAgent() {
         const result = data.mcpResults;
         newEntries.push({
           id: ++entryId,
-          role: "mcp-response",
+          role: "mcp-result",
           resultType: result.resultType,
           data: result.data,
+          contextLabel,
+          contextType,
         });
       }
 

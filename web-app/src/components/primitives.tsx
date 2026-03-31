@@ -37,48 +37,30 @@ export const Pill = ({ variant, type, children }: PillProps) => {
   );
 };
 
-// ─── Chat bubble ────────────────────────────────────────────
+// Context type → border color mapping
+const CONTEXT_COLORS: Record<string, string> = {
+  schema: "#6e8efb",
+  manifest: "#a78bfa",
+  file: "#34d399",
+  field: "#fbbf24",
+};
+
 interface BubbleProps {
   role: "user" | "claude" | "system";
   children: ReactNode;
+  contextLabel?: string;
+  contextType?: string;
 }
 
-export const Bubble = ({ role, children }: BubbleProps) => {
+export const Bubble = ({ role, children, contextLabel, contextType }: BubbleProps) => {
   const isUser = role === "user";
+  const borderColor = contextType ? CONTEXT_COLORS[contextType] || "var(--color-border-primary, #3a3a3a)" : undefined;
 
-  if (role === "claude" && typeof children === "string") {
-    return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "flex-start",
-          gap: 4,
-          animation: "fangornFadeIn 0.3s ease-out",
-          animationFillMode: "both",
-        }}
-      >
-        <div
-          className="markdown-body"
-          style={{
-            maxWidth: "88%",
-            padding: "10px 14px",
-            borderRadius: 16,
-            fontSize: 14,
-            lineHeight: 1.55,
-            background: "var(--color-background-primary, #fff)",
-            border: "0.5px solid var(--color-border-tertiary, #e0e0e0)",
-            color: "var(--color-text-primary, #1a1a1a)",
-            borderBottomLeftRadius: 4,
-          }}
-        >
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {children}
-          </ReactMarkdown>
-        </div>
-      </div>
-    );
-  }
+  const bubbleContent = role === "claude" && typeof children === "string" ? (
+    <ReactMarkdown remarkPlugins={[remarkGfm]}>{children}</ReactMarkdown>
+  ) : (
+    children
+  );
 
   return (
     <div
@@ -91,24 +73,56 @@ export const Bubble = ({ role, children }: BubbleProps) => {
         animationFillMode: "both",
       }}
     >
+      {/* Context label */}
+      {contextLabel && (
+        <div
+          style={{
+            fontSize: 10,
+            fontWeight: 500,
+            color: borderColor || "var(--color-text-tertiary, #5a5a5a)",
+            fontFamily: "var(--font-mono, monospace)",
+            padding: "0 4px",
+            display: "flex",
+            alignItems: "center",
+            gap: 4,
+          }}
+        >
+          <span style={{
+            width: 6,
+            height: 6,
+            borderRadius: "50%",
+            backgroundColor: borderColor || "var(--color-text-tertiary, #5a5a5a)",
+            display: "inline-block",
+            flexShrink: 0,
+          }} />
+          {contextLabel}
+        </div>
+      )}
+
       <div
+        className={role === "claude" ? "markdown-body" : undefined}
         style={{
           maxWidth: "88%",
           padding: "10px 14px",
           borderRadius: 16,
           fontSize: 14,
           lineHeight: 1.55,
+          // Context border
+          ...(borderColor ? {
+            borderLeft: `3px solid ${borderColor}`,
+            paddingLeft: 12,
+          } : {}),
           ...(isUser
-            ? { background: ACCENT, color: "#0f2a4a", borderBottomRightRadius: 4 }
+            ? { background: "var(--accent, #fafafa)", color: "#0f2a4a", borderBottomRightRadius: 4 }
             : {
-                background: "var(--color-background-primary, #fff)",
-                border: "0.5px solid var(--color-border-tertiary, #e0e0e0)",
-                color: "var(--color-text-primary, #1a1a1a)",
+                background: "var(--color-background-primary, #141414)",
+                border: `0.5px solid var(--color-border-tertiary, #1e1e1e)`,
+                color: "var(--color-text-primary, #fafafa)",
                 borderBottomLeftRadius: 4,
               }),
         }}
       >
-        {children}
+        {bubbleContent}
       </div>
     </div>
   );

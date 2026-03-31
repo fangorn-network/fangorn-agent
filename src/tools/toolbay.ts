@@ -58,6 +58,8 @@ export class ToolBay {
   // that the model will have new tools bound on first invocation.
   private dirty = true;
 
+  hasEntityContext: boolean = false;
+
   static async initToolbay(): Promise<ToolBay> {
     const toolboxes = [];
 
@@ -103,15 +105,22 @@ export class ToolBay {
     if (MCP_UI_TOOLS.has(toolName)) {
       try {
         const parsed = JSON.parse(result)
-
-        console.log(`resultType: ${JSON.stringify(parsed.resultType)}`)
-
         const data: any = parsed.data
         const resultType: string = parsed.resultType
+
         if (resultType !== "non-standard") {
-          console.log("It was not non-standard")
-          console.log(resultType)
-          result = `Tell the user something along the lines of "${data.length} results have been successfully retrieved". Do not pretend that you were exposed to the JSON. No further tool calls are required.`
+          const count = Array.isArray(data) ? data.length : 1;
+          const summary = this.buildSummary(data, resultType);
+         result = [
+          `${count} ${resultType.replace(/_/g, " ")} retrieved successfully.`,
+          `Summary: ${summary}`,
+          `The full data is being displayed to the user in the UI.`,
+          `You can use the summary above to form a response.`,
+          this.hasEntityContext
+            ? `If the user's question requires additional data, you may make further tool calls.`
+            : `Do not make additional tool calls unless the user explicitly asks for different data. ` +
+              "Do not include raw JSON in your response.",
+           ].join("\n");
         } else {
           console.log("It was non-standard")
           console.log("resultType")
@@ -128,6 +137,35 @@ export class ToolBay {
 
     return result;
   }
+  private buildSummary(data: any, resultType: string): string {
+  if (!Array.isArray(data)) return JSON.stringify(data).slice(0, 500);
+  
+  switch (resultType) {
+    case "schemas":
+      return data.map((s: any) => 
+        `${s.name} (owner: ${s.owner}, ${s.versions?.length || 0} versions, fields: ${s.versions?.[s.versions.length-1]?.fields?.map((f: any) => f.name).join(", ") || "none"})`
+      ).join("; ");
+    
+    case "manifest_states":
+      return data.map((ms: any) => 
+        `${ms.schema_name} by ${ms.owner} (${ms.manifest?.files?.length || 0} files, v${ms.version})`
+      ).join("; ");
+    
+    case "file_entries":
+      return data.map((fe: any, i: number) => {
+        const fields = fe.fields?.map((f: any) => `${f.name}=${f.acc === "plain" ? f.value : "[encrypted]"}`).join(", ");
+        return `File ${i+1}: ${fields}`;
+      }).join("; ");
+    
+    case "fields":
+      return data.map((f: any) => 
+        `${f.name}=${f.acc === "plain" ? f.value : "[encrypted]"} (${f.atType})`
+      ).join("; ");
+    
+    default:
+      return `${data.length} items`;
+  }
+}
 
   inject(newTools: DynamicStructuredTool[], toolToRemove?: string) {
     newTools.forEach((t) => this.currentTools.set(t.name, t));

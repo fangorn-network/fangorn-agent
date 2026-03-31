@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Schema } from "../../types/subgraph";
 import { Pill, Card, FieldRow, truncAddr } from "../primitives";
+import { useChatContext } from "../ChatContext";
 
 interface SchemaCardProps {
   schema: Schema;
@@ -12,10 +13,23 @@ interface SchemaCardProps {
 export const SchemaCard = ({ schema, fieldCount, selected, onSelect }: SchemaCardProps) => {
   const [hovered, setHovered] = useState(false);
   const [chatInput, setChatInput] = useState("");
+  const { sendMessage } = useChatContext();
+
+  const contextLabel = `Re: ${schema.name}`;
 
   const handleChatSubmit = () => {
     if (!chatInput.trim()) return;
-    console.log(`[SchemaCard "${schema.name}"] chat:`, chatInput);
+    const context = {
+      name: schema.name,
+      schemaId: schema.schemaId,
+      owner: schema.owner,
+      versionCount: schema.versions?.length || 0,
+      latestFields: schema.versions?.[schema.versions.length - 1]?.fields?.map((f) => `${f.name} (${f.fieldType})`) || [],
+    };
+    sendMessage(
+      `In regards to the Schema ${JSON.stringify(context)}: ${chatInput}`,
+      { contextLabel, contextType: "schema", displayMessage: chatInput }
+    );
     setChatInput("");
   };
 
@@ -26,7 +40,7 @@ export const SchemaCard = ({ schema, fieldCount, selected, onSelect }: SchemaCar
       onMouseLeave={() => setHovered(false)}
       style={{
         background: selected ? "rgba(255, 255, 255, 0.04)" : "var(--color-background-primary, #141414)",
-        border: `0.5px solid ${selected ? "var(--color-border-primary, #3a3a3a)" : hovered ? "var(--color-border-primary, #3a3a3a)" : "var(--color-border-tertiary, #1e1e1e)"}`,
+        border: `0.5px solid ${selected || hovered ? "var(--color-border-primary, #3a3a3a)" : "var(--color-border-tertiary, #1e1e1e)"}`,
         borderRadius: 12,
         padding: "10px 12px",
         cursor: "pointer",
@@ -56,11 +70,24 @@ interface SchemaDetailCardProps {
 
 export const SchemaDetailCard = ({ schema }: SchemaDetailCardProps) => {
   const [chatInput, setChatInput] = useState("");
+  const { sendMessage } = useChatContext();
   const latestVersion = schema.versions?.[schema.versions.length - 1];
+
+  const contextLabel = `Re: ${schema.name}`;
 
   const handleChatSubmit = () => {
     if (!chatInput.trim()) return;
-    console.log(`[SchemaDetailCard "${schema.name}"] chat:`, chatInput);
+    const context = {
+      name: schema.name,
+      schemaId: schema.schemaId,
+      owner: schema.owner,
+      versionCount: schema.versions?.length || 0,
+      latestFields: latestVersion?.fields?.map((f) => `${f.name} (${f.fieldType})`) || [],
+    };
+    sendMessage(
+      `In regards to the Schema ${JSON.stringify(context)}: ${chatInput}`,
+      { contextLabel, contextType: "schema", displayMessage: chatInput }
+    );
     setChatInput("");
   };
 
