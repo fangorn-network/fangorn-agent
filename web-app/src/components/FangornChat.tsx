@@ -204,9 +204,6 @@ export default function FangornChat({
       case "fields":
         return <FieldsBlock key={entry.id} fields={entry.data as Field[]} />;
       default:
-        if (entry.data) {
-          return <Bubble key={entry.id} role="system">Received data (type: {entry.resultType || "unknown"}).</Bubble>;
-        }
         return null;
     }
   };
