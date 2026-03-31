@@ -95,9 +95,28 @@ export default function FangornChat({
     if (!trimmed || loading) return;
 
     if (replyContext) {
-      // Build context-enriched message using the original prefix
+      // Gather recent conversation history for this context thread
+      const threadMessages = chatHistory
+        .filter(
+          (e) =>
+            e.contextLabel === replyContext.contextLabel &&
+            e.contextType === replyContext.contextType &&
+            (e.role === "user" || e.role === "claude")
+        )
+        .slice(-6) // last 3 exchanges (6 messages max to keep payload reasonable)
+        .map((e) => {
+          const role = e.role === "user" ? "User" : "Assistant";
+          const text = e.displayMessage || e.message || "";
+          return `${role}: ${text}`;
+        })
+        .join("\n");
+
       const prefix = replyContext.contextPrefix || `Continuing conversation about ${replyContext.contextLabel}`;
-      sendMessage(`${prefix}: ${trimmed}`, {
+      const threadContext = threadMessages
+        ? `\n\nHere is the recent conversation about this entity:\n${threadMessages}\n\nUser's new message: ${trimmed}`
+        : `: ${trimmed}`;
+
+      sendMessage(`${prefix}${threadContext}`, {
         contextLabel: replyContext.contextLabel,
         contextType: replyContext.contextType,
         displayMessage: trimmed,

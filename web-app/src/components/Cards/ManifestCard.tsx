@@ -3,30 +3,26 @@ import { ManifestState, FileEntry } from "../../types/subgraph";
 import { Pill, EncryptedBadge, truncAddr } from "../primitives";
 import { useChatContext } from "../ChatContext";
 
+const MANIFEST_COLOR = "#a78bfa";
+const FILE_COLOR = "#34d399";
+
 /* ── File entry row ── */
 interface FileEntryRowProps { file: FileEntry; fileIndex: number; isSelected: boolean; onSelect: () => void; }
 
 const FileEntryRow = ({ file, fileIndex, isSelected, onSelect }: FileEntryRowProps) => {
   const [hovered, setHovered] = useState(false);
   const [chatInput, setChatInput] = useState("");
+  const [hasSent, setHasSent] = useState(false);
   const { sendMessage } = useChatContext();
-  const contextLabel = `Re: File ${fileIndex + 1}`;
+  const contextLabel = `Re: File ${file.tag}`;
 
   const handleChatSubmit = () => {
     if (!chatInput.trim()) return;
-    const context = {
-      id: file.id,
-      tag: file.tag,
-      fieldCount: file.fields.length,
-      fields: file.fields.map((f) => ({
-        name: f.name,
-        value: f.acc === "plain" ? f.value : `[${f.acc}]`,
-        type: f.atType,
-        hasPrice: f.price != null && Number(f.price?.price) > 0,
-      })),
-    };
+    const context = { id: file.id, tag: file.tag, fieldCount: file.fields.length, fields: file.fields.map((f) => ({ name: f.name, value: f.acc === "plain" ? f.value : `[${f.acc}]`, type: f.atType, hasPrice: f.price != null && Number(f.price?.price) > 0 })) };
     sendMessage(`In regards to this File Entry ${JSON.stringify(context)}: ${chatInput}`, { contextLabel, contextType: "file", displayMessage: chatInput });
     setChatInput("");
+    setHasSent(true);
+    onSelect(); // collapse
   };
 
   const plainFields = file.fields.filter((f) => f.acc === "plain");
@@ -37,13 +33,19 @@ const FileEntryRow = ({ file, fileIndex, isSelected, onSelect }: FileEntryRowPro
 
   return (
     <div onClick={(e) => { e.stopPropagation(); onSelect(); }} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
-      style={{ background: isSelected ? "rgba(255, 255, 255, 0.06)" : "var(--color-background-secondary, #0e0e0e)", border: `0.5px solid ${isSelected || hovered ? "var(--color-border-primary, #3a3a3a)" : "var(--color-border-tertiary, #1e1e1e)"}`, borderRadius: 10, padding: "8px 10px", cursor: "pointer", transition: "border-color 0.15s, background 0.15s" }}>
+      style={{
+        background: isSelected ? "rgba(255, 255, 255, 0.06)" : "var(--color-background-secondary, #0e0e0e)",
+        border: `0.5px solid ${isSelected || hovered ? "var(--color-border-primary, #3a3a3a)" : "var(--color-border-tertiary, #1e1e1e)"}`,
+        borderLeft: hasSent ? `3px solid ${FILE_COLOR}` : undefined,
+        borderRadius: 10, padding: "8px 10px", cursor: "pointer", transition: "border-color 0.15s, background 0.15s",
+      }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ maxWidth: "60%" }}>
           <div style={{ fontSize: 12, fontWeight: 500, color: "var(--color-text-primary, #fafafa)" }}>{summaryField ? summaryField.value : `File ${fileIndex + 1}`}</div>
           {secondaryField && <div style={{ fontSize: 11, color: "var(--color-text-secondary, #8a8a8a)", marginTop: 1 }}>{secondaryField.name}: {secondaryField.value}</div>}
         </div>
         <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+          {hasSent && <span style={{ fontSize: 9, color: FILE_COLOR, fontFamily: "var(--font-mono, monospace)" }}>● thread</span>}
           {encFields.length > 0 && totalEncPrice > 0 && <Pill variant="green">${totalEncPrice.toFixed(2)}</Pill>}
           {encFields.length > 0 && <Pill variant="amber">🔒 {encFields.length}</Pill>}
           <span style={{ fontSize: 10, color: "var(--color-text-tertiary, #5a5a5a)", transform: isSelected ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s", display: "inline-block" }}>▼</span>
@@ -91,22 +93,17 @@ export const ManifestCard = ({ index, manifestState, isExpanded, onToggle, selec
   const [hovered, setHovered] = useState(false);
   const [filePage, setFilePage] = useState(1);
   const [chatInput, setChatInput] = useState("");
+  const [hasSent, setHasSent] = useState(false);
   const { sendMessage } = useChatContext();
   const contextLabel = `Re: ${manifestState.schema_name} (${truncAddr(manifestState.owner)})`;
 
   const handleChatSubmit = () => {
     if (!chatInput.trim()) return;
-    const context = {
-      id: manifestState.id,
-      owner: manifestState.owner,
-      schema_name: manifestState.schema_name,
-      schema_id: manifestState.schema_id,
-      version: manifestState.version,
-      manifest_cid: manifestState.manifest_cid,
-      fileCount: manifestState.manifest?.files?.length || 0,
-    };
+    const context = { id: manifestState.id, owner: manifestState.owner, schema_name: manifestState.schema_name, schema_id: manifestState.schema_id, version: manifestState.version, manifest_cid: manifestState.manifest_cid, fileCount: manifestState.manifest?.files?.length || 0 };
     sendMessage(`In regards to this ManifestState ${JSON.stringify(context)}: ${chatInput}`, { contextLabel, contextType: "manifest", displayMessage: chatInput });
     setChatInput("");
+    setHasSent(true);
+    onToggle(); // collapse
   };
 
   const files = manifestState.manifest?.files || [];
@@ -117,13 +114,19 @@ export const ManifestCard = ({ index, manifestState, isExpanded, onToggle, selec
 
   return (
     <div onClick={onToggle} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
-      style={{ background: isExpanded ? "rgba(255, 255, 255, 0.04)" : "var(--color-background-primary, #141414)", border: `0.5px solid ${isExpanded || hovered ? "var(--color-border-primary, #3a3a3a)" : "var(--color-border-tertiary, #1e1e1e)"}`, borderRadius: 12, padding: "10px 12px", cursor: "pointer", transition: "border-color 0.15s, background 0.15s" }}>
+      style={{
+        background: isExpanded ? "rgba(255, 255, 255, 0.04)" : "var(--color-background-primary, #141414)",
+        border: `0.5px solid ${isExpanded || hovered ? "var(--color-border-primary, #3a3a3a)" : "var(--color-border-tertiary, #1e1e1e)"}`,
+        borderLeft: hasSent ? `3px solid ${MANIFEST_COLOR}` : undefined,
+        borderRadius: 12, padding: "10px 12px", cursor: "pointer", transition: "border-color 0.15s, background 0.15s",
+      }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div style={{ maxWidth: "65%" }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text-primary, #fafafa)", fontFamily: "var(--font-mono, monospace)" }}>{manifestState.schema_name || `Manifest ${index + 1}`}</div>
           <div style={{ fontSize: 11, color: "var(--color-text-tertiary, #5a5a5a)", marginTop: 3, fontFamily: "var(--font-mono, monospace)" }}>owner: {truncAddr(manifestState.owner)}</div>
         </div>
         <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+          {hasSent && <span style={{ fontSize: 9, color: MANIFEST_COLOR, fontFamily: "var(--font-mono, monospace)" }}>● thread</span>}
           <Pill variant="blue">{fileCount} file{fileCount !== 1 ? "s" : ""}</Pill>
           <span style={{ fontSize: 11, color: "var(--color-text-tertiary, #5a5a5a)", transform: isExpanded ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s", display: "inline-block" }}>▼</span>
         </div>

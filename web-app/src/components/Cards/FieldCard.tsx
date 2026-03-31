@@ -3,28 +3,24 @@ import { Field } from "../../types/subgraph";
 import { Pill, EncryptedBadge, truncAddr } from "../primitives";
 import { useChatContext } from "../ChatContext";
 
+const FIELD_COLOR = "#fbbf24";
+
 interface FieldCardProps { field: Field; index: number; isExpanded: boolean; onToggle: () => void; }
 
 export const FieldCard = ({ field, index, isExpanded, onToggle }: FieldCardProps) => {
   const [hovered, setHovered] = useState(false);
   const [chatInput, setChatInput] = useState("");
+  const [hasSent, setHasSent] = useState(false);
   const { sendMessage } = useChatContext();
-  const contextLabel = `Re: Field "${field.name}"`;
+  const contextLabel = `Re: "${field.name}: ${field.value}"`;
 
   const handleChatSubmit = () => {
     if (!chatInput.trim()) return;
-    const context = {
-      id: field.id,
-      name: field.name,
-      value: field.acc === "plain" ? field.value : `[${field.acc}]`,
-      atType: field.atType,
-      acc: field.acc,
-      manifestStateId: field.manifestState.id,
-      fileEntryId: field.fileEntry?.id || null,
-      price: field.price ? { price: field.price.price, currency: field.price.currency } : null,
-    };
+    const context = { id: field.id, name: field.name, value: field.acc === "plain" ? field.value : `[${field.acc}]`, atType: field.atType, acc: field.acc, manifestStateId: field.manifestState.id, fileEntryId: field.fileEntry?.id || null, price: field.price ? { price: field.price.price, currency: field.price.currency } : null };
     sendMessage(`In regards to this Field ${JSON.stringify(context)}: ${chatInput}`, { contextLabel, contextType: "field", displayMessage: chatInput });
     setChatInput("");
+    setHasSent(true);
+    onToggle(); // collapse
   };
 
   const isEncrypted = field.acc !== "plain";
@@ -32,7 +28,12 @@ export const FieldCard = ({ field, index, isExpanded, onToggle }: FieldCardProps
 
   return (
     <div onClick={onToggle} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
-      style={{ background: isExpanded ? "rgba(255, 255, 255, 0.04)" : "var(--color-background-primary, #141414)", border: `0.5px solid ${isExpanded || hovered ? "var(--color-border-primary, #3a3a3a)" : "var(--color-border-tertiary, #1e1e1e)"}`, borderRadius: 12, padding: "10px 12px", cursor: "pointer", transition: "border-color 0.15s, background 0.15s" }}>
+      style={{
+        background: isExpanded ? "rgba(255, 255, 255, 0.04)" : "var(--color-background-primary, #141414)",
+        border: `0.5px solid ${isExpanded || hovered ? "var(--color-border-primary, #3a3a3a)" : "var(--color-border-tertiary, #1e1e1e)"}`,
+        borderLeft: hasSent ? `3px solid ${FIELD_COLOR}` : undefined,
+        borderRadius: 12, padding: "10px 12px", cursor: "pointer", transition: "border-color 0.15s, background 0.15s",
+      }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ maxWidth: "55%" }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text-primary, #fafafa)", fontFamily: "var(--font-mono, monospace)" }}>{field.name}</div>
@@ -41,6 +42,7 @@ export const FieldCard = ({ field, index, isExpanded, onToggle }: FieldCardProps
           </div>
         </div>
         <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+          {hasSent && <span style={{ fontSize: 9, color: FIELD_COLOR, fontFamily: "var(--font-mono, monospace)" }}>● thread</span>}
           <Pill type={field.atType}>{field.atType}</Pill>
           {isEncrypted && <Pill variant="amber">🔒</Pill>}
           {hasPrice && <Pill variant="green">${Number(field.price!.price).toFixed(2)}</Pill>}

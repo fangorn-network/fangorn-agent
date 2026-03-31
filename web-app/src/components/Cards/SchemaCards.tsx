@@ -3,35 +3,18 @@ import { Schema } from "../../types/subgraph";
 import { Pill, Card, FieldRow, truncAddr } from "../primitives";
 import { useChatContext } from "../ChatContext";
 
+const SCHEMA_COLOR = "#6e8efb";
+
 interface SchemaCardProps {
   schema: Schema;
   fieldCount: number;
   selected: boolean;
+  hasSent?: boolean;
   onSelect: () => void;
 }
 
-export const SchemaCard = ({ schema, fieldCount, selected, onSelect }: SchemaCardProps) => {
+export const SchemaCard = ({ schema, fieldCount, selected, hasSent = false, onSelect }: SchemaCardProps) => {
   const [hovered, setHovered] = useState(false);
-  const [chatInput, setChatInput] = useState("");
-  const { sendMessage } = useChatContext();
-
-  const contextLabel = `Re: ${schema.name}`;
-
-  const handleChatSubmit = () => {
-    if (!chatInput.trim()) return;
-    const context = {
-      name: schema.name,
-      schemaId: schema.schemaId,
-      owner: schema.owner,
-      versionCount: schema.versions?.length || 0,
-      latestFields: schema.versions?.[schema.versions.length - 1]?.fields?.map((f) => `${f.name} (${f.fieldType})`) || [],
-    };
-    sendMessage(
-      `In regards to the Schema ${JSON.stringify(context)}: ${chatInput}`,
-      { contextLabel, contextType: "schema", displayMessage: chatInput }
-    );
-    setChatInput("");
-  };
 
   return (
     <div
@@ -41,6 +24,7 @@ export const SchemaCard = ({ schema, fieldCount, selected, onSelect }: SchemaCar
       style={{
         background: selected ? "rgba(255, 255, 255, 0.04)" : "var(--color-background-primary, #141414)",
         border: `0.5px solid ${selected || hovered ? "var(--color-border-primary, #3a3a3a)" : "var(--color-border-tertiary, #1e1e1e)"}`,
+        borderLeft: hasSent ? `3px solid ${SCHEMA_COLOR}` : undefined,
         borderRadius: 12,
         padding: "10px 12px",
         cursor: "pointer",
@@ -51,7 +35,14 @@ export const SchemaCard = ({ schema, fieldCount, selected, onSelect }: SchemaCar
         <div style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text-primary, #fafafa)", fontFamily: "var(--font-mono, monospace)", maxWidth: "70%" }}>
           {schema.name}
         </div>
-        <Pill variant="blue">{fieldCount} field{fieldCount !== 1 ? "s" : ""}</Pill>
+        <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+          {hasSent && (
+            <span style={{ fontSize: 9, color: SCHEMA_COLOR, fontFamily: "var(--font-mono, monospace)" }}>
+              ● thread
+            </span>
+          )}
+          <Pill variant="blue">{fieldCount} field{fieldCount !== 1 ? "s" : ""}</Pill>
+        </div>
       </div>
       <div style={{ fontSize: 11, color: "var(--color-text-tertiary, #5a5a5a)", marginTop: 4, fontFamily: "var(--font-mono, monospace)" }}>
         owner: {truncAddr(schema.owner)}
@@ -66,13 +57,13 @@ export const SchemaCard = ({ schema, fieldCount, selected, onSelect }: SchemaCar
 
 interface SchemaDetailCardProps {
   schema: Schema;
+  onChatSent?: () => void;
 }
 
-export const SchemaDetailCard = ({ schema }: SchemaDetailCardProps) => {
+export const SchemaDetailCard = ({ schema, onChatSent }: SchemaDetailCardProps) => {
   const [chatInput, setChatInput] = useState("");
   const { sendMessage } = useChatContext();
   const latestVersion = schema.versions?.[schema.versions.length - 1];
-
   const contextLabel = `Re: ${schema.name}`;
 
   const handleChatSubmit = () => {
@@ -89,6 +80,7 @@ export const SchemaDetailCard = ({ schema }: SchemaDetailCardProps) => {
       { contextLabel, contextType: "schema", displayMessage: chatInput }
     );
     setChatInput("");
+    onChatSent?.();
   };
 
   return (
@@ -107,15 +99,7 @@ export const SchemaDetailCard = ({ schema }: SchemaDetailCardProps) => {
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
             {latestVersion.fields.map((f) => (
-              <div
-                key={f.name}
-                style={{
-                  display: "flex", alignItems: "center", gap: 6,
-                  padding: "4px 10px",
-                  background: "var(--color-background-secondary, #0e0e0e)",
-                  borderRadius: 8, fontSize: 12,
-                }}
-              >
+              <div key={f.name} style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", background: "var(--color-background-secondary, #0e0e0e)", borderRadius: 8, fontSize: 12 }}>
                 <span style={{ fontWeight: 500, color: "var(--color-text-primary, #fafafa)" }}>{f.name}</span>
                 <Pill type={f.fieldType}>{f.fieldType}</Pill>
               </div>
@@ -123,42 +107,12 @@ export const SchemaDetailCard = ({ schema }: SchemaDetailCardProps) => {
           </div>
         </div>
       )}
-
-      {/* Inline chat */}
       <div style={{ marginTop: 10, paddingTop: 8, borderTop: "0.5px solid var(--color-border-tertiary, #1e1e1e)" }}>
-        <div style={{
-          display: "flex", gap: 6, alignItems: "center",
-          background: "var(--color-background-secondary, #0e0e0e)",
-          border: "0.5px solid var(--color-border-tertiary, #1e1e1e)",
-          borderRadius: 8, padding: 4,
-        }}>
-          <input
-            type="text"
-            value={chatInput}
-            onChange={(e) => setChatInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleChatSubmit()}
-            placeholder="Ask about this schema..."
-            style={{
-              flex: 1, border: "none", outline: "none", fontSize: 12,
-              padding: "5px 6px", background: "transparent",
-              color: "var(--color-text-primary, #fafafa)",
-              fontFamily: "var(--font-body, sans-serif)",
-            }}
-          />
-          <button
-            onClick={handleChatSubmit}
-            disabled={!chatInput.trim()}
-            style={{
-              border: "none", background: chatInput.trim() ? "var(--color-text-primary, #fafafa)" : "var(--color-border-tertiary, #1e1e1e)",
-              color: chatInput.trim() ? "var(--color-background-primary, #141414)" : "var(--color-text-tertiary, #5a5a5a)",
-              borderRadius: 6, padding: "4px 10px", fontSize: 11, fontWeight: 600,
-              cursor: chatInput.trim() ? "pointer" : "default",
-              transition: "background 0.15s, color 0.15s",
-              fontFamily: "var(--font-body, sans-serif)",
-            }}
-          >
-            ↵
-          </button>
+        <div style={{ display: "flex", gap: 6, alignItems: "center", background: "var(--color-background-secondary, #0e0e0e)", border: "0.5px solid var(--color-border-tertiary, #1e1e1e)", borderRadius: 8, padding: 4 }}>
+          <input type="text" value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleChatSubmit()} placeholder="Ask about this schema..."
+            style={{ flex: 1, border: "none", outline: "none", fontSize: 12, padding: "5px 6px", background: "transparent", color: "var(--color-text-primary, #fafafa)", fontFamily: "var(--font-body, sans-serif)" }} />
+          <button onClick={handleChatSubmit} disabled={!chatInput.trim()}
+            style={{ border: "none", background: chatInput.trim() ? "var(--color-text-primary, #fafafa)" : "var(--color-border-tertiary, #1e1e1e)", color: chatInput.trim() ? "var(--color-background-primary, #141414)" : "var(--color-text-tertiary, #5a5a5a)", borderRadius: 6, padding: "4px 10px", fontSize: 11, fontWeight: 600, cursor: chatInput.trim() ? "pointer" : "default", transition: "background 0.15s, color 0.15s", fontFamily: "var(--font-body, sans-serif)" }}>↵</button>
         </div>
       </div>
     </Card>

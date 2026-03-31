@@ -11,13 +11,18 @@ interface SchemaBlockProps {
 }
 
 export const SchemaBlock = ({ schemas, sendMessage }: SchemaBlockProps) => {
-  if (!schemas.length) return null
   const [selected, setSelected] = useState<Schema | null>(null);
   const [page, setPage] = useState(1);
+  const [threadedSchemas, setThreadedSchemas] = useState<Set<string>>(new Set());
 
   const totalPages = Math.max(1, Math.ceil(schemas.length / ITEMS_PER_PAGE));
   const pageStart = (page - 1) * ITEMS_PER_PAGE;
   const pageItems = schemas.slice(pageStart, pageStart + ITEMS_PER_PAGE);
+
+  const handleChatSent = (schemaName: string) => {
+    setThreadedSchemas((prev) => new Set(prev).add(schemaName));
+    setSelected(null);
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 8, animation: "fangornFadeIn 0.3s ease-out" }}>
@@ -33,10 +38,11 @@ export const SchemaBlock = ({ schemas, sendMessage }: SchemaBlockProps) => {
           return (
             <div key={s.name}>
               <SchemaCard schema={s} fieldCount={fieldCount} selected={isSelected}
+                hasSent={threadedSchemas.has(s.name)}
                 onSelect={() => setSelected(prev => prev?.name === s.name ? null : s)} />
               {isSelected && (
                 <div style={{ animation: "fangornFadeIn 0.3s ease-out", marginTop: 8 }}>
-                  <SchemaDetailCard schema={s} />
+                  <SchemaDetailCard schema={s} onChatSent={() => handleChatSent(s.name)} />
                 </div>
               )}
             </div>
