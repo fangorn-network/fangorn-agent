@@ -119,6 +119,9 @@ export class FangornAgent {
           toolCall.args,
         );
 
+        console.log("The result of that tool call.")
+        console.log(JSON.stringify(result))
+
         messages.push({
           role: "tool",
           tool_call_id: toolCall.id,

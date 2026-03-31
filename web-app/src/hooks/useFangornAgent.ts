@@ -1,26 +1,43 @@
 // hooks/useFangornAgent.ts
-import { useState, useCallback, useRef } from "react";
-import { Schema, FileEntry, ManifestState } from "@/types/subgraph";
+import { useState, useCallback } from "react";
+
+export interface ChatEntry {
+  id: number;
+  role: "user" | "claude" | "system" | "mcp-response";
+  message?: string;
+  resultType?: "schemas" | "schema_entries" | "manifest_states" | "manifests" | "file_entries" | "fields";
+  data?: any;
+}
 
 interface AgentState {
   loading: boolean;
   error: string | null;
-  schemas: Schema[];
-  dataEntries: FileEntry[];
-  manifestData: ManifestState[]
+  chatHistory: ChatEntry[];
 }
+
+let entryId = 0;
 
 export function useFangornAgent() {
   const [state, setState] = useState<AgentState>({
     loading: false,
     error: null,
-    schemas: [],
-    dataEntries: [],
-    manifestData: []
+    chatHistory: [],
   });
 
   const sendMessage = useCallback(async (message: string) => {
-    setState((prev) => ({ ...prev, loading: true, error: null }));
+    // Add the user message to history
+    const userEntry: ChatEntry = {
+      id: ++entryId,
+      role: "user",
+      message,
+    };
+
+    setState((prev) => ({
+      ...prev,
+      loading: true,
+      error: null,
+      chatHistory: [...prev.chatHistory, userEntry],
+    }));
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_AGENT_URL || "http://localhost:3001";
@@ -33,18 +50,33 @@ export function useFangornAgent() {
       if (!res.ok) throw new Error(`Agent returned ${res.status}`);
       const data = await res.json();
 
+      const newEntries: ChatEntry[] = [];
+
+      // Add the LLM's text response if present
+      if (data.response) {
+        newEntries.push({
+          id: ++entryId,
+          role: "claude",
+          message: data.response,
+        });
+      }
+
+      // Add the MCP result if present
       if (data.mcpResults) {
         const result = data.mcpResults;
-        setState((prev) => ({
-          loading: false,
-          error: null,
-          schemas: result.schemaData?.length ? result.schemaData : prev.schemas,
-          dataEntries: result.fileData?.length ? result.fileData : prev.dataEntries,
-          manifestData: result.manifestData?.length ? result.manifestData : prev.manifestData,
-        }));
-      } else {
-        setState((prev) => ({ ...prev, loading: false }));
+        newEntries.push({
+          id: ++entryId,
+          role: "mcp-response",
+          resultType: result.resultType,
+          data: result.data,
+        });
       }
+
+      setState((prev) => ({
+        loading: false,
+        error: null,
+        chatHistory: [...prev.chatHistory, ...newEntries],
+      }));
     } catch (err: any) {
       setState((prev) => ({
         ...prev,

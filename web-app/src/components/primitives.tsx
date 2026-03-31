@@ -1,5 +1,7 @@
 import { useState, ReactNode } from "react";
 import { ACCENT, typeColor } from "@/constants";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 // ─── Pill badge ─────────────────────────────────────────────
 interface PillProps {
@@ -37,12 +39,47 @@ export const Pill = ({ variant, type, children }: PillProps) => {
 
 // ─── Chat bubble ────────────────────────────────────────────
 interface BubbleProps {
-  role: "user" | "claude";
+  role: "user" | "claude" | "system";
   children: ReactNode;
 }
 
 export const Bubble = ({ role, children }: BubbleProps) => {
   const isUser = role === "user";
+
+  if (role === "claude" && typeof children === "string") {
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-start",
+          gap: 4,
+          animation: "fangornFadeIn 0.3s ease-out",
+          animationFillMode: "both",
+        }}
+      >
+        <div
+          className="markdown-body"
+          style={{
+            maxWidth: "88%",
+            padding: "10px 14px",
+            borderRadius: 16,
+            fontSize: 14,
+            lineHeight: 1.55,
+            background: "var(--color-background-primary, #fff)",
+            border: "0.5px solid var(--color-border-tertiary, #e0e0e0)",
+            color: "var(--color-text-primary, #1a1a1a)",
+            borderBottomLeftRadius: 4,
+          }}
+        >
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+            {children}
+          </ReactMarkdown>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       style={{

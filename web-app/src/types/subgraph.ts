@@ -39,6 +39,7 @@ export interface Field {
 
 export interface FileEntry {
   id: string;
+  tag: string | null;
   fields: Field[];
 }
 

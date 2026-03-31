@@ -12,19 +12,37 @@ import { ToolMessage } from "langchain";
 // Toolboxes are a collection of tools that are local to the agent.
 // Tool names whose raw results should be forwarded to the frontend
 
-const SUBGRAPH_LIST_SCHEMAS = "subgraph_list_schemas"
-const SUBGRAPH_QUERY_DATA = "subgraph_query_data"
+const SUBGRAPH_LIST_SCHEMAS = "subgraph_list_schemas";
+const SUBGRAPH_GET_SCHEMA = "subgraph_get_schema";
+const SUBGRAPH_GET_SCHEMA_ENTRIES = "subgraph_get_schema_entries";
+const SUBGRAPH_LIST_MANIFEST_STATES = "subgraph_list_manifest_states";
+const SUBGRAPH_LIST_MANIFESTS = "subgraph_list_manifests";
+const SUBGRAPH_GET_MANIFEST = "subgraph_get_manifest";
+const SUBGRAPH_LIST_FILE_ENTRIES = "subgraph_list_file_entries";
+const SUBGRAPH_GET_FILE_ENTRIES = "subgraph_get_file_entries";
+const SUBGRAPH_GET_FIELDS = "subgraph_get_fields";
+const SUBGRAPH_SEARCH_FIELDS = "subgraph_search_fields";
+const SUBGRAPH_SEARCH_FIELDS_GLOBAL = "subgraph_search_fields_global";
+const SUBGRAPH_RAW_QUERY = "subgraph_raw_query";
 
 const MCP_UI_TOOLS = new Set([
-  SUBGRAPH_LIST_SCHEMAS,
-  SUBGRAPH_QUERY_DATA
+SUBGRAPH_LIST_SCHEMAS,
+SUBGRAPH_GET_SCHEMA,
+SUBGRAPH_GET_SCHEMA_ENTRIES,
+SUBGRAPH_LIST_MANIFEST_STATES,
+SUBGRAPH_LIST_MANIFESTS,
+SUBGRAPH_GET_MANIFEST,
+SUBGRAPH_LIST_FILE_ENTRIES,
+SUBGRAPH_GET_FILE_ENTRIES,
+SUBGRAPH_GET_FIELDS,
+SUBGRAPH_SEARCH_FIELDS,
+SUBGRAPH_SEARCH_FIELDS_GLOBAL,
+SUBGRAPH_RAW_QUERY
 ]);
 
 export interface McpUiResult {
   toolName?: string;
-  schemaData?: Schema[];
-  manifestData?: ManifestState[]
-  fileData?: FileEntry[];
+  resultType?: string;
   data?: any;
 }
 
@@ -88,30 +106,19 @@ export class ToolBay {
 
         console.log(`resultType: ${JSON.stringify(parsed.resultType)}`)
 
-        let schemaData: Schema[] = this.mcpData.schemaData ?? []
-        let fileData: FileEntry[] = this.mcpData.fileData ?? []
-        let manifestData: ManifestState[] = this.mcpData. manifestData ?? []
-        let data: any = this.mcpData.data ?? {}
-        if (parsed.resultType === "schemas") {
-          schemaData = parsed.data
-          console.log(`Schemas successfully retrieved. There were ${schemaData.length} schemas found.`)
-          result = `Tell the user something along the lines of "${schemaData.length} schemas successfully retrieved". No further tool calls are required.`
-        } else if (parsed.resultType === "manifest_states") {
-          manifestData = parsed.data;
-          console.log(`Data retrieved: ${manifestData.length} manifests found.`);
-          console.log(`manifest data: ${JSON.stringify(manifestData, null, 2)}`)
-          result = `Tell the user "${manifestData.length} manifests successfully retrieved". No further tool calls are required.`;
-        } else if (parsed.resultType === "file_entries") {
-          fileData = parsed.data;
-          console.log(`Data retrieved: ${fileData.length} file entries found.`);
-          result = `Tell the user "${fileData.length} file entries successfully retrieved". No further tool calls are required.`;
+        const data: any = parsed.data
+        const resultType: string = parsed.resultType
+        if (resultType !== "non-standard") {
+          console.log("It was not non-standard")
+          console.log(resultType)
+          result = `Tell the user something along the lines of "${data.length} results have been successfully retrieved". Do not pretend that you were exposed to the JSON. No further tool calls are required.`
         } else {
-          data = typeof result === "string" ? JSON.parse(result) : result;
-          console.log(`[ToolBay] Stashing MCP UI result for "${toolName}". Type: ${typeof result}. Parsed keys:`, typeof data === "object" ? Object.keys(data) : "not an object");
-          result = `Tell the user something along the lines of "Data successfully retrieved". No further tool calls are required.`
+          console.log("It was non-standard")
+          console.log("resultType")
+          result = `${result} \n\nIf you need to use this result for a response, be sure you change it to markdown.`
         }
 
-        this.mcpData = { toolName, manifestData, schemaData, fileData, data};
+        this.mcpData = { toolName, data, resultType};
 
       } catch {
         // If it doesn't parse, skip — the model still gets the string
