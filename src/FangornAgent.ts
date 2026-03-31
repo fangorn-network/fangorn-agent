@@ -37,7 +37,7 @@ export class FangornAgent {
     // });
 
     this.model = new ChatAnthropic(
-      'claude-sonnet-4-6'
+      'claude-opus-4-6'
     )
 
     // Display systemPrompt info

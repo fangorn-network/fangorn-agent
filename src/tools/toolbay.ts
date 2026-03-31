@@ -3,6 +3,7 @@ import { GmailToolbox } from "./toolboxes/gmailToolbox/GmailToolbox.js";
 import { FileEntry, initializeToolbox, ManifestState, Schema, Toolbox } from "./types.js";
 import { McpToolbox } from "./toolboxes/mcpToolbox/mcpToolbox.js";
 import { ToolMessage } from "langchain";
+import { FangornToolbox } from "./toolboxes/fangornToolbox/fangornToolbox.js";
 
 // Examples of a toolbox:
 // Web3 toolbox: wallets, signing, funds, etc.
@@ -74,8 +75,10 @@ export class ToolBay {
       "mcp_toolbox"
     )
     const gmailToolbox = await initializeToolbox(GmailToolbox)
+    const fangornToolbox = await initializeToolbox(FangornToolbox)
     toolboxes.push(gmailToolbox);
     toolboxes.push(mcpToolbox)
+    toolboxes.push(fangornToolbox)
 
     return new ToolBay(toolboxes);
   }
