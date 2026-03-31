@@ -166,6 +166,8 @@ export class ToolBay {
    * be forwarded to the frontend for rich UI rendering.
    */
   consumeMcpResults(): McpUiResult {
-    return this.mcpData;
+    const data = this.mcpData
+    this.mcpData = {}
+    return data;
   }
 }

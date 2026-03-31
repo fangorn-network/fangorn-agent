@@ -24,20 +24,25 @@ export function useFangornAgent() {
     chatHistory: [],
   });
 
-  const sendMessage = useCallback(async (message: string) => {
-    // Add the user message to history
-    const userEntry: ChatEntry = {
-      id: ++entryId,
-      role: "user",
-      message,
-    };
+  const sendMessage = useCallback(async (message: string, options?: { silent?: boolean }) => {
+    const silent = options?.silent ?? false;
 
-    setState((prev) => ({
-      ...prev,
-      loading: true,
-      error: null,
-      chatHistory: [...prev.chatHistory, userEntry],
-    }));
+    if (!silent) {
+      const userEntry: ChatEntry = {
+        id: ++entryId,
+        role: "user",
+        message,
+      };
+
+      setState((prev) => ({
+        ...prev,
+        loading: true,
+        error: null,
+        chatHistory: [...prev.chatHistory, userEntry],
+      }));
+    } else {
+      setState((prev) => ({ ...prev, loading: true, error: null }));
+    }
 
     try {
       const apiUrl = process.env.NEXT_PUBLIC_AGENT_URL || "http://localhost:3001";

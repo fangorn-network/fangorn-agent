@@ -1,17 +1,30 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import { FangornLogo } from '../../../public/svg/fangorn-logo';
 import { useFangornAgent } from '@/hooks/useFangornAgent';
 import FangornChat from '@/components/FangornChat';
 
 export default function ExplorePage() {
   const { chatHistory, loading, error, sendMessage } = useFangornAgent();
+  const hasSent = useRef(false);
 
-  const handleLoadSchemas = () => {
-    sendMessage('List all registered schemas. Use JSON response format.');
-  };
+  // On mount, send the capability prompt exactly once (ref survives strict mode)
+  useEffect(() => {
+    if (!hasSent.current) {
+      hasSent.current = true;
+      sendMessage(
+        'Briefly describe your capabilities with the Fangorn Network MCP server. ' +
+        'Keep it concise — 2-5 sentences. Treat this as a greeting for someone who just joined. ' +
+        'Do not directly mention the MCP server, these are YOUR capabilities. ' +
+        'It is not strictly a data marketplace, and try to keep technical jargon out of the greeting.' ,
+        { silent: true }
+      );
+    }
+  }, [sendMessage]);
 
-  const hasContent = chatHistory.length > 0;
+  // Show chat once we have at least one entry (the LLM response)
+  const hasResponse = chatHistory.length > 0;
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
@@ -43,59 +56,104 @@ export default function ExplorePage() {
           </div>
         </div>
 
-        <a
-          href="/"
-          className="px-4 py-2 rounded-lg text-sm transition-colors"
-          style={{
-            color: 'var(--text-secondary)',
-            border: '1px solid var(--border)',
-            fontFamily: 'var(--font-body)',
-          }}
-        >
-          ← Back to chat
-        </a>
+        <div className="flex items-center gap-3">
+          {chatHistory.some((e) => e.resultType === "schemas") ? null : (
+            <button
+              onClick={() =>
+                sendMessage("List all registered schemas. Use JSON response format.")
+              }
+              disabled={loading}
+              className="px-4 py-2 rounded-lg text-sm transition-colors"
+              style={{
+                color: loading ? 'var(--text-secondary)' : 'var(--text-primary)',
+                border: '1px solid var(--border)',
+                fontFamily: 'var(--font-body)',
+                background: 'transparent',
+                cursor: loading ? 'default' : 'pointer',
+                opacity: loading ? 0.5 : 1,
+              }}
+            >
+              Load schemas
+            </button>
+          )}
+          <a
+            href="/"
+            className="px-4 py-2 rounded-lg text-sm transition-colors"
+            style={{
+              color: 'var(--text-secondary)',
+              border: '1px solid var(--border)',
+              fontFamily: 'var(--font-body)',
+            }}
+          >
+            ← Back to chat
+          </a>
+        </div>
       </header>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto px-8 py-8">
-          {/* Empty state — show load button */}
-          {!hasContent && !loading && (
-            <div className="flex flex-col items-center justify-center py-20 message-appear">
+      <main className="flex-1 overflow-hidden flex flex-col">
+        <div className="max-w-4xl mx-auto px-8 py-8 w-full flex-1 flex flex-col min-h-0">
+          {!hasResponse ? (
+            /* ── Splash screen with animated logo ── */
+            <div className="flex-1 flex flex-col items-center justify-center">
+              <style>{`
+                @keyframes fangornPulse {
+                  0%, 100% { opacity: 0.4; transform: scale(1); }
+                  50% { opacity: 1; transform: scale(1.08); }
+                }
+                @keyframes fangornSpin {
+                  from { transform: rotate(0deg); }
+                  to { transform: rotate(360deg); }
+                }
+                @keyframes fangornFadeIn {
+                  from { opacity: 0; transform: translateY(8px); }
+                  to { opacity: 1; transform: translateY(0); }
+                }
+              `}</style>
+
               <div
-                className="w-14 h-14 rounded-full flex items-center justify-center p-2.5 mb-6"
-                style={{ backgroundColor: 'var(--color-black)', border: '1px solid var(--border)' }}
-              >
-                <FangornLogo />
-              </div>
-              <h2
-                className="text-xl font-medium mb-2"
-                style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-display)' }}
-              >
-                Explore the subgraph
-              </h2>
-              <p
-                className="text-sm mb-6 text-center max-w-sm"
-                style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-body)' }}
-              >
-                Browse registered schemas and query their data. Start by loading the available schemas.
-              </p>
-              <button
-                onClick={handleLoadSchemas}
-                className="px-5 py-2.5 rounded-xl text-sm font-medium transition-all"
                 style={{
-                  backgroundColor: 'var(--accent)',
-                  color: 'var(--color-black)',
-                  fontFamily: 'var(--font-body)',
+                  width: 80,
+                  height: 80,
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: 16,
+                  backgroundColor: 'var(--color-black)',
+                  border: '1px solid var(--border)',
+                  animation: 'fangornPulse 2s ease-in-out infinite',
+                  position: 'relative',
                 }}
               >
-                Load schemas
-              </button>
-            </div>
-          )}
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: -6,
+                    borderRadius: '50%',
+                    border: '1px solid transparent',
+                    borderTopColor: 'var(--text-secondary)',
+                    animation: 'fangornSpin 2s linear infinite',
+                    opacity: 0.4,
+                  }}
+                />
+                <FangornLogo />
+              </div>
 
-          {/* Chat — shown once there's any content or while loading the first request */}
-          {(hasContent || loading) && (
+              <p
+                style={{
+                  marginTop: 24,
+                  fontSize: 14,
+                  color: 'var(--text-secondary)',
+                  fontFamily: 'var(--font-body)',
+                  animation: 'fangornFadeIn 0.6s ease-out 0.3s both',
+                }}
+              >
+                Waking the forest...
+              </p>
+            </div>
+          ) : (
+            /* ── Chat interface ── */
             <FangornChat
               chatHistory={chatHistory}
               loading={loading}
