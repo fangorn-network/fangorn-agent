@@ -41,7 +41,7 @@ Also note that the `qwen3.5:4b` model also reliably executes the available tool 
 
 ## Pre-reqs
 1. Make run_agent.sh and run_web.sh executable `chmod +x run_agent.sh` and `chmod +x run_web.sh`.
-2. Run the ollama container then download the `qwen3.5:9b` (or `qwen3.5:4b`) model `docker exec -it ollama ollama pull qwen3.5:9b`.
+2. (Ollama only) Run the ollama container then download the `qwen3.5:9b` (or `qwen3.5:4b`) model `docker exec -it ollama ollama pull qwen3.5:9b`.
 3. Ensure you have `pnpm` installed
 4. Run `pnpm i` at the root of the agent project
 5. Run `pnpm i` at the root of the web-app directory
