@@ -74,9 +74,14 @@ export class ToolBay {
       },
       "mcp_toolbox"
     )
-    const gmailToolbox = await initializeToolbox(GmailToolbox)
+
+    if (process.env.USE_GMAIL) {
+        const gmailToolbox = await initializeToolbox(GmailToolbox)
+        toolboxes.push(gmailToolbox);
+    }
+
     const fangornToolbox = await initializeToolbox(FangornToolbox)
-    toolboxes.push(gmailToolbox);
+
     toolboxes.push(mcpToolbox)
     toolboxes.push(fangornToolbox)
 
