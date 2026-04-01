@@ -27,7 +27,11 @@ export default function Home() {
       const data = await res.json();
       setMessages([
         ...newMessages,
-        { role: 'assistant', content: data.response },
+        {
+          role: 'assistant',
+          content: data.response,
+          mcpResults: data.mcpResults,
+        },
       ]);
     } catch (err) {
       console.error('Fangorn Agent error:', err);

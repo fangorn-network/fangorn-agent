@@ -101,7 +101,17 @@ export default function ChatArea({
             </button>
           )}
         </div>
-        <div />
+        <a
+          href="/explore"
+          className="px-3 py-1.5 rounded-lg text-xs transition-colors"
+          style={{
+            color: 'var(--text-secondary)',
+            border: '1px solid var(--border)',
+            fontFamily: 'var(--font-body)',
+          }}
+        >
+          Explore subgraph →
+        </a>
       </header>
 
       {/* Messages area */}
@@ -111,7 +121,7 @@ export default function ChatArea({
         ) : (
           <div className="max-w-3xl mx-auto px-4 py-6">
             {messages.map((msg: any, i: any) => (
-              <Message key={i} message={msg} />
+              <Message key={i} message={msg} onSendMessage={onSendMessage} />
             ))}
             {isTyping && <TypingIndicator />}
             <div ref={messagesEndRef} />
@@ -198,7 +208,7 @@ function NewChatView() {
   );
 }
 
-function Message({ message }: any) {
+function Message({ message, onSendMessage }: any) {
   const isAssistant = message.role === 'assistant';
 
   return (

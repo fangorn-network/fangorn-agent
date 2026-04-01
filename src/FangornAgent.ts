@@ -4,10 +4,19 @@ import {
   systemPromptHeader,
 } from "./constants.js";
 import { ChatOllama } from "@langchain/ollama";
-import { ToolBay } from "./tools/toolbay.js";
+import { ToolBay, McpUiResult } from "./tools/toolbay.js";
+import { ChatAnthropic } from "@langchain/anthropic"
+
+export interface AgentResponse {
+  text: string;
+  mcpResults: McpUiResult;
+}
+
+const MAX_RETRIES = 3;
+let retryCount = 0;
 
 export class FangornAgent {
-  private model: ChatOllama;
+  private model: ChatAnthropic;
   private toolbay: ToolBay;
 
   static async create(): Promise<FangornAgent> {
@@ -17,15 +26,19 @@ export class FangornAgent {
 
   constructor(toolbay: ToolBay) {
     this.toolbay = toolbay;
-    const ollamaPort = process.env.OLLAMA_PORT || 11434; // fallback to default if not set
-    const model = process.env.MODEL || "qwen3.5:4b"
-    console.log(`running ${model} model`)
-    const baseUrl = `http://localhost:${ollamaPort}`;
-    this.model = new ChatOllama({
-      model,
-      verbose: false,
-      baseUrl
-    });
+    // const ollamaPort = process.env.OLLAMA_PORT || 11434; // fallback to default if not set
+    // const model = process.env.MODEL || "qwen3.5:4b"
+    // console.log(`running ${model} model`)
+    // const baseUrl = `http://localhost:${ollamaPort}`;
+    // this.model = new ChatOllama({
+    //   model,
+    //   verbose: false,
+    //   baseUrl
+    // });
+
+    this.model = new ChatAnthropic(
+      'claude-opus-4-6'
+    )
 
     // Display systemPrompt info
     console.log(systemPromptHeader);
@@ -33,7 +46,7 @@ export class FangornAgent {
     console.log(systemPromptFooter);
   }
 
-  async invokeAgent(query: string) {
+  async invokeAgent(query: string, options: { hasEntityContext: boolean}): Promise<AgentResponse> {
     // messages is initially just the user query + system message,
     // but later it will also collect the model's
     // outputs in order to continue decision making.
@@ -42,6 +55,8 @@ export class FangornAgent {
     console.log("Query received");
     let modelWithTools = this.model.bindTools(this.toolbay.consumeDirty());
     console.log("Beginning agent loop...");
+
+    this.toolbay.hasEntityContext = options.hasEntityContext;
 
     // in order to hot swap tools, we have to process
     // the entire agent event loop so we can check if the
@@ -72,7 +87,24 @@ export class FangornAgent {
       // the LLM has no more tools to call, a human readable response should be ready
       if (!fullMessage.tool_calls?.length) {
         console.log("console.log - Model returned final response");
-        return fullMessage.content;
+
+        // Normalize content to a string (ChatAnthropic may return content blocks)
+        let text: string;
+        if (typeof fullMessage.content === "string") {
+          text = fullMessage.content;
+        } else {
+          text = fullMessage.content
+            .filter((block: any) => block.type === "text")
+            .map((block: any) => block.text)
+            .join("\n");
+        }
+
+        // Collect any MCP results that were stashed during tool execution
+        const mcpResults = this.toolbay.consumeMcpResults();
+        this.toolbay.hasEntityContext = false;
+        retryCount = 0;
+
+        return { text, mcpResults };
       }
 
       console.log("Intercepting tool calls:", fullMessage.tool_calls);
@@ -89,10 +121,30 @@ export class FangornAgent {
           continue;
         }
 
-        const result = await this.toolbay.invokeToolcall(
-          toolCall.name,
-          toolCall.args,
-        );
+        let result: any;
+
+          try {
+            result = await this.toolbay.invokeToolcall(
+              toolCall.name,
+              toolCall.args,
+            );
+          } catch (err: any) {
+            retryCount++;
+            if (retryCount >= MAX_RETRIES) {
+              result = `Tool failed after ${MAX_RETRIES} attempts. Last error: ${err.message || String(err)}. Please inform the user that this query could not be completed.`;
+              retryCount = 0;
+            } else {
+              result = `Tool error: ${err.message || String(err)}. Please fix your query and try again. (Attempt ${retryCount} of ${MAX_RETRIES})`;
+            }
+          }
+
+        // result = await this.toolbay.invokeToolcall(
+        //   toolCall.name,
+        //   toolCall.args,
+        // );
+
+        console.log("The result of that tool call.")
+        console.log(JSON.stringify(result))
 
         messages.push({
           role: "tool",

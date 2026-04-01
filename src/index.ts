@@ -15,7 +15,8 @@ async function chatLoop(fangornAgent: FangornAgent) {
       const message = await rl.question("\nQuery: ");
       if (message.toLowerCase() === "/bye") break;
 
-      const response = await fangornAgent.invokeAgent(message);
+      const options = {hasEntityContext: false}
+      const response = await fangornAgent.invokeAgent(message, options);
 
       // Right now, we assume that once a response is received
       // then the LLM is done. However, once we add memory

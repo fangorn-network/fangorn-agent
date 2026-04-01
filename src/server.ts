@@ -4,7 +4,7 @@ import { FangornAgent } from "./FangornAgent.js";
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({limit: '10mb'}));
 
 async function main() {
   const agent = await FangornAgent.create();
@@ -14,12 +14,17 @@ async function main() {
   app.locals.agent = agent;
 
   app.post("/chat", async (req, res) => {
-    const { message } = req.body;
+    const { message, hasEntityContext } = req.body;
+    console.log(`received message: ${message}`)
     if (!message) return res.status(400).json({ error: "No message provided" });
     try {
-      const response = await agent.invokeAgent(message);
+      const { text, mcpResults } = await agent.invokeAgent(message, { hasEntityContext });
       agent.resetToolbay();
-      res.json({ response });
+      res.json({
+        response: text,
+        mcpResults: mcpResults ??  undefined,
+      });
+      // console.log(`The response got turned into JSON and here it is parsed as a string: ${JSON.stringify(res)}`)
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: "Agent error" });
