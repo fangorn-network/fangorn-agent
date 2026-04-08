@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from "react";
-import { ManifestState } from "../types/subgraph";
+import { FileEntry, ManifestState } from "@fangorn-network/client-types";
 
 interface ActiveFilter {
   fieldName: string;
@@ -22,7 +22,7 @@ function extractFieldOptions(manifests: ManifestState[]): Map<string, string[]> 
   for (const ms of manifests) {
     const files = ms.manifest?.files || [];
     for (const file of files) {
-      for (const field of file.fields) {
+      for (const field of file.fileFields!) {
         const name = field.name;
         if (!name) continue;
 
@@ -317,9 +317,9 @@ export function applyFilters(
   return manifests.filter((ms) => {
     const files = ms.manifest?.files || [];
     // A manifest matches if ANY of its files match ALL active filters
-    return files.some((file) =>
+    return files.some((file: FileEntry) =>
       filters.every((filter) =>
-        file.fields.some((f) => {
+        file.fileFields?.some((f) => {
           if (f.name !== filter.fieldName) return false;
           const val = f.value ?? (f.acc !== "plain" ? "(encrypted)" : "(empty)");
           return val === filter.value;

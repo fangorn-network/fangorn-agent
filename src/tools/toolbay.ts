@@ -3,6 +3,7 @@ import { GmailToolbox } from "./toolboxes/gmailToolbox/GmailToolbox.js";
 import { initializeToolbox, Toolbox } from "./types.js";
 import { McpToolbox } from "./toolboxes/mcpToolbox/mcpToolbox.js";
 import { FangornToolbox } from "./toolboxes/fangornToolbox/fangornToolbox.js";
+import type { FileEntry, FileField, Manifest, ManifestState, SchemaState } from "@fangorn-network/client-types";
 
 // Examples of a toolbox:
 // Web3 toolbox: wallets, signing, funds, etc.
@@ -149,23 +150,28 @@ export class ToolBay {
   
   switch (resultType) {
     case "schemas":
-      return data.map((s: any) => 
+      return data.map((s: SchemaState) => 
         `${s.name} (owner: ${s.owner}, ${s.versions?.length || 0} versions, fields: ${s.versions?.[s.versions.length-1]?.fields?.map((f: any) => f.name).join(", ") || "none"})`
       ).join("; ");
     
     case "manifest_states":
-      return data.map((ms: any) => 
-        `${ms.schema_name} by ${ms.owner} (${ms.manifest?.files?.length || 0} files, v${ms.version})`
+      return data.map((ms:  ManifestState) => 
+        `${ms.schemaName} by ${ms.owner} (${ms.manifest?.files?.length || 0} files, v${ms.version})`
+      ).join("; ");
+
+		case "manifests":
+			return data.map((m: Manifest, i: number) => 
+        `manifest${i + 1}: (${m.files?.length || 0} files, v${m.manifestVersion})`
       ).join("; ");
     
     case "file_entries":
-      return data.map((fe: any, i: number) => {
-        const fields = fe.fields?.map((f: any) => `${f.name}=${f.acc === "plain" ? f.value : "[encrypted]"}`).join(", ");
+      return data.map((fe: FileEntry, i: number) => {
+        const fields = fe.fileFields?.map((f: any) => `${f.name}=${f.acc === "plain" ? f.value : "[encrypted]"}`).join(", ");
         return `File ${i+1}: ${fields}`;
       }).join("; ");
     
     case "fields":
-      return data.map((f: any) => 
+      return data.map((f: FileField) => 
         `${f.name}=${f.acc === "plain" ? f.value : "[encrypted]"} (${f.atType})`
       ).join("; ");
     
