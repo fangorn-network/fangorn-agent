@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Schema, FileEntry, ManifestState, Manifest, Field } from "../types/subgraph";
+import { Schema, FileEntry, ManifestState, FileField } from "@fangorn-network/client-types";
 import { Bubble, TypingDots } from "./primitives";
 import {
   SchemaBlock,
@@ -192,17 +192,17 @@ export default function FangornChat({
 
     switch (entry.resultType) {
       case "schemas":
-        return <SchemaBlock key={entry.id} schemas={Array.isArray(entry.data) ? entry.data : [entry.data]} sendMessage={sendMessage} />;
+        return <SchemaBlock key={entry.id} schemas={Array.isArray(entry.data) ? entry.data : [entry.data]} />;
       case "schema_entries":
-        return <SchemaEntriesBlock key={entry.id} entries={entry.data as any[]} />;
+        return <SchemaEntriesBlock key={entry.id} entries={entry.data as Schema[]} />;
       case "manifest_states":
-        return <ManifestStatesBlock key={entry.id} manifests={entry.data as ManifestState[]} sendMessage={sendMessage} />;
+        return <ManifestStatesBlock key={entry.id} manifests={entry.data as ManifestState[]} />;
       case "manifests":
         return <ManifestsBlock key={entry.id} manifests={Array.isArray(entry.data) ? entry.data : [entry.data]} />;
       case "file_entries":
         return <FileEntriesBlock key={entry.id} entries={entry.data as FileEntry[]} />;
       case "fields":
-        return <FieldsBlock key={entry.id} fields={entry.data as Field[]} />;
+        return <FieldsBlock key={entry.id} fields={entry.data as FileField[]} />;
       default:
         return null;
     }

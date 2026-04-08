@@ -6,7 +6,7 @@ import remarkGfm from 'remark-gfm';
 // ─── Pill badge ─────────────────────────────────────────────
 interface PillProps {
   variant?: "green" | "blue" | "amber" | "purple";
-  type?: string;
+  type?: string | null;
   children: ReactNode;
 }
 

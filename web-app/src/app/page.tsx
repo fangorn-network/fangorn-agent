@@ -17,7 +17,8 @@ export default function ExplorePage() {
         'Briefly describe your capabilities with the Fangorn Network MCP server. ' +
         'Keep it concise — 2-5 sentences. Treat this as a greeting for someone who just joined. ' +
         'Do not directly mention the MCP server, these are YOUR capabilities. ' +
-        'It is not strictly a data marketplace, and try to keep technical jargon out of the greeting.' ,
+        'It is not strictly a data marketplace, and try to keep technical jargon out of the greeting.' +
+        'Get all schemas.' ,
         { silent: true }
       );
     }

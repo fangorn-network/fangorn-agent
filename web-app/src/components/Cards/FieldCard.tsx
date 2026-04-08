@@ -1,85 +1,136 @@
-import { useState } from "react";
-import { Field } from "../../types/subgraph";
+import type { FileField } from "@fangorn-network/client-types";
 import { Pill, EncryptedBadge, truncAddr } from "../primitives";
-import { useChatContext } from "../ChatContext";
+import {
+  BaseCard,
+  CardChatConfig,
+  ThreadIndicator,
+  ExpandChevron,
+  ExpandedSection,
+  DetailRow,
+} from "./BaseCard";
 
 const FIELD_COLOR = "#fbbf24";
 
-interface FieldCardProps { field: Field; index: number; isExpanded: boolean; onToggle: () => void; }
+/* ═══════════════════════════════════════════════════════════
+   FieldCard
+   Uses FileField (FileFieldFragment) — nullable fields:
+     - name: string | null
+     - value: string | null
+     - atType: string | null
+     - acc: string | null
+     - pricing: PricingResource | null  (replaces old .price)
+   Non-nullable:
+     - id: string
+   Removed (not on fragment):
+     - manifestState, fileEntry
+   ═══════════════════════════════════════════════════════════ */
 
-export const FieldCard = ({ field, index, isExpanded, onToggle }: FieldCardProps) => {
-  const [hovered, setHovered] = useState(false);
-  const [chatInput, setChatInput] = useState("");
-  const [hasSent, setHasSent] = useState(false);
-  const { sendMessage } = useChatContext();
-  const contextLabel = `Re: "${field.name}: ${field.value}"`;
+interface FieldCardProps {
+  field: FileField;
+  index: number;
+  isExpanded: boolean;
+  hasSent?: boolean;
+  onToggle: () => void;
+  onChatSent?: () => void;
+}
 
-  const handleChatSubmit = () => {
-    if (!chatInput.trim()) return;
-    const context = { id: field.id, name: field.name, value: field.acc === "plain" ? field.value : `[${field.acc}]`, atType: field.atType, acc: field.acc, manifestStateId: field.manifestState.id, fileEntryId: field.fileEntry?.id || null, price: field.price ? { price: field.price.price, currency: field.price.currency } : null };
-    sendMessage(`In regards to this Field ${JSON.stringify(context)}: ${chatInput}`, { contextLabel, contextType: "field", displayMessage: chatInput });
-    setChatInput("");
-    setHasSent(true);
-    onToggle(); // collapse
+export const FieldCard = ({
+  field,
+  index,
+  isExpanded,
+  hasSent,
+  onToggle,
+  onChatSent,
+}: FieldCardProps) => {
+  const fieldName = field.name ?? "Unnamed";
+  const fieldValue = field.value ?? "";
+  const fieldType = field.atType ?? "unknown";
+  const accessLevel = field.acc ?? "unknown";
+  const isEncrypted = accessLevel !== "plain";
+  const hasPrice = field.pricing != null && Number(field.pricing.price) > 0;
+
+  const chat: CardChatConfig = {
+    contextType: "field",
+    contextLabel: `Re: "${fieldName}: ${fieldValue}"`,
+    placeholder: "Ask about this field...",
+    buildContext: () => ({
+      id: field.id,
+      name: fieldName,
+      value: isEncrypted ? `[${accessLevel}]` : fieldValue,
+      atType: fieldType,
+      acc: accessLevel,
+      pricing: field.pricing
+        ? { price: field.pricing.price, currency: field.pricing.currency }
+        : null,
+    }),
   };
 
-  const isEncrypted = field.acc !== "plain";
-  const hasPrice = field.price != null && Number(field.price.price) > 0;
-
   return (
-    <div onClick={onToggle} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
-      style={{
-        background: isExpanded ? "rgba(255, 255, 255, 0.04)" : "var(--color-background-primary, #141414)",
-        border: `0.5px solid ${isExpanded || hovered ? "var(--color-border-primary, #3a3a3a)" : "var(--color-border-tertiary, #1e1e1e)"}`,
-        borderLeft: hasSent ? `3px solid ${FIELD_COLOR}` : undefined,
-        borderRadius: 12, padding: "10px 12px", cursor: "pointer", transition: "border-color 0.15s, background 0.15s",
-      }}>
+    <BaseCard
+      isActive={isExpanded}
+      hasSent={hasSent}
+      accentColor={FIELD_COLOR}
+      onClick={onToggle}
+      onChatSent={() => {
+        onToggle();
+        onChatSent?.();
+      }}
+      chat={isExpanded ? chat : undefined}
+    >
+      {/* ── Header row ── */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ maxWidth: "55%" }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text-primary, #fafafa)", fontFamily: "var(--font-mono, monospace)" }}>{field.name}</div>
-          <div style={{ fontSize: 12, color: "var(--color-text-secondary, #8a8a8a)", marginTop: 2, wordBreak: "break-all" }}>
-            {isEncrypted ? <EncryptedBadge /> : field.value}
+          <div
+            style={{
+              fontSize: 13,
+              fontWeight: 600,
+              color: "var(--color-text-primary, #fafafa)",
+              fontFamily: "var(--font-mono, monospace)",
+            }}
+          >
+            {fieldName}
+          </div>
+          <div
+            style={{
+              fontSize: 12,
+              color: "var(--color-text-secondary, #8a8a8a)",
+              marginTop: 2,
+              wordBreak: "break-all",
+            }}
+          >
+            {isEncrypted ? <EncryptedBadge /> : fieldValue}
           </div>
         </div>
         <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-          {hasSent && <span style={{ fontSize: 9, color: FIELD_COLOR, fontFamily: "var(--font-mono, monospace)" }}>● thread</span>}
-          <Pill type={field.atType}>{field.atType}</Pill>
+          {hasSent && <ThreadIndicator color={FIELD_COLOR} />}
+          <Pill type={fieldType}>{fieldType}</Pill>
           {isEncrypted && <Pill variant="amber">🔒</Pill>}
-          {hasPrice && <Pill variant="green">${Number(field.price!.price).toFixed(2)}</Pill>}
-          <span style={{ fontSize: 11, color: "var(--color-text-tertiary, #5a5a5a)", transform: isExpanded ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s", display: "inline-block" }}>▼</span>
+          {hasPrice && (
+            <Pill variant="green">${Number(field.pricing!.price).toFixed(2)}</Pill>
+          )}
+          <ExpandChevron isExpanded={isExpanded} />
         </div>
       </div>
+
+      {/* ── Expanded details ── */}
       {isExpanded && (
-        <div style={{ marginTop: 10, borderTop: "0.5px solid var(--color-border-tertiary, #1e1e1e)", paddingTop: 8 }} onClick={(e) => e.stopPropagation()}>
+        <ExpandedSection>
           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
             <DetailRow label="ID" value={truncAddr(field.id)} mono />
-            <DetailRow label="Type" value={field.atType} />
-            <DetailRow label="Access" value={field.acc} />
-            <DetailRow label="ManifestState" value={truncAddr(field.manifestState.id)} mono />
-            {field.fileEntry && <DetailRow label="FileEntry" value={truncAddr(field.fileEntry.id)} mono />}
-            {field.price && (
+            <DetailRow label="Type" value={fieldType} />
+            <DetailRow label="Access" value={accessLevel} />
+            {field.pricing && (
               <>
-                <DetailRow label="Price" value={`${field.price.price} ${field.price.currency}`} />
-                <DetailRow label="Price owner" value={truncAddr(field.price.owner)} mono />
+                <DetailRow
+                  label="Price"
+                  value={`${field.pricing.price} ${field.pricing.currency}`}
+                />
+                <DetailRow label="Price owner" value={truncAddr(field.pricing.owner)} mono />
               </>
             )}
           </div>
-          <div style={{ marginTop: 10, paddingTop: 8, borderTop: "0.5px solid var(--color-border-tertiary, #1e1e1e)" }}>
-            <div style={{ display: "flex", gap: 6, alignItems: "center", background: "var(--color-background-secondary, #0e0e0e)", border: "0.5px solid var(--color-border-tertiary, #1e1e1e)", borderRadius: 8, padding: 4 }}>
-              <input type="text" value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleChatSubmit()} placeholder="Ask about this field..."
-                style={{ flex: 1, border: "none", outline: "none", fontSize: 12, padding: "5px 6px", background: "transparent", color: "var(--color-text-primary, #fafafa)", fontFamily: "var(--font-body, sans-serif)" }} />
-              <button onClick={handleChatSubmit} disabled={!chatInput.trim()} style={{ border: "none", background: chatInput.trim() ? "var(--color-text-primary, #fafafa)" : "var(--color-border-tertiary, #1e1e1e)", color: chatInput.trim() ? "var(--color-background-primary, #141414)" : "var(--color-text-tertiary, #5a5a5a)", borderRadius: 6, padding: "4px 10px", fontSize: 11, fontWeight: 600, cursor: chatInput.trim() ? "pointer" : "default", transition: "background 0.15s, color 0.15s", fontFamily: "var(--font-body, sans-serif)" }}>↵</button>
-            </div>
-          </div>
-        </div>
+        </ExpandedSection>
       )}
-    </div>
+    </BaseCard>
   );
 };
-
-const DetailRow = ({ label, value, mono }: { label: string; value: string; mono?: boolean }) => (
-  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "2px 0", fontSize: 11, gap: 8 }}>
-    <span style={{ color: "var(--color-text-secondary, #8a8a8a)", flexShrink: 0 }}>{label}</span>
-    <span style={{ color: "var(--color-text-primary, #fafafa)", fontWeight: 500, fontFamily: mono ? "var(--font-mono, monospace)" : "inherit", textAlign: "right", wordBreak: "break-all" }}>{value}</span>
-  </div>
-);

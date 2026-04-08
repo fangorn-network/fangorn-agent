@@ -11,6 +11,9 @@ importers:
       '@a2a-js/sdk':
         specifier: 0.3.10
         version: 0.3.10(express@5.2.1)
+      '@fangorn-network/client-types':
+        specifier: file:../subgraphs/client-types
+        version: file:../subgraphs/client-types
       '@fangorn-network/fetch':
         specifier: 2026.3.3-1.1
         version: 2026.3.3-1.1(@sinclair/typebox@0.34.48)(@types/snarkjs@0.7.9)(bufferutil@4.1.0)(encoding@0.1.13)(express@5.2.1)(graphql@16.12.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(tslib@2.8.1)(typescript@5.9.3)(zod@4.3.6)
@@ -459,6 +462,9 @@ packages:
 
   '@ethersproject/wordlists@5.7.0':
     resolution: {integrity: sha512-S2TFNJNfHWVHNE6cNDjbVlZ6MgE17MIxMbMg2zv3wn+3XSJGosL1m9ZVv3GXCf/2ymSsQ+hRI5IzoMJTG6aoVA==}
+
+  '@fangorn-network/client-types@file:../subgraphs/client-types':
+    resolution: {directory: ../subgraphs/client-types, type: directory}
 
   '@fangorn-network/fetch@2026.3.3-1.1':
     resolution: {integrity: sha512-r81u1wFU1TalhFbvxtLk+1wnkX5XImuaP9y3s0ipobfNmX6K8fBhBmn9DCbTJNQKISYwqIeL8NfpC3FEfqU1Yw==}
@@ -4440,6 +4446,8 @@ snapshots:
       '@ethersproject/logger': 5.8.0
       '@ethersproject/properties': 5.8.0
       '@ethersproject/strings': 5.8.0
+
+  '@fangorn-network/client-types@file:../subgraphs/client-types': {}
 
   '@fangorn-network/fetch@2026.3.3-1.1(@sinclair/typebox@0.34.48)(@types/snarkjs@0.7.9)(bufferutil@4.1.0)(encoding@0.1.13)(express@5.2.1)(graphql@16.12.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(tslib@2.8.1)(typescript@5.9.3)(zod@4.3.6)':
     dependencies:
