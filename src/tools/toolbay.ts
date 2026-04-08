@@ -122,9 +122,9 @@ export class ToolBay {
          result = [
           `${count} ${resultType.replace(/_/g, " ")} retrieved successfully.`,
           `Summary: ${summary}`,
-          `The full data is being displayed to the user in the UI.`,
-          `You can use the summary above to form a response.`,
-          `Do not include raw JSON in your response.`,
+          `The full data is being displayed to the user in the UI. `,
+          `You can use the summary above to form a response. `,
+          `Do not include raw JSON in your response. `,
           this.hasEntityContext
             ? `If the user's question requires additional data, you may make further tool calls.`
             : `Do not make additional tool calls unless the user explicitly asks for different data. `
@@ -132,7 +132,7 @@ export class ToolBay {
         } else {
           console.log("It was non-standard")
           console.log("resultType")
-          result = `${result} \n\nIf you need to use this result for a response, be sure you change it to markdown.`
+          result = `${result} \n\nIt looks like you made a raw query. The user will not get to see the full data in the UI.`
         }
 
         this.mcpData = { toolName, data, resultType};

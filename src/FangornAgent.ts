@@ -37,7 +37,7 @@ export class FangornAgent {
     // });
 
     this.model = new ChatAnthropic(
-      'claude-opus-4-6'
+      'claude-sonnet-4-6'
     )
 
     // Display systemPrompt info
@@ -144,7 +144,7 @@ export class FangornAgent {
         // );
 
         console.log("The result of that tool call.")
-        console.log(JSON.stringify(result))
+        console.log(JSON.stringify(result, null, 2))
 
         messages.push({
           role: "tool",
