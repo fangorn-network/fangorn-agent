@@ -36,9 +36,10 @@ export class FangornAgent {
     //   baseUrl
     // });
 
-    this.model = new ChatAnthropic(
-      'claude-sonnet-4-6'
-    )
+    this.model = new ChatAnthropic({
+			model: 'claude-sonnet-4-6',
+			maxRetries: 3
+		})
 
     // Display systemPrompt info
     console.log(systemPromptHeader);
@@ -143,8 +144,8 @@ export class FangornAgent {
         //   toolCall.args,
         // );
 
-        console.log("The result of that tool call.")
-        console.log(JSON.stringify(result, null, 2))
+        // console.log("The result of that tool call.")
+        // console.log(JSON.stringify(result, null, 2))
 
         messages.push({
           role: "tool",

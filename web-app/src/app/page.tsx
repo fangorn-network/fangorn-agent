@@ -18,7 +18,7 @@ export default function ExplorePage() {
         'Keep it concise — 2-5 sentences. Treat this as a greeting for someone who just joined. ' +
         'Do not directly mention the MCP server, these are YOUR capabilities. ' +
         'It is not strictly a data marketplace, and try to keep technical jargon out of the greeting.' +
-        'Get all schemas.' ,
+        'Get the first 100 schemas.' ,
         { silent: true }
       );
     }

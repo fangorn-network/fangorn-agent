@@ -3,7 +3,7 @@ import { GmailToolbox } from "./toolboxes/gmailToolbox/GmailToolbox.js";
 import { initializeToolbox, Toolbox } from "./types.js";
 import { McpToolbox } from "./toolboxes/mcpToolbox/mcpToolbox.js";
 import { FangornToolbox } from "./toolboxes/fangornToolbox/fangornToolbox.js";
-import type { FileEntry, FileField, Manifest, ManifestState, SchemaState } from "@fangorn-network/client-types";
+import type { FileEntry, ManifestState, SchemaState } from "@fangorn-network/client-types";
 
 // Examples of a toolbox:
 // Web3 toolbox: wallets, signing, funds, etc.
@@ -13,32 +13,26 @@ import type { FileEntry, FileField, Manifest, ManifestState, SchemaState } from 
 // Toolboxes are a collection of tools that are local to the agent.
 // Tool names whose raw results should be forwarded to the frontend
 
-const SUBGRAPH_LIST_SCHEMAS = "subgraph_list_schemas";
-const SUBGRAPH_GET_SCHEMA = "subgraph_get_schema";
-const SUBGRAPH_GET_SCHEMA_ENTRIES = "subgraph_get_schema_entries";
-const SUBGRAPH_LIST_MANIFEST_STATES = "subgraph_list_manifest_states";
-const SUBGRAPH_LIST_MANIFESTS = "subgraph_list_manifests";
-const SUBGRAPH_GET_MANIFEST = "subgraph_get_manifest";
+const SUBGRAPH_LIST_SCHEMAS = "subgraph_list_all_schemas";
+const SUBGRAPH_GET_SCHEMA_BY_NAME = "subgraph_get_schema_by_name";
+const SUBGRAPH_LIST_MANIFEST_STATES_BY_SCHEMA_NAME = "subgraph_list_manifest_states_by_schema_name";
+const SUBGRAPH_GET_MANIFEST_BY_ID = "subgraph_get_manifest_by_id";
 const SUBGRAPH_LIST_FILE_ENTRIES = "subgraph_list_file_entries";
-const SUBGRAPH_GET_FILE_ENTRIES = "subgraph_get_file_entries";
-const SUBGRAPH_GET_FIELDS = "subgraph_get_fields";
 const SUBGRAPH_SEARCH_FIELDS = "subgraph_search_fields";
 const SUBGRAPH_SEARCH_FIELDS_GLOBAL = "subgraph_search_fields_global";
 const SUBGRAPH_RAW_QUERY = "subgraph_raw_query";
+const SUBGRAPH_SEARCH_FIELDS_BY_NAME_GLOBAL = "subgraph_search_fields_by_name_global";
 
 const MCP_UI_TOOLS = new Set([
 SUBGRAPH_LIST_SCHEMAS,
-SUBGRAPH_GET_SCHEMA,
-SUBGRAPH_GET_SCHEMA_ENTRIES,
-SUBGRAPH_LIST_MANIFEST_STATES,
-SUBGRAPH_LIST_MANIFESTS,
-SUBGRAPH_GET_MANIFEST,
+SUBGRAPH_GET_SCHEMA_BY_NAME,
+SUBGRAPH_LIST_MANIFEST_STATES_BY_SCHEMA_NAME,
+SUBGRAPH_GET_MANIFEST_BY_ID,
 SUBGRAPH_LIST_FILE_ENTRIES,
-SUBGRAPH_GET_FILE_ENTRIES,
-SUBGRAPH_GET_FIELDS,
 SUBGRAPH_SEARCH_FIELDS,
 SUBGRAPH_SEARCH_FIELDS_GLOBAL,
-SUBGRAPH_RAW_QUERY
+SUBGRAPH_RAW_QUERY,
+SUBGRAPH_SEARCH_FIELDS_BY_NAME_GLOBAL
 ]);
 
 export interface McpUiResult {
@@ -123,8 +117,8 @@ export class ToolBay {
           `${count} ${resultType.replace(/_/g, " ")} retrieved successfully.`,
           `Summary: ${summary}`,
           `The full data is being displayed to the user in the UI. `,
-          `You can use the summary above to form a response. `,
-          `Do not include raw JSON in your response. `,
+  					`Use the summary above to form a natural language response.`,
+  					`Always describe results in plain sentences or bullet points, never as raw JSON or code blocks.`,
           this.hasEntityContext
             ? `If the user's question requires additional data, you may make further tool calls.`
             : `Do not make additional tool calls unless the user explicitly asks for different data. `
@@ -149,33 +143,52 @@ export class ToolBay {
   if (!Array.isArray(data)) return JSON.stringify(data).slice(0, 500);
   
   switch (resultType) {
-    case "schemas":
-      return data.map((s: SchemaState) => 
-        `${s.name} (owner: ${s.owner}, ${s.versions?.length || 0} versions, fields: ${s.versions?.[s.versions.length-1]?.fields?.map((f: any) => f.name).join(", ") || "none"})`
-      ).join("; ");
-    
-    case "manifest_states":
-      return data.map((ms:  ManifestState) => 
-        `${ms.schemaName} by ${ms.owner} (${ms.manifest?.files?.length || 0} files, v${ms.version})`
-      ).join("; ");
-
-		case "manifests":
-			return data.map((m: Manifest, i: number) => 
-        `manifest${i + 1}: (${m.files?.length || 0} files, v${m.manifestVersion})`
-      ).join("; ");
-    
-    case "file_entries":
-      return data.map((fe: FileEntry, i: number) => {
-        const fields = fe.fileFields?.map((f: any) => `${f.name}=${f.acc === "plain" ? f.value : "[encrypted]"}`).join(", ");
-        return `File ${i+1}: ${fields}`;
-      }).join("; ");
-    
-    case "fields":
-      return data.map((f: FileField) => 
-        `${f.name}=${f.acc === "plain" ? f.value : "[encrypted]"} (${f.atType})`
-      ).join("; ");
-    
+		case "schemas": {
+		  console.log("got schema states")
+		  const owners = [...new Set(data.map((s: SchemaState) => s.owner))];
+		  const schemaFields = data
+		    .filter((s: SchemaState) => (s.versions?.length ?? 0) > 0)
+		    .map((s: SchemaState) => {
+		      const fieldNames = [...new Set(
+		        s.versions?.[s.versions.length - 1]?.fields?.map((f: any) => f.name) ?? []
+		      )];
+		      return `${s.name} [${fieldNames.join(", ")}]`;
+		    });
+		  return `Owners: ${owners.join(", ")}; Schemas: ${schemaFields.join("; ")}`;
+		}
+		case "manifest_states": {
+		  const owners = [...new Set(data.map((ms: ManifestState) => ms.owner))];
+		  const manifests = data.map((ms: ManifestState) => {
+		    const fields = [...new Set(
+		      ms.manifest?.files?.flatMap((fe: FileEntry) =>
+		        fe.fileFields?.map((f: any) => f.name) ?? []
+		      ) ?? []
+		    )];
+		    const values = [...new Set(
+		      ms.manifest?.files?.flatMap((fe: FileEntry) =>
+		        fe.fileFields?.map((f: any) => f.acc === "plain" ? f.value : "[encrypted]") ?? []
+		      ) ?? []
+		    )];
+		    return `${ms.schemaName} v${ms.version} [fields: ${fields.join(", ")}] [values: ${values.join(", ")}]`;
+		  });
+		  return `Owners: ${owners.join(", ")}; Manifests: ${manifests.join("; ")}`;
+		}
+    case "file_entries": {
+			console.log("got Files")
+  		const fieldNames = [...new Set(
+  		  data.flatMap((fe: FileEntry) =>
+  		    fe.fileFields?.map((f: any) => f.name) ?? []
+  		  )
+  		)];
+  		const fieldValues = [...new Set(
+  		  data.flatMap((fe: FileEntry) =>
+  		    fe.fileFields?.map((f: any) => f.acc === "plain" ? f.value : "[encrypted]") ?? []
+  		  )
+  		)];
+  		return `Field names: ${fieldNames.join(", ")}; Field values: ${fieldValues.join(", ")}`;
+    }
     default:
+			console.log(`Result type was: ${resultType}`)
       return `${data.length} items`;
   }
 }
