@@ -1,10 +1,5 @@
 import { useState, ReactNode, CSSProperties } from "react";
-import { CardChatConfig, CardChatInput, useChatContext } from "../Chat/Chat";
-
-/* ═══════════════════════════════════════════════════════════
-   Types
-   ═══════════════════════════════════════════════════════════ */
-
+import { CardChatConfig, CardChatInput } from "../Chat/Chat";
 
 
 export interface BaseCardProps {
@@ -32,10 +27,6 @@ export interface BaseCardProps {
   style?: CSSProperties;
   children: ReactNode;
 }
-
-/* ═══════════════════════════════════════════════════════════
-   BaseCard
-   ═══════════════════════════════════════════════════════════ */
 
 export const BaseCard = ({
   isActive = false,
@@ -91,19 +82,11 @@ export const BaseCard = ({
   );
 };
 
-/* ═══════════════════════════════════════════════════════════
-   ThreadIndicator — "● thread" label for sent cards
-   ═══════════════════════════════════════════════════════════ */
-
 export const ThreadIndicator = ({ color }: { color: string }) => (
   <span style={{ fontSize: 9, color, fontFamily: "var(--font-mono, monospace)" }}>
     ● thread
   </span>
 );
-
-/* ═══════════════════════════════════════════════════════════
-   ExpandChevron — ▼ that rotates when expanded
-   ═══════════════════════════════════════════════════════════ */
 
 export const ExpandChevron = ({ isExpanded, size = 11 }: { isExpanded: boolean; size?: number }) => (
   <span
@@ -118,10 +101,6 @@ export const ExpandChevron = ({ isExpanded, size = 11 }: { isExpanded: boolean; 
     ▼
   </span>
 );
-
-/* ═══════════════════════════════════════════════════════════
-   DetailRow — key/value row for expanded card details
-   ═══════════════════════════════════════════════════════════ */
 
 export const DetailRow = ({
   label,

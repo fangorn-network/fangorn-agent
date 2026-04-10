@@ -2,9 +2,9 @@ import type { SchemaState, Schema } from "@fangorn-network/client-types";
 import { Pill, Card, FieldRow, truncAddr } from "../primitives";
 import {
   BaseCard,
-  CardChatConfig,
   ThreadIndicator,
 } from "./BaseCard";
+import { CardChatConfig } from "../Chat/Chat";
 
 const SCHEMA_COLOR = "#6e8efb";
 

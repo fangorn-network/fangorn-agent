@@ -50,7 +50,6 @@ export class ToolBay {
   private toolboxes: Map<string, Toolbox> = new Map();
 
   // Accumulated MCP results that should be forwarded to the frontend
-  // private mcpResults: McpUiResult = {};
   private mcpData: McpUiResult = {};
 
   // The toolbay is always dirty after initialization. This will guarantee
@@ -115,8 +114,6 @@ export class ToolBay {
         const parsed = JSON.parse(result)
         const data: any = parsed.data
         const resultType: string = parsed.resultType
-
-				console.log(`resultType: ${resultType}`)
 
         if (resultType !== "non-standard") {
           const count = Array.isArray(data) ? data.length : 1;
