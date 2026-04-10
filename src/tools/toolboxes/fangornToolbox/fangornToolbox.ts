@@ -81,8 +81,6 @@ export class FangornToolbox implements Toolbox {
             baseUrl: fangornToolboxConfig.resourceServerUrl
         });
 
-        console.log(`result: ${JSON.stringify(result, null, 2)}`)
-
         if (result.success) {
           const dataContents = result.data!;
           fs.mkdirSync('./Downloads', { recursive: true });
