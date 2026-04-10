@@ -22,6 +22,8 @@ const SUBGRAPH_SEARCH_FIELDS = "subgraph_search_fields";
 const SUBGRAPH_SEARCH_FIELDS_GLOBAL = "subgraph_search_fields_global";
 const SUBGRAPH_RAW_QUERY = "subgraph_raw_query";
 const SUBGRAPH_SEARCH_FIELDS_BY_NAME_GLOBAL = "subgraph_search_fields_by_name_global";
+const SUBGRAPH_GET_SCHEMA_BY_ID = "subgraph_get_schema_by_id";
+const SUBGRAPH_GET_FILE_BY_ID = "subgraph_get_file_by_id";
 
 const MCP_UI_TOOLS = new Set([
 SUBGRAPH_LIST_SCHEMAS,
@@ -32,7 +34,9 @@ SUBGRAPH_LIST_FILE_ENTRIES,
 SUBGRAPH_SEARCH_FIELDS,
 SUBGRAPH_SEARCH_FIELDS_GLOBAL,
 SUBGRAPH_RAW_QUERY,
-SUBGRAPH_SEARCH_FIELDS_BY_NAME_GLOBAL
+SUBGRAPH_SEARCH_FIELDS_BY_NAME_GLOBAL,
+SUBGRAPH_GET_SCHEMA_BY_ID,
+SUBGRAPH_GET_FILE_BY_ID
 ]);
 
 export interface McpUiResult {
@@ -111,6 +115,8 @@ export class ToolBay {
         const parsed = JSON.parse(result)
         const data: any = parsed.data
         const resultType: string = parsed.resultType
+
+				console.log(`resultType: ${resultType}`)
 
         if (resultType !== "non-standard") {
           const count = Array.isArray(data) ? data.length : 1;
