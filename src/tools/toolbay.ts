@@ -55,7 +55,7 @@ export class ToolBay {
 
   hasEntityContext: boolean = false;
 
-  static async initToolbay(): Promise<ToolBay> {
+  static async initToolbay(dataContextProvider: () => any): Promise<ToolBay> {
     const toolboxes = [];
 
     const fangornMcpUrl = process.env.FANGORN_MCP_URL ?? "http://localhost:4000"
@@ -75,6 +75,8 @@ export class ToolBay {
     }
 
     const fangornToolbox = await initializeToolbox(FangornToolbox)
+		const fangornToolboxImpl = fangornToolbox as FangornToolbox
+		fangornToolboxImpl.setDataContextProvider(dataContextProvider)
 
     toolboxes.push(mcpToolbox)
     toolboxes.push(fangornToolbox)

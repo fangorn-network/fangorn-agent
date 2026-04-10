@@ -1,18 +1,15 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Schema, FileEntry, ManifestState, FileField } from "@fangorn-network/client-types";
+import { FileEntry, ManifestState, SchemaState } from "@fangorn-network/client-types";
 import { Bubble, TypingDots } from "./primitives";
 import {
   SchemaBlock,
-  SchemaEntriesBlock,
   ManifestStatesBlock,
-  ManifestsBlock,
   FileEntriesBlock,
-  FieldsBlock,
 } from "./index";
-import { ChatEntry } from "@/hooks/useFangornAgent";
-import { ChatProvider } from "./ChatContext";
+import { ChatEntry, SendOptions } from "@/hooks/useFangornAgent";
+import { ChatProvider } from "./Chat/Chat";
 
 // Duplicated here so we can color the input badge — keep in sync with Bubble
 const CONTEXT_COLORS: Record<string, string> = {
@@ -24,16 +21,17 @@ const CONTEXT_COLORS: Record<string, string> = {
 
 interface ReplyContext {
   contextLabel: string;
-  contextType: "schema" | "manifest" | "file" | "field";
+  contextType: "schema" | "manifest" | "file" ;
   /** The original context message from the ChatEntry, so we can re-send it as prefix */
   contextPrefix?: string;
+	dataContext: any;
 }
 
 interface FangornChatProps {
   chatHistory: ChatEntry[];
   loading: boolean;
   error: string | null;
-  sendMessage: (message: string, options?: { silent?: boolean; contextLabel?: string; contextType?: string; displayMessage?: string }) => void;
+  sendMessage: (message: string, options?: SendOptions) => void;
 }
 
 export default function FangornChat({
@@ -80,6 +78,7 @@ export default function FangornChat({
       contextType: entry.contextType as ReplyContext["contextType"],
       // Carry forward the original context prefix from the user message
       contextPrefix: originalUserEntry?.message?.split(": ").slice(0, -1).join(": "),
+			dataContext: {}
     });
 
     // Focus the input
@@ -120,6 +119,7 @@ export default function FangornChat({
         contextLabel: replyContext.contextLabel,
         contextType: replyContext.contextType,
         displayMessage: trimmed,
+				dataContext: replyContext.dataContext
       });
       setReplyContext(null);
     } else {
@@ -192,17 +192,11 @@ export default function FangornChat({
 
     switch (entry.resultType) {
       case "schemas":
-        return <SchemaBlock key={entry.id} schemas={Array.isArray(entry.data) ? entry.data : [entry.data]} />;
-      case "schema_entries":
-        return <SchemaEntriesBlock key={entry.id} entries={entry.data as Schema[]} />;
+        return <SchemaBlock key={entry.id} schemaStates={entry.data as SchemaState[]} />;
       case "manifest_states":
-        return <ManifestStatesBlock key={entry.id} manifests={entry.data as ManifestState[]} />;
-      case "manifests":
-        return <ManifestsBlock key={entry.id} manifests={Array.isArray(entry.data) ? entry.data : [entry.data]} />;
+        return <ManifestStatesBlock key={entry.id} manifestStates={entry.data as ManifestState[]} />;
       case "file_entries":
-        return <FileEntriesBlock key={entry.id} entries={entry.data as FileEntry[]} />;
-      case "fields":
-        return <FieldsBlock key={entry.id} fields={entry.data as FileField[]} />;
+        return <FileEntriesBlock key={entry.id} files={entry.data as FileEntry[]} />;
       default:
         return null;
     }

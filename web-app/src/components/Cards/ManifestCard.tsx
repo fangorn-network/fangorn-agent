@@ -3,10 +3,10 @@ import type { ManifestState, FileEntry, FileField } from "@fangorn-network/clien
 import { Pill, EncryptedBadge, truncAddr } from "../primitives";
 import {
   BaseCard,
-  CardChatConfig,
   ExpandChevron,
   ExpandedSection,
 } from "./BaseCard";
+import { CardChatConfig } from "../Chat/Chat";
 
 const MANIFEST_COLOR = "#a78bfa";
 const FILE_COLOR = "#34d399";
@@ -47,13 +47,17 @@ const FileEntryRow = ({ file, fileIndex, isSelected, onSelect }: FileEntryRowPro
     placeholder: "Ask about this file...",
     buildContext: () => ({
       id: file.id,
+			type:"file",
       tag: file.tag,
+			manifestStateId: file.manifestStateId,
+			schemaId: file.schemaId,
+			schemaName: file.schemaName,
       fieldCount: allFields.length,
       fields: allFields.map((f) => ({
         name: f.name,
-        value: f.acc === "plain" ? f.value : `[${f.acc ?? "unknown"}]`,
+        value:f.value,
         type: f.atType,
-        hasPrice: f.pricing != null && Number(f.pricing.price) > 0,
+				owner: f.pricing? f.pricing.owner : ""
       })),
     }),
   };
@@ -156,18 +160,6 @@ const FileEntryRow = ({ file, fileIndex, isSelected, onSelect }: FileEntryRowPro
   );
 };
 
-/* ═══════════════════════════════════════════════════════════
-   ManifestCard
-
-   ManifestState (ManifestStateFragment) — all required strings:
-     - id, owner, schemaId, schemaName, manifestCid, version, lastUpdated
-   Nullable:
-     - manifest: Manifest | null (contains files)
-     - manifest.files: File[] | null
-     - manifest.manifestVersion: string | null
-     - manifest.schemaId: string | null
-   ═══════════════════════════════════════════════════════════ */
-
 interface ManifestCardProps {
   index: number;
   manifestState: ManifestState;
@@ -175,7 +167,7 @@ interface ManifestCardProps {
   onToggle: () => void;
   selectedFileIndex: number | null;
   onFileSelect: (fileIndex: number | null) => void;
-}
+} 
 
 export const ManifestCard = ({
   index,
@@ -199,12 +191,10 @@ export const ManifestCard = ({
     placeholder: "Ask about this manifest...",
     buildContext: () => ({
       id: manifestState.id,
+			type: "manifest",
       owner: manifestState.owner,
       schemaName: manifestState.schemaName,
       schemaId: manifestState.schemaId,
-      version: manifestState.version,
-      manifestCid: manifestState.manifestCid,
-      fileCount,
     }),
   };
 

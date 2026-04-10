@@ -15,7 +15,7 @@ async function chatLoop(fangornAgent: FangornAgent) {
       const message = await rl.question("\nQuery: ");
       if (message.toLowerCase() === "/bye") break;
 
-      const options = {hasEntityContext: false}
+      const options = {hasEntityContext: false, dataContext: ""}
       const response = await fangornAgent.invokeAgent(message, options);
 
       // Right now, we assume that once a response is received
@@ -31,7 +31,8 @@ async function chatLoop(fangornAgent: FangornAgent) {
 }
 
 async function main() {
-  const fangornAgent = await FangornAgent.create();
+	const dataContextProvider = (() => {})
+  const fangornAgent = await FangornAgent.create(dataContextProvider);
   console.log("\nFangorn Agent Created!");
   try {
     await chatLoop(fangornAgent);

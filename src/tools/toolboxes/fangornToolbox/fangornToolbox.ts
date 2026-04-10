@@ -11,6 +11,8 @@ export class FangornToolbox implements Toolbox {
   private fangornClient: FangornX402Middleware;
   public name: string = "fangorn_toolbox";
 
+	dataContextProvider: (() => any) | null = null;
+
   static async init(): Promise<FangornToolbox> {
 
     const fangornClient = await FangornX402Middleware.create(
@@ -22,6 +24,19 @@ export class FangornToolbox implements Toolbox {
 
   constructor(fangornClient: FangornX402Middleware) {
     this.fangornClient = fangornClient;
+  }
+
+	public setDataContextProvider(dataContextProvider: () => any) {
+
+		this.dataContextProvider = dataContextProvider;
+
+	}
+
+	private getData(): any {
+    if (!this.dataContextProvider) {
+      throw new Error("No data provider set");
+    }
+    return this.dataContextProvider();
   }
 
   public getToolboxAsTool(): DynamicStructuredTool {
@@ -52,6 +67,9 @@ export class FangornToolbox implements Toolbox {
         console.log(
           `console.log - Agent called fangornFetch tool with args: owner: ${owner}, file tag: ${tag}, and schemaName: ${schemaName}`,
         );
+
+				const dataContext = this.getData()
+				console.log(`dataContext: ${JSON.stringify(dataContext)}`)
 
         const hexId = owner as Hex;
 

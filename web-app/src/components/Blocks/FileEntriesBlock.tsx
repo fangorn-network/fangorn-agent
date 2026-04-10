@@ -4,10 +4,10 @@ import { BaseBlock, CardRenderContext } from "./BaseBlock";
 import { BaseCard, ExpandChevron, ExpandedSection } from "../Cards/BaseCard";
 
 interface FileEntriesBlockProps {
-  entries: FileEntry[];
+  files: FileEntry[];
 }
 
-export const FileEntriesBlock = ({ entries }: FileEntriesBlockProps) => (
+export const FileEntriesBlock = ({ files: entries }: FileEntriesBlockProps) => (
   <BaseBlock
     items={entries}
     pageSize={5}

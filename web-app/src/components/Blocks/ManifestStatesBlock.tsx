@@ -6,10 +6,10 @@ import { ManifestCard } from "../Cards/ManifestCard";
 import { FilterBar, applyFilters, ActiveFilter } from "../FilterBar";
 
 interface ManifestStatesBlockProps {
-  manifests: ManifestState[];
+  manifestStates: ManifestState[];
 }
 
-export const ManifestStatesBlock = ({ manifests }: ManifestStatesBlockProps) => {
+export const ManifestStatesBlock = ({ manifestStates: manifests }: ManifestStatesBlockProps) => {
   if (!manifests.length) return null;
 
   const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([]);

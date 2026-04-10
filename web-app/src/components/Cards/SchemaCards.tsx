@@ -86,7 +86,7 @@ interface SchemaDetailCardProps {
   schema: SchemaState;
   onChatSent?: () => void;
 }
-
+ 
 export const SchemaDetailCard = ({ schema, onChatSent }: SchemaDetailCardProps) => {
   const versions = schema.versions ?? [];
   const latestVersion: Schema | undefined = versions[versions.length - 1];
@@ -97,8 +97,9 @@ export const SchemaDetailCard = ({ schema, onChatSent }: SchemaDetailCardProps) 
     contextLabel: `Re: ${schema.name}`,
     placeholder: "Ask about this schema...",
     buildContext: () => ({
+			id: schema.id,
       name: schema.name,
-      schemaId: schema.schemaId,
+			type: "schema",
       owner: schema.owner,
       versionCount: versions.length,
       latestFields: fields.map((f) => `${f.name} (${f.fieldType})`),

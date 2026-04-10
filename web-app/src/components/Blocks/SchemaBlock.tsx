@@ -4,10 +4,10 @@ import { BaseBlock, CardRenderContext } from "./BaseBlock";
 import { SchemaCard, SchemaDetailCard } from "../Cards/SchemaCards";
 
 interface SchemaBlockProps {
-  schemas: SchemaState[];
+  schemaStates: SchemaState[];
 }
 
-export const SchemaBlock = ({ schemas }: SchemaBlockProps) => {
+export const SchemaBlock = ({ schemaStates: schemas }: SchemaBlockProps) => {
   const [threadedSchemas, setThreadedSchemas] = useState<Set<string>>(new Set());
 
   const handleChatSent = (schemaName: string) => {

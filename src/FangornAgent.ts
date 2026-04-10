@@ -18,9 +18,10 @@ let retryCount = 0;
 export class FangornAgent {
   private model: ChatAnthropic;
   private toolbay: ToolBay;
+	private dataContext: any;
 
-  static async create(): Promise<FangornAgent> {
-    const toolbay = await ToolBay.initToolbay();
+  static async create(dataContextProvider: () => any): Promise<FangornAgent> {
+    const toolbay = await ToolBay.initToolbay(dataContextProvider);
     return new FangornAgent(toolbay);
   }
 
