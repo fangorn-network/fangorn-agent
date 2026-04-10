@@ -49,7 +49,7 @@ const resourceServerUrl = process.env.RESOURCE_SERVER_URL
 
 if (!resourceServerUrl) throw new Error("resourceServerUrl not defined")
 
-export const config: AppConfig = {
+export const appConfig: AppConfig = {
   dataSourceRegistryContractAddress,
   schemaRegistryContractAddress,
   settlementRegistryContractAddress,
@@ -61,7 +61,7 @@ export const config: AppConfig = {
 
 export const fangornMiddlewareConfig = {
   privateKey: key,
-  config,
+  config: appConfig,
   usdcContractAddress,
   usdcDomainName,
   facilitatorAddress,
@@ -70,6 +70,12 @@ export const fangornMiddlewareConfig = {
 
 export const fangornToolboxConfig = {
   resourceServerUrl
+}
+
+export const agent0SdkConfig = {
+	pinataJwt,
+	appConfig,
+	key
 }
 
 const gmailClientId = process.env.GMAIL_CLIENT_ID
