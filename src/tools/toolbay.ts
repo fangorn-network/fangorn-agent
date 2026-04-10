@@ -13,32 +13,6 @@ import type { FileEntry, ManifestState, SchemaState } from "@fangorn-network/cli
 // Toolboxes are a collection of tools that are local to the agent.
 // Tool names whose raw results should be forwarded to the frontend
 
-const SUBGRAPH_LIST_SCHEMAS = "subgraph_list_all_schemas";
-const SUBGRAPH_GET_SCHEMA_BY_NAME = "subgraph_get_schema_by_name";
-const SUBGRAPH_LIST_MANIFEST_STATES_BY_SCHEMA_NAME = "subgraph_list_manifest_states_by_schema_name";
-const SUBGRAPH_GET_MANIFEST_BY_ID = "subgraph_get_manifest_by_id";
-const SUBGRAPH_LIST_FILE_ENTRIES = "subgraph_list_file_entries";
-const SUBGRAPH_SEARCH_FIELDS = "subgraph_search_fields";
-const SUBGRAPH_SEARCH_FIELDS_GLOBAL = "subgraph_search_fields_global";
-const SUBGRAPH_RAW_QUERY = "subgraph_raw_query";
-const SUBGRAPH_SEARCH_FIELDS_BY_NAME_GLOBAL = "subgraph_search_fields_by_name_global";
-const SUBGRAPH_GET_SCHEMA_BY_ID = "subgraph_get_schema_by_id";
-const SUBGRAPH_GET_FILE_BY_ID = "subgraph_get_file_by_id";
-
-const MCP_UI_TOOLS = new Set([
-SUBGRAPH_LIST_SCHEMAS,
-SUBGRAPH_GET_SCHEMA_BY_NAME,
-SUBGRAPH_LIST_MANIFEST_STATES_BY_SCHEMA_NAME,
-SUBGRAPH_GET_MANIFEST_BY_ID,
-SUBGRAPH_LIST_FILE_ENTRIES,
-SUBGRAPH_SEARCH_FIELDS,
-SUBGRAPH_SEARCH_FIELDS_GLOBAL,
-SUBGRAPH_RAW_QUERY,
-SUBGRAPH_SEARCH_FIELDS_BY_NAME_GLOBAL,
-SUBGRAPH_GET_SCHEMA_BY_ID,
-SUBGRAPH_GET_FILE_BY_ID
-]);
-
 export interface McpUiResult {
   toolName?: string;
   resultType?: string;
@@ -105,13 +79,14 @@ export class ToolBay {
 
     console.log(`Executing tool: ${toolName}`);
     let result = await tool!.invoke(toolArgs);
-    // console.log(`Tool result: ${result}`);
+		const parsed = JSON.parse(result)
+		let displayData = parsed.displayData
 
     // If this is an MCP tool whose data should be rendered in the UI,
     // stash the parsed result so the server can forward it to the frontend.
-    if (MCP_UI_TOOLS.has(toolName)) {
+    if (displayData) {
       try {
-        const parsed = JSON.parse(result)
+        
         const data: any = parsed.data
         const resultType: string = parsed.resultType
 

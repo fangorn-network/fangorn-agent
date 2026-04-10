@@ -6,7 +6,7 @@ export interface ChatEntry {
   role: "user" | "claude" | "system" | "mcp-result";
   message?: string;
   displayMessage?: string;
-  resultType?: "schemas" | "schema_entries" | "manifest_states" | "manifests" | "file_entries" | "fields";
+  resultType?: "schemas" | "schema_entries" | "manifest_states" | "manifests" | "files" | "fields";
   data?: any;
   /** Short label shown above contextual messages, e.g. "Re: fangorn.music.v1" */
   contextLabel?: string;

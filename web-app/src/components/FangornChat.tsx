@@ -195,7 +195,7 @@ export default function FangornChat({
         return <SchemaBlock key={entry.id} schemaStates={entry.data as SchemaState[]} />;
       case "manifest_states":
         return <ManifestStatesBlock key={entry.id} manifestStates={entry.data as ManifestState[]} />;
-      case "file_entries":
+      case "files":
         return <FileEntriesBlock key={entry.id} files={entry.data as FileEntry[]} />;
       default:
         return null;
