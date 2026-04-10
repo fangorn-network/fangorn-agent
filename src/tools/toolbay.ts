@@ -47,7 +47,9 @@ export class ToolBay {
     if (process.env.USE_GMAIL) {
         const gmailToolbox = await initializeToolbox(GmailToolbox)
         toolboxes.push(gmailToolbox);
-    }
+    } else {
+			console.warn("Gmail tools are not being added.")
+		}
 
     const fangornToolbox = await initializeToolbox(FangornToolbox)
 		const fangornToolboxImpl = fangornToolbox as FangornToolbox
