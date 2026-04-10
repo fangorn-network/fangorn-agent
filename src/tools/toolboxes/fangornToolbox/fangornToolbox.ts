@@ -32,6 +32,7 @@ export class FangornToolbox implements Toolbox {
 
 	}
 
+	// Unused for now, but keeping here for the future
 	private getData(): any {
     if (!this.dataContextProvider) {
       throw new Error("No data provider set");
@@ -68,9 +69,6 @@ export class FangornToolbox implements Toolbox {
           `console.log - Agent called fangornFetch tool with args: owner: ${owner}, file tag: ${tag}, and schemaName: ${schemaName}`,
         );
 
-				const dataContext = this.getData()
-				console.log(`dataContext: ${JSON.stringify(dataContext)}`)
-
         const hexId = owner as Hex;
 
         const result = await this.fangornClient.fetchResource({
@@ -82,15 +80,17 @@ export class FangornToolbox implements Toolbox {
         });
 
         if (result.success) {
+					console.log("Fetch was successful")
           const dataContents = result.data!;
           fs.mkdirSync('./Downloads', { recursive: true });
           fs.writeFileSync(`./Downloads/${tag}`, dataContents, "binary");
           return JSON.stringify({
             status: 200,
             statusText: "OK",
-            result: `Notify the user that the request file has been downloaded to Downloads/${tag}.`,
+            result: `Notify the user that the requested file has been downloaded to Downloads/${tag}. No further tool calls are required.`,
           });
         } else {
+					console.log("Fetch failed")
           return JSON.stringify({
             status: 500,
             result:

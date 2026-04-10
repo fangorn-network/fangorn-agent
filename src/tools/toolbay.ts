@@ -99,9 +99,6 @@ export class ToolBay {
           `The full data is being displayed to the user in the UI. `,
   					`Use the summary above to form a natural language response.`,
   					`Always describe results in plain sentences or bullet points, never as raw JSON or code blocks.`,
-          this.hasEntityContext
-            ? `If the user's question requires additional data, you may make further tool calls.`
-            : `Do not make additional tool calls unless the user explicitly asks for different data. `
            ].join("\n");
         } else {
           console.log("It was non-standard")
