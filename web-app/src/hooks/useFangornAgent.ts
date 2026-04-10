@@ -71,7 +71,6 @@ export function useFangornAgent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           message,
-          hasEntityContext: !!contextType, // true when sent from a card
 					dataContext
         }),
       });

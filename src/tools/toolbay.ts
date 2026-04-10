@@ -30,8 +30,6 @@ export class ToolBay {
   // that the model will have new tools bound on first invocation.
   private dirty = true;
 
-  hasEntityContext: boolean = false;
-
   static async initToolbay(dataContextProvider: () => any): Promise<ToolBay> {
     const toolboxes = [];
 

@@ -19,14 +19,14 @@ async function main() {
   app.locals.agent = agent;
 
   app.post("/chat", async (req, res) => {
-    const { message, hasEntityContext, dataContext } = req.body;
+    const { message, dataContext } = req.body;
 		console.log(`req.body: ${JSON.stringify(req.body, null, 2)}`)
 		app.locals.dataContext = dataContext
     console.log(`received message: ${message}`)
     if (!message) return res.status(400).json({ error: "No message provided" });
     try {
 			
-      const { text, mcpResults } = await agent.invokeAgent(message, { hasEntityContext });
+      const { text, mcpResults } = await agent.invokeAgent(message);
       agent.resetToolbay();
 			app.locals.dataContext = {}
       res.json({

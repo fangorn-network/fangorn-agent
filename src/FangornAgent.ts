@@ -135,7 +135,7 @@ private truncateToolContent(content: string, maxLen: number = 500): string {
   return content.slice(0, maxLen) + "... [truncated]";
 }
 
-async invokeAgent(query: string, options: { hasEntityContext: boolean}): Promise<AgentResponse> {
+async invokeAgent(query: string): Promise<AgentResponse> {
     // const messages: any[] = [systemPrompt, { role: "user", content: query }];
 
 		const systemMessage = new SystemMessage(systemPrompt.content);
@@ -152,8 +152,6 @@ async invokeAgent(query: string, options: { hasEntityContext: boolean}): Promise
     console.log("Query received");
     let modelWithTools = this.model.bindTools(this.toolbay.consumeDirty());
     console.log("Beginning agent loop...");
-
-    this.toolbay.hasEntityContext = options.hasEntityContext;
 
     let retryInvokeCount = 0;
 		let retryToolCallCount = 0;
@@ -206,7 +204,6 @@ async invokeAgent(query: string, options: { hasEntityContext: boolean}): Promise
         }
 
         const mcpResults = this.toolbay.consumeMcpResults();
-        this.toolbay.hasEntityContext = false;
         retryInvokeCount = 0;
 				const newMessages = messages.slice(newMessagesIndex)
 				this.shortTermMemory.push(...this.sanitizeForShortTermMemory(newMessages))
