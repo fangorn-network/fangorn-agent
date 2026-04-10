@@ -18,7 +18,8 @@ export const SchemaBlock = ({ schemaStates: schemas }: SchemaBlockProps) => {
     <BaseBlock
       items={schemas}
       pageSize={5}
-      itemNoun="schema"
+      itemNoun="template"
+			itemNounPlural="templates"
       getKey={(s) => s.name}
       renderCard={(s: SchemaState, ctx: CardRenderContext) => {
         const versions = s.versions ?? [];

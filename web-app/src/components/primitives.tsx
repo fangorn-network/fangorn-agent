@@ -38,7 +38,7 @@ export const Pill = ({ variant, type, children }: PillProps) => {
 };
 
 // Context type → border color mapping
-const CONTEXT_COLORS: Record<string, string> = {
+export const CONTEXT_COLORS: Record<string, string> = {
   schema: "#6e8efb",
   manifest: "#a78bfa",
   file: "#34d399",

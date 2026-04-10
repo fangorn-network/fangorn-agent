@@ -26,7 +26,8 @@ export const ManifestStatesBlock = ({ manifestStates: manifests }: ManifestState
     <BaseBlock
       items={filtered}
       pageSize={PAGE_SIZE}
-      itemNoun="manifest"
+      itemNoun="collection"
+			itemNounPlural="collections"
       getKey={(ms, i) => ms.id || i}
       isFiltered={activeFilters.length > 0}
       totalCount={manifests.length}

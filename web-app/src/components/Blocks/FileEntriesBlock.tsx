@@ -11,8 +11,8 @@ export const FileEntriesBlock = ({ files: entries }: FileEntriesBlockProps) => (
   <BaseBlock
     items={entries}
     pageSize={5}
-    itemNoun="file entry"
-    itemNounPlural="file entries"
+    itemNoun="file"
+    itemNounPlural="files"
     getKey={(file, i) => file.id || i}
     renderCard={(file: FileEntry, ctx: CardRenderContext) => {
       const allFields = file.fileFields ?? [];

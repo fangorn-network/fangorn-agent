@@ -22,7 +22,7 @@ export interface CardChatConfig {
   /** Label shown in the chat thread, e.g. "Re: Schema Foo" */
   contextLabel: string;
   /** "schema" | "manifest" | "file" etc. */
-  contextType: "schema" | "manifest" | "file" | undefined;
+  contextType?: "schema" | "manifest" | "file";
   /** Placeholder text for the input */
   placeholder?: string;
 }
@@ -47,7 +47,7 @@ export const CardChatInput = ({
     const dataContext = chat.buildContext();
 		const dataContextString = JSON.stringify(dataContext)
     sendMessage(
-      `In regards to the ${chat.contextType} ${dataContextString}: ${value}`,
+      `In regards to: ${dataContextString}: ${value}`,
       {
         contextLabel: chat.contextLabel,
         contextType: chat.contextType,

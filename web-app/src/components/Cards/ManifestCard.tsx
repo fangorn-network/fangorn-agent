@@ -80,7 +80,7 @@ export const ManifestCard = ({
               fontFamily: "var(--font-mono, monospace)",
             }}
           >
-            {manifestState.schemaName || `Manifest ${index + 1}`}
+            {`Collection ${index + 1}`}
           </div>
           <div
             style={{

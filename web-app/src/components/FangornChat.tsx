@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { FileEntry, ManifestState, SchemaState } from "@fangorn-network/client-types";
-import { Bubble, TypingDots } from "./primitives";
+import { Bubble, CONTEXT_COLORS, TypingDots } from "./primitives";
 import {
   SchemaBlock,
   ManifestStatesBlock,
@@ -11,19 +11,9 @@ import {
 import { ChatEntry, SendOptions } from "@/hooks/useFangornAgent";
 import { ChatProvider } from "./Chat/Chat";
 
-// Duplicated here so we can color the input badge — keep in sync with Bubble
-const CONTEXT_COLORS: Record<string, string> = {
-  schema: "#6e8efb",
-  manifest: "#a78bfa",
-  file: "#34d399",
-  field: "#fbbf24",
-};
-
 interface ReplyContext {
   contextLabel: string;
   contextType: "schema" | "manifest" | "file" ;
-  /** The original context message from the ChatEntry, so we can re-send it as prefix */
-  contextPrefix?: string;
 	dataContext: any;
 }
 
@@ -62,23 +52,10 @@ export default function FangornChat({
   const handleReply = (entry: ChatEntry) => {
     if (!entry.contextLabel || !entry.contextType) return;
 
-    // Find the original user message that started this context thread
-    // by looking backwards for the most recent user message with the same contextLabel
-    const originalUserEntry = [...chatHistory]
-      .reverse()
-      .find(
-        (e) =>
-          e.role === "user" &&
-          e.contextLabel === entry.contextLabel &&
-          e.contextType === entry.contextType
-      );
-
     setReplyContext({
       contextLabel: entry.contextLabel,
       contextType: entry.contextType as ReplyContext["contextType"],
-      // Carry forward the original context prefix from the user message
-      contextPrefix: originalUserEntry?.message?.split(": ").slice(0, -1).join(": "),
-			dataContext: {}
+			dataContext: entry.data
     });
 
     // Focus the input
@@ -90,47 +67,22 @@ export default function FangornChat({
   };
 
   const handleSubmit = () => {
-    const trimmed = input.trim();
-    if (!trimmed || loading) return;
+  const trimmed = input.trim();
+  if (!trimmed || loading) return;
 
-    if (replyContext) {
-      // Gather recent conversation history for this context thread
-      const threadMessages = chatHistory
-        .filter(
-          (e) =>
-            e.contextLabel === replyContext.contextLabel &&
-            e.contextType === replyContext.contextType &&
-            (e.role === "user" || e.role === "claude")
-        )
-        .slice(-6) // last 3 exchanges (6 messages max to keep payload reasonable)
-        .map((e) => {
-          const role = e.role === "user" ? "User" : "Assistant";
-          const text = e.displayMessage || e.message || "";
-          return `${role}: ${text}`;
-        })
-        .join("\n");
+  sendMessage(trimmed, replyContext ? {
+    contextLabel: replyContext.contextLabel,
+    contextType: replyContext.contextType,
+    displayMessage: trimmed,
+    dataContext: replyContext.dataContext,
+  } : undefined);
 
-      const prefix = replyContext.contextPrefix || `Continuing conversation about ${replyContext.contextLabel}`;
-      const threadContext = threadMessages
-        ? `\n\nHere is the recent conversation about this entity:\n${threadMessages}\n\nUser's new message: ${trimmed}`
-        : `: ${trimmed}`;
-
-      sendMessage(`${prefix}${threadContext}`, {
-        contextLabel: replyContext.contextLabel,
-        contextType: replyContext.contextType,
-        displayMessage: trimmed,
-				dataContext: replyContext.dataContext
-      });
-      setReplyContext(null);
-    } else {
-      sendMessage(trimmed);
-    }
-
-    setInput("");
-    if (inputRef.current) {
-      inputRef.current.style.height = "auto";
-    }
-  };
+  setReplyContext(null);
+  setInput("");
+  if (inputRef.current) {
+    inputRef.current.style.height = "auto";
+  }
+};
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {

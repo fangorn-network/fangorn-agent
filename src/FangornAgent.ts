@@ -178,6 +178,7 @@ async invokeAgent(query: string): Promise<AgentResponse> {
       } catch (err: any) {
         retryInvokeCount++;
         if (retryInvokeCount >= MAX_INVOKE_RETRIES) {
+					console.log(`Agent failure: ${fullMessage}`)
           throw new Error(`Agent failed after ${MAX_INVOKE_RETRIES} attempts. Last error: ${err.message || String(err)}`);
         }
         console.warn(`Stream error (attempt ${retryInvokeCount}/${MAX_INVOKE_RETRIES}), retrying: ${err.message}`);
@@ -191,18 +192,13 @@ async invokeAgent(query: string): Promise<AgentResponse> {
 
         let text: string;
         if (typeof fullMessage.content === "string") {
-					console.log("fullMessage content type was string")
           text = fullMessage.content;
-					console.log(`text: ${text}`)
         } else {
-					console.log("fullMessage content type was not string")
           text = fullMessage.content
             .filter((block: any) => block.type === "text")
             .map((block: any) => block.text)
             .join("\n");
-					console.log(`text: ${text}`)
         }
-
         const mcpResults = this.toolbay.consumeMcpResults();
         retryInvokeCount = 0;
 				const newMessages = messages.slice(newMessagesIndex)
