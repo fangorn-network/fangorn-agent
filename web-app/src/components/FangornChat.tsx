@@ -1,39 +1,27 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Schema, FileEntry, ManifestState, Manifest, Field } from "../types/subgraph";
-import { Bubble, TypingDots } from "./primitives";
+import { FileEntry, ManifestState, SchemaState } from "@fangorn-network/client-types";
+import { Bubble, CONTEXT_COLORS, TypingDots } from "./primitives";
 import {
   SchemaBlock,
-  SchemaEntriesBlock,
   ManifestStatesBlock,
-  ManifestsBlock,
   FileEntriesBlock,
-  FieldsBlock,
 } from "./index";
-import { ChatEntry } from "@/hooks/useFangornAgent";
-import { ChatProvider } from "./ChatContext";
-
-// Duplicated here so we can color the input badge — keep in sync with Bubble
-const CONTEXT_COLORS: Record<string, string> = {
-  schema: "#6e8efb",
-  manifest: "#a78bfa",
-  file: "#34d399",
-  field: "#fbbf24",
-};
+import { ChatEntry, SendOptions } from "@/hooks/useFangornAgent";
+import { ChatProvider } from "./Chat/Chat";
 
 interface ReplyContext {
   contextLabel: string;
-  contextType: "schema" | "manifest" | "file" | "field";
-  /** The original context message from the ChatEntry, so we can re-send it as prefix */
-  contextPrefix?: string;
+  contextType: "schema" | "manifest" | "file" ;
+	dataContext: any;
 }
 
 interface FangornChatProps {
   chatHistory: ChatEntry[];
   loading: boolean;
   error: string | null;
-  sendMessage: (message: string, options?: { silent?: boolean; contextLabel?: string; contextType?: string; displayMessage?: string }) => void;
+  sendMessage: (message: string, options?: SendOptions) => void;
 }
 
 export default function FangornChat({
@@ -64,22 +52,10 @@ export default function FangornChat({
   const handleReply = (entry: ChatEntry) => {
     if (!entry.contextLabel || !entry.contextType) return;
 
-    // Find the original user message that started this context thread
-    // by looking backwards for the most recent user message with the same contextLabel
-    const originalUserEntry = [...chatHistory]
-      .reverse()
-      .find(
-        (e) =>
-          e.role === "user" &&
-          e.contextLabel === entry.contextLabel &&
-          e.contextType === entry.contextType
-      );
-
     setReplyContext({
       contextLabel: entry.contextLabel,
       contextType: entry.contextType as ReplyContext["contextType"],
-      // Carry forward the original context prefix from the user message
-      contextPrefix: originalUserEntry?.message?.split(": ").slice(0, -1).join(": "),
+			dataContext: entry.data
     });
 
     // Focus the input
@@ -91,46 +67,22 @@ export default function FangornChat({
   };
 
   const handleSubmit = () => {
-    const trimmed = input.trim();
-    if (!trimmed || loading) return;
+  const trimmed = input.trim();
+  if (!trimmed || loading) return;
 
-    if (replyContext) {
-      // Gather recent conversation history for this context thread
-      const threadMessages = chatHistory
-        .filter(
-          (e) =>
-            e.contextLabel === replyContext.contextLabel &&
-            e.contextType === replyContext.contextType &&
-            (e.role === "user" || e.role === "claude")
-        )
-        .slice(-6) // last 3 exchanges (6 messages max to keep payload reasonable)
-        .map((e) => {
-          const role = e.role === "user" ? "User" : "Assistant";
-          const text = e.displayMessage || e.message || "";
-          return `${role}: ${text}`;
-        })
-        .join("\n");
+  sendMessage(trimmed, replyContext ? {
+    contextLabel: replyContext.contextLabel,
+    contextType: replyContext.contextType,
+    displayMessage: trimmed,
+    dataContext: replyContext.dataContext,
+  } : undefined);
 
-      const prefix = replyContext.contextPrefix || `Continuing conversation about ${replyContext.contextLabel}`;
-      const threadContext = threadMessages
-        ? `\n\nHere is the recent conversation about this entity:\n${threadMessages}\n\nUser's new message: ${trimmed}`
-        : `: ${trimmed}`;
-
-      sendMessage(`${prefix}${threadContext}`, {
-        contextLabel: replyContext.contextLabel,
-        contextType: replyContext.contextType,
-        displayMessage: trimmed,
-      });
-      setReplyContext(null);
-    } else {
-      sendMessage(trimmed);
-    }
-
-    setInput("");
-    if (inputRef.current) {
-      inputRef.current.style.height = "auto";
-    }
-  };
+  setReplyContext(null);
+  setInput("");
+  if (inputRef.current) {
+    inputRef.current.style.height = "auto";
+  }
+};
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -192,17 +144,11 @@ export default function FangornChat({
 
     switch (entry.resultType) {
       case "schemas":
-        return <SchemaBlock key={entry.id} schemas={Array.isArray(entry.data) ? entry.data : [entry.data]} sendMessage={sendMessage} />;
-      case "schema_entries":
-        return <SchemaEntriesBlock key={entry.id} entries={entry.data as any[]} />;
+        return <SchemaBlock key={entry.id} schemaStates={entry.data as SchemaState[]} />;
       case "manifest_states":
-        return <ManifestStatesBlock key={entry.id} manifests={entry.data as ManifestState[]} sendMessage={sendMessage} />;
-      case "manifests":
-        return <ManifestsBlock key={entry.id} manifests={Array.isArray(entry.data) ? entry.data : [entry.data]} />;
-      case "file_entries":
-        return <FileEntriesBlock key={entry.id} entries={entry.data as FileEntry[]} />;
-      case "fields":
-        return <FieldsBlock key={entry.id} fields={entry.data as Field[]} />;
+        return <ManifestStatesBlock key={entry.id} manifestStates={entry.data as ManifestState[]} />;
+      case "files":
+        return <FileEntriesBlock key={entry.id} files={entry.data as FileEntry[]} />;
       default:
         return null;
     }

@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@fangorn-network/client-types':
+        specifier: file:../../subgraphs/client-types
+        version: file:../../subgraphs/client-types
       next:
         specifier: ^14.2.0
         version: 14.2.35(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -51,6 +54,9 @@ packages:
   '@alloc/quick-lru@5.2.0':
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}
     engines: {node: '>=10'}
+
+  '@fangorn-network/client-types@file:../../subgraphs/client-types':
+    resolution: {directory: ../../subgraphs/client-types, type: directory}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -860,6 +866,8 @@ packages:
 snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
+
+  '@fangorn-network/client-types@file:../../subgraphs/client-types': {}
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:

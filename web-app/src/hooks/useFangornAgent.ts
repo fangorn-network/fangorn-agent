@@ -6,7 +6,7 @@ export interface ChatEntry {
   role: "user" | "claude" | "system" | "mcp-result";
   message?: string;
   displayMessage?: string;
-  resultType?: "schemas" | "schema_entries" | "manifest_states" | "manifests" | "file_entries" | "fields";
+  resultType?: "schemas" | "schema_entries" | "manifest_states" | "manifests" | "files" | "fields";
   data?: any;
   /** Short label shown above contextual messages, e.g. "Re: fangorn.music.v1" */
   contextLabel?: string;
@@ -14,11 +14,12 @@ export interface ChatEntry {
   contextType?: "schema" | "manifest" | "file" | "field";
 }
 
-interface SendOptions {
+export interface SendOptions {
   silent?: boolean;
   contextLabel?: string;
   displayMessage?: string;
-  contextType?: "schema" | "manifest" | "file" | "field";
+  contextType?: "schema" | "manifest" | "file";
+	dataContext?: string;
 }
 
 interface AgentState {
@@ -41,6 +42,7 @@ export function useFangornAgent() {
     const contextLabel = options?.contextLabel;
     const contextType = options?.contextType;
     const displayMessage = options?.displayMessage;
+		const dataContext = options?.dataContext;
 
     if (!silent) {
       const userEntry: ChatEntry = {
@@ -69,7 +71,7 @@ export function useFangornAgent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           message,
-          hasEntityContext: !!contextType,  // true when sent from a card
+					dataContext
         }),
       });
 

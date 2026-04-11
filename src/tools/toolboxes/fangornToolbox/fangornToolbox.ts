@@ -11,6 +11,8 @@ export class FangornToolbox implements Toolbox {
   private fangornClient: FangornX402Middleware;
   public name: string = "fangorn_toolbox";
 
+	dataContextProvider: (() => any) | null = null;
+
   static async init(): Promise<FangornToolbox> {
 
     const fangornClient = await FangornX402Middleware.create(
@@ -22,6 +24,20 @@ export class FangornToolbox implements Toolbox {
 
   constructor(fangornClient: FangornX402Middleware) {
     this.fangornClient = fangornClient;
+  }
+
+	public setDataContextProvider(dataContextProvider: () => any) {
+
+		this.dataContextProvider = dataContextProvider;
+
+	}
+
+	// Unused for now, but keeping here for the future
+	private getData(): any {
+    if (!this.dataContextProvider) {
+      throw new Error("No data provider set");
+    }
+    return this.dataContextProvider();
   }
 
   public getToolboxAsTool(): DynamicStructuredTool {
@@ -63,18 +79,18 @@ export class FangornToolbox implements Toolbox {
             baseUrl: fangornToolboxConfig.resourceServerUrl
         });
 
-        console.log(`result: ${JSON.stringify(result, null, 2)}`)
-
         if (result.success) {
+					console.log("Fetch was successful")
           const dataContents = result.data!;
           fs.mkdirSync('./Downloads', { recursive: true });
           fs.writeFileSync(`./Downloads/${tag}`, dataContents, "binary");
           return JSON.stringify({
             status: 200,
             statusText: "OK",
-            result: `Notify the user that the request file has been downloaded to Downloads/${tag}.`,
+            result: `Notify the user that the requested file has been downloaded to Downloads/${tag}. No further tool calls are required.`,
           });
         } else {
+					console.log("Fetch failed")
           return JSON.stringify({
             status: 500,
             result:

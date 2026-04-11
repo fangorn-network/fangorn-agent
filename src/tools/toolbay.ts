@@ -1,9 +1,9 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { GmailToolbox } from "./toolboxes/gmailToolbox/GmailToolbox.js";
-import { FileEntry, initializeToolbox, ManifestState, Schema, Toolbox } from "./types.js";
+import { initializeToolbox, Toolbox } from "./types.js";
 import { McpToolbox } from "./toolboxes/mcpToolbox/mcpToolbox.js";
-import { ToolMessage } from "langchain";
 import { FangornToolbox } from "./toolboxes/fangornToolbox/fangornToolbox.js";
+import type { FileEntry, ManifestState, SchemaState } from "@fangorn-network/client-types";
 
 // Examples of a toolbox:
 // Web3 toolbox: wallets, signing, funds, etc.
@@ -12,34 +12,6 @@ import { FangornToolbox } from "./toolboxes/fangornToolbox/fangornToolbox.js";
 // etc.
 // Toolboxes are a collection of tools that are local to the agent.
 // Tool names whose raw results should be forwarded to the frontend
-
-const SUBGRAPH_LIST_SCHEMAS = "subgraph_list_schemas";
-const SUBGRAPH_GET_SCHEMA = "subgraph_get_schema";
-const SUBGRAPH_GET_SCHEMA_ENTRIES = "subgraph_get_schema_entries";
-const SUBGRAPH_LIST_MANIFEST_STATES = "subgraph_list_manifest_states";
-const SUBGRAPH_LIST_MANIFESTS = "subgraph_list_manifests";
-const SUBGRAPH_GET_MANIFEST = "subgraph_get_manifest";
-const SUBGRAPH_LIST_FILE_ENTRIES = "subgraph_list_file_entries";
-const SUBGRAPH_GET_FILE_ENTRIES = "subgraph_get_file_entries";
-const SUBGRAPH_GET_FIELDS = "subgraph_get_fields";
-const SUBGRAPH_SEARCH_FIELDS = "subgraph_search_fields";
-const SUBGRAPH_SEARCH_FIELDS_GLOBAL = "subgraph_search_fields_global";
-const SUBGRAPH_RAW_QUERY = "subgraph_raw_query";
-
-const MCP_UI_TOOLS = new Set([
-SUBGRAPH_LIST_SCHEMAS,
-SUBGRAPH_GET_SCHEMA,
-SUBGRAPH_GET_SCHEMA_ENTRIES,
-SUBGRAPH_LIST_MANIFEST_STATES,
-SUBGRAPH_LIST_MANIFESTS,
-SUBGRAPH_GET_MANIFEST,
-SUBGRAPH_LIST_FILE_ENTRIES,
-SUBGRAPH_GET_FILE_ENTRIES,
-SUBGRAPH_GET_FIELDS,
-SUBGRAPH_SEARCH_FIELDS,
-SUBGRAPH_SEARCH_FIELDS_GLOBAL,
-SUBGRAPH_RAW_QUERY
-]);
 
 export interface McpUiResult {
   toolName?: string;
@@ -52,16 +24,13 @@ export class ToolBay {
   private toolboxes: Map<string, Toolbox> = new Map();
 
   // Accumulated MCP results that should be forwarded to the frontend
-  // private mcpResults: McpUiResult = {};
   private mcpData: McpUiResult = {};
 
   // The toolbay is always dirty after initialization. This will guarantee
   // that the model will have new tools bound on first invocation.
   private dirty = true;
 
-  hasEntityContext: boolean = false;
-
-  static async initToolbay(): Promise<ToolBay> {
+  static async initToolbay(dataContextProvider: () => any): Promise<ToolBay> {
     const toolboxes = [];
 
     const fangornMcpUrl = process.env.FANGORN_MCP_URL ?? "http://localhost:4000"
@@ -78,9 +47,13 @@ export class ToolBay {
     if (process.env.USE_GMAIL) {
         const gmailToolbox = await initializeToolbox(GmailToolbox)
         toolboxes.push(gmailToolbox);
-    }
+    } else {
+			console.warn("Gmail tools are not being added.")
+		}
 
     const fangornToolbox = await initializeToolbox(FangornToolbox)
+		const fangornToolboxImpl = fangornToolbox as FangornToolbox
+		fangornToolboxImpl.setDataContextProvider(dataContextProvider)
 
     toolboxes.push(mcpToolbox)
     toolboxes.push(fangornToolbox)
@@ -106,13 +79,14 @@ export class ToolBay {
 
     console.log(`Executing tool: ${toolName}`);
     let result = await tool!.invoke(toolArgs);
-    // console.log(`Tool result: ${result}`);
+		const parsed = JSON.parse(result)
+		let displayData = parsed.displayData
 
     // If this is an MCP tool whose data should be rendered in the UI,
     // stash the parsed result so the server can forward it to the frontend.
-    if (MCP_UI_TOOLS.has(toolName)) {
+    if (displayData) {
       try {
-        const parsed = JSON.parse(result)
+        
         const data: any = parsed.data
         const resultType: string = parsed.resultType
 
@@ -122,17 +96,14 @@ export class ToolBay {
          result = [
           `${count} ${resultType.replace(/_/g, " ")} retrieved successfully.`,
           `Summary: ${summary}`,
-          `The full data is being displayed to the user in the UI.`,
-          `You can use the summary above to form a response.`,
-          `Do not include raw JSON in your response.`,
-          this.hasEntityContext
-            ? `If the user's question requires additional data, you may make further tool calls.`
-            : `Do not make additional tool calls unless the user explicitly asks for different data. `
+          `The full data is being displayed to the user in the UI. `,
+  					`Use the summary above to form a natural language response.`,
+  					`Always describe results in plain sentences or bullet points, never as raw JSON or code blocks.`,
            ].join("\n");
         } else {
           console.log("It was non-standard")
           console.log("resultType")
-          result = `${result} \n\nIf you need to use this result for a response, be sure you change it to markdown.`
+          result = `${result} \n\nIt looks like you made a raw query. The user will not get to see the full data in the UI.`
         }
 
         this.mcpData = { toolName, data, resultType};
@@ -149,28 +120,52 @@ export class ToolBay {
   if (!Array.isArray(data)) return JSON.stringify(data).slice(0, 500);
   
   switch (resultType) {
-    case "schemas":
-      return data.map((s: any) => 
-        `${s.name} (owner: ${s.owner}, ${s.versions?.length || 0} versions, fields: ${s.versions?.[s.versions.length-1]?.fields?.map((f: any) => f.name).join(", ") || "none"})`
-      ).join("; ");
-    
-    case "manifest_states":
-      return data.map((ms: any) => 
-        `${ms.schema_name} by ${ms.owner} (${ms.manifest?.files?.length || 0} files, v${ms.version})`
-      ).join("; ");
-    
-    case "file_entries":
-      return data.map((fe: any, i: number) => {
-        const fields = fe.fields?.map((f: any) => `${f.name}=${f.acc === "plain" ? f.value : "[encrypted]"}`).join(", ");
-        return `File ${i+1}: ${fields}`;
-      }).join("; ");
-    
-    case "fields":
-      return data.map((f: any) => 
-        `${f.name}=${f.acc === "plain" ? f.value : "[encrypted]"} (${f.atType})`
-      ).join("; ");
-    
+		case "schemas": {
+		  console.log("got schema states")
+		  const owners = [...new Set(data.map((s: SchemaState) => s.owner))];
+		  const schemaFields = data
+		    .filter((s: SchemaState) => (s.versions?.length ?? 0) > 0)
+		    .map((s: SchemaState) => {
+		      const fieldNames = [...new Set(
+		        s.versions?.[s.versions.length - 1]?.fields?.map((f: any) => f.name) ?? []
+		      )];
+		      return `${s.name} [${fieldNames.join(", ")}]`;
+		    });
+		  return `Owners: ${owners.join(", ")}; Schemas: ${schemaFields.join("; ")}`;
+		}
+		case "manifest_states": {
+		  const owners = [...new Set(data.map((ms: ManifestState) => ms.owner))];
+		  const manifests = data.map((ms: ManifestState) => {
+		    const fields = [...new Set(
+		      ms.manifest?.files?.flatMap((fe: FileEntry) =>
+		        fe.fileFields?.map((f: any) => f.name) ?? []
+		      ) ?? []
+		    )];
+		    const values = [...new Set(
+		      ms.manifest?.files?.flatMap((fe: FileEntry) =>
+		        fe.fileFields?.map((f: any) => f.acc === "plain" ? f.value : "[encrypted]") ?? []
+		      ) ?? []
+		    )];
+		    return `${ms.schemaName} v${ms.version} [fields: ${fields.join(", ")}] [values: ${values.join(", ")}]`;
+		  });
+		  return `Owners: ${owners.join(", ")}; Manifests: ${manifests.join("; ")}`;
+		}
+    case "file_entries": {
+			console.log("got Files")
+  		const fieldNames = [...new Set(
+  		  data.flatMap((fe: FileEntry) =>
+  		    fe.fileFields?.map((f: any) => f.name) ?? []
+  		  )
+  		)];
+  		const fieldValues = [...new Set(
+  		  data.flatMap((fe: FileEntry) =>
+  		    fe.fileFields?.map((f: any) => f.acc === "plain" ? f.value : "[encrypted]") ?? []
+  		  )
+  		)];
+  		return `Field names: ${fieldNames.join(", ")}; Field values: ${fieldValues.join(", ")}`;
+    }
     default:
+			console.log(`Result type was: ${resultType}`)
       return `${data.length} items`;
   }
 }
