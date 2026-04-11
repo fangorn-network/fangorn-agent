@@ -141,7 +141,7 @@ async invokeAgent(query: string): Promise<AgentResponse> {
 		const systemMessage = new SystemMessage(systemPrompt.content);
     const userMessage = new HumanMessage(query);
 
-    // The messages that the agent should have to perserve conversations
+    // The messages that the agent should have to preserve conversations
     // within the same session
     const messages: BaseMessage[] = [
       systemMessage, ...this.shortTermMemory, userMessage
