@@ -64,9 +64,9 @@ export class FangornToolbox implements Toolbox {
 
   public getTools(): DynamicStructuredTool[] {
     const fangornFetch = tool(
-      async ({ owner, schemaName, tag }) => {
+      async ({ owner, schemaName, name }) => {
         console.log(
-          `console.log - Agent called fangornFetch tool with args: owner: ${owner}, file tag: ${tag}, and schemaName: ${schemaName}`,
+          `console.log - Agent called fangornFetch tool with args: owner: ${owner}, file name: ${name}, and schemaName: ${schemaName}`,
         );
 
         const hexId = owner as Hex;
@@ -75,7 +75,7 @@ export class FangornToolbox implements Toolbox {
             privateKey: fangornMiddlewareConfig.privateKey,
             owner: hexId,
             schemaName,
-            tag,
+            tag: name,
             baseUrl: fangornToolboxConfig.resourceServerUrl
         });
 
@@ -83,11 +83,11 @@ export class FangornToolbox implements Toolbox {
 					console.log("Fetch was successful")
           const dataContents = result.data!;
           fs.mkdirSync('./Downloads', { recursive: true });
-          fs.writeFileSync(`./Downloads/${tag}`, dataContents, "binary");
+          fs.writeFileSync(`./Downloads/${name}`, dataContents, "binary");
           return JSON.stringify({
             status: 200,
             statusText: "OK",
-            result: `Notify the user that the requested file has been downloaded to Downloads/${tag}. No further tool calls are required.`,
+            result: `Notify the user that the requested file has been downloaded to Downloads/${name}. No further tool calls are required.`,
           });
         } else {
 					console.log("Fetch failed")
@@ -101,7 +101,7 @@ export class FangornToolbox implements Toolbox {
       {
         name: "fangorn_fetch",
         description:
-          "Purchases and decrypts a file from the Fangorn network. Use this when the user wants to obtain a specific encrypted file. You must first inspect the ManifestState data to extract the three required parameters. To find them: 'owner' comes from the 'owner' field inside the PricingResource (field.price.owner) on the encrypted field the user wants. 'schemaName' comes from the 'schema_name' field on the top-level ManifestState object. 'tag' comes from the 'tag' field on the FileEntry that contains the encrypted field.",
+          "Purchases and decrypts a file from the Fangorn network. Use this when the user wants to obtain a specific encrypted file. You must first inspect the ManifestState data to extract the three required parameters. To find them: 'owner' comes from the 'owner' field inside the PricingResource (field.price.owner) on the encrypted field the user wants. 'schemaName' comes from the 'schema_name' field on the top-level ManifestState object. 'name' comes from the 'name' field on the FileEntry that contains the encrypted field.",
         schema: z.object({
           owner: z
             .string()
@@ -109,7 +109,7 @@ export class FangornToolbox implements Toolbox {
           schemaName: z
             .string()
             .describe("The name of the schema this manifest belongs to. Found at manifestState.schema_name."),
-          tag: z
+          name: z
             .string()
             .describe("The file identifier. Found at fileEntry.tag on the FileEntry containing the target encrypted field."),
         }),

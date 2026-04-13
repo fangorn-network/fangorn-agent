@@ -16,7 +16,7 @@ const FILES_PER_PAGE = 5;
    FileEntryRow — nested card for files within a manifest
 
    FileEntry (FileFragment) nullable fields:
-     - tag: string | null
+     - name: string | null
      - fileFields: FileField[] | null
    FileField (FileFieldFragment) nullable fields:
      - name, value, atType, acc: string | null

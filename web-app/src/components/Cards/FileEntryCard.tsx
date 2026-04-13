@@ -25,12 +25,12 @@ export const FileEntryRow = ({ file, fileIndex, isSelected, onSelect }: FileEntr
 
 	const chat: CardChatConfig = {
 		contextType: "file",
-		contextLabel: `Re: File ${file.tag ?? file.id}`,
+		contextLabel: `Re: File ${file.name ?? file.id}`,
 		placeholder: "Ask about this file...",
 		buildContext: () => ({
 			id: file.id,
 			type:"file",
-			tag: file.tag,
+			name: file.name,
 			manifestStateId: file.manifestStateId,
 			schemaId: file.schemaId,
 			schemaName: file.schemaName,
@@ -60,7 +60,7 @@ export const FileEntryRow = ({ file, fileIndex, isSelected, onSelect }: FileEntr
 			<div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
 				<div style={{ maxWidth: "60%" }}>
 					<div style={{ fontSize: 12, fontWeight: 500, color: "var(--color-text-primary, #fafafa)" }}>
-						{summaryField?.value ?? file.tag ?? `File ${fileIndex + 1}`}
+						{summaryField?.value ?? file.name ?? `File ${fileIndex + 1}`}
 					</div>
 					{secondaryField && (
 						<div style={{ fontSize: 11, color: "var(--color-text-secondary, #8a8a8a)", marginTop: 1 }}>
