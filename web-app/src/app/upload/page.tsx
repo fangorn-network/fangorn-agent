@@ -195,8 +195,8 @@ function usePublisherFangorn() {
                 walletClient: wc,
                 storage: {
                     pinata: {
-                        jwt: import.meta.env.VITE_PINATA_JWT ?? '',
-                        gateway: import.meta.env.VITE_PINATA_GATEWAY ?? ''
+                        jwt: process.env.PINATA_JWT ?? '',
+                        gateway: process.env.PINATA_GATEWAY ?? ''
                     }
                 },
                 encryption: { lit: true },

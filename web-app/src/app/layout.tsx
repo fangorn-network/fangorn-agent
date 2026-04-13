@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css';
+import { Providers } from './providers';
 
 export const metadata: Metadata = {
   title: 'Fangorn Agent',
@@ -12,7 +13,7 @@ export default function RootLayout({ children }: {children: React.ReactNode}) {
       <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
-      <body className="h-screen overflow-hidden">{children}</body>
+      <body className="h-screen overflow-hidden"><Providers>{children}</Providers></body>
     </html>
   );
 }

@@ -1,7 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 	reactStrictMode: true,
+	watchOptions: {
+		ignored: /node_modules/,
+	},
   webpack: (config, { isServer }) => {
+		config.watchOptions = {
+			...config.watchOptions,
+			ignored: /node_modules/,
+		};
     if (!isServer) {
 			config.resolve.alias = {
         ...config.resolve.alias,
