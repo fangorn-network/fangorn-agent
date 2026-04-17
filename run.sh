@@ -61,7 +61,7 @@ fi
 # ─────────────────────────────────────────────
 echo "🔨 Building Fangorn Agent..."
 
-# cd agent
+cd agent
 
 pnpm build
 
@@ -80,7 +80,7 @@ echo "🌐 Starting web chat server at http://localhost:${WEB_PORT}..."
 LLM="$LLM" OLLAMA_PORT="$HOST_PORT" MODEL="$MODEL" PORT="$WEB_PORT" node build/server.js & AGENT_PID=$!
 
 if [ "$USE_WEB" = "true" ]; then
-	cd web-app
+	cd ../web-app
 
 	echo "🖥️ Starting up UI..."
 

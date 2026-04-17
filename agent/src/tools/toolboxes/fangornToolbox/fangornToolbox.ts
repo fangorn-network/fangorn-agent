@@ -15,9 +15,15 @@ export class FangornToolbox implements Toolbox {
 
   static async init(): Promise<FangornToolbox> {
 
-    const fangornClient = await FangornX402Middleware.create(
-        fangornMiddlewareConfig
-    )
+
+    const fangornClient = await FangornX402Middleware.create({
+			walletClient: fangornMiddlewareConfig.walletClient,
+			config: fangornMiddlewareConfig.config,
+			usdcContractAddress: fangornMiddlewareConfig.usdcContractAddress,
+			usdcDomainName: fangornMiddlewareConfig.usdcDomainName,
+			facilitatorAddress: fangornMiddlewareConfig.facilitatorAddress,
+			domain: fangornMiddlewareConfig.domain
+		})
 
     return new FangornToolbox(fangornClient);
   }
@@ -72,10 +78,9 @@ export class FangornToolbox implements Toolbox {
         const hexId = owner as Hex;
 
         const result = await this.fangornClient.fetchResource({
-            privateKey: fangornMiddlewareConfig.privateKey,
             owner: hexId,
             schemaName,
-            tag: name,
+            name,
             baseUrl: fangornToolboxConfig.resourceServerUrl
         });
 

@@ -1,12 +1,14 @@
 import dotenv from "dotenv";
 
 import { AppConfig, FangornConfig } from "@fangorn-network/sdk";
-import { Hex } from "viem";
+import { Account, createWalletClient, Hex, http, WalletClient } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
 
 dotenv.config();
 
 const key = process.env.ETH_PRIVATE_KEY as Hex;
 if (!key) throw new Error("No private key found");
+
 const envChain = process.env.CHAIN;
 console.log("chain: ", envChain);
 if (!envChain) throw new Error("No chain specified");
@@ -49,19 +51,15 @@ const resourceServerUrl = process.env.RESOURCE_SERVER_URL
 
 if (!resourceServerUrl) throw new Error("resourceServerUrl not defined")
 
-export const appConfig: AppConfig = {
-  dataSourceRegistryContractAddress,
-  schemaRegistryContractAddress,
-  settlementRegistryContractAddress,
-  chainName: chainConfig.chainName,
+const walletClient = createWalletClient({
+  account: privateKeyToAccount(key),
   chain: chainConfig.chain,
-  rpcUrl: chainConfig.rpcUrl,
-  caip2: chainConfig.caip2
-}
+  transport: http(chainConfig.rpcUrl),
+})
 
 export const fangornMiddlewareConfig = {
-  privateKey: key,
-  config: appConfig,
+  walletClient: walletClient as any,
+  config: chainConfig,
   usdcContractAddress,
   usdcDomainName,
   facilitatorAddress,
@@ -74,7 +72,7 @@ export const fangornToolboxConfig = {
 
 export const agent0SdkConfig = {
 	pinataJwt,
-	appConfig,
+	chainConfig,
 	key
 }
 
