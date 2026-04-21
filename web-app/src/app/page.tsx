@@ -1,12 +1,10 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { FangornLogo } from '../../public/svg/fangorn-logo';
 import { useFangornAgent } from '@/hooks/useFangornAgent';
 import FangornChat from '@/components/FangornChat';
 import Splash from '../components/Splash';
 import FangornHeader from '@/components/FangornHeader';
-import { PrivyProvider } from '@privy-io/react-auth';
 
 export default function ExplorePage() {
 	const { chatHistory, loading, error, sendMessage } = useFangornAgent();
