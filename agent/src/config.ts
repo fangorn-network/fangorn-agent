@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 
-import { AppConfig, FangornConfig } from "@fangorn-network/sdk";
-import { Account, createWalletClient, Hex, http, WalletClient } from "viem";
+import { FangornConfig } from "@fangorn-network/sdk";
+import { createWalletClient, Hex, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
 dotenv.config();
@@ -23,10 +23,6 @@ if (!pinataGateway) throw new Error("No pinataGateway provided");
 
 const domain = process.env.DOMAIN ? process.env.DOMAIN : "localhost";
 
-const dataSourceRegistryContractAddress = process.env.DATASOURCE_CONTRACT as Hex
-
-if (!dataSourceRegistryContractAddress) throw new Error("DATASOURCE_CONTRACT env var not set")
-
 const usdcContractAddress = process.env.USDC_CONTRACT as Hex
 
 if (!usdcContractAddress) throw new Error("No usdcContractAddress provided")
@@ -39,13 +35,7 @@ const facilitatorAddress = process.env.FACILITATOR_PUBKEY as Hex;
 
 if (!facilitatorAddress) throw new Error("facilitator address not set")
 
-const settlementRegistryContractAddress = process.env.SETTLEMENT_CONTRACT as Hex
 
-if (!settlementRegistryContractAddress) throw new Error("settlement registry contract address not set")
-
-const schemaRegistryContractAddress = process.env.SCHEMA_CONTRACT as Hex
-
-if (!schemaRegistryContractAddress) throw new Error("schem registry contract address not set")
 
 const resourceServerUrl = process.env.RESOURCE_SERVER_URL
 

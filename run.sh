@@ -10,7 +10,7 @@ CONTAINER_PORT=11434
 MODEL="qwen3.5:9b"
 WAIT_TIMEOUT=30
 WEB_PORT=3001      # port for the chat UI
-USE_WEB="true"
+USE_WEB="false"
 
 # ─────────────────────────────────────────────
 # Start or restart the Ollama container (only if using ollama)
