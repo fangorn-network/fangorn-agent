@@ -25,7 +25,7 @@ export default function FangornHeader() {
 						className="text-xs"
 						style={{ color: 'var(--text-secondary)', fontFamily: 'var(--font-body)' }}
 					>
-						Browse schemas & query data on the Fangorn subgraph
+						Browse for & discover data in the Fangorn Network
 					</p>
 				</div>
 			</div>
