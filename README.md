@@ -193,6 +193,7 @@ If you'd like to see what models are offered by Ollama that support tool calling
 ### Known issues
 - Anthropic limiting: There are times (even if you have a sufficient balance) that Anthropic will deny calls to Claude. Switching between `claude-opus-4-6` and `claude-sonnet-4-6` seems to remedy this issue.
 - `/chat` endpoint unavailable: If an error occurs during agent startup when running `run_web.sh`, the NextJs server is not always killed. In this case, when you run `./run_web.sh` again, it will start another NextJs server which will occupy the port typically used by the agent. Use `ps aux` to list all process, and kill any orphaned nextjs instances.
+- On Ubuntu there may be an issues with mismatching GPU driver versions after updates. Symptoms of this are high CPU core usage and sluggish tool call usage. You can verify this by running `docker exec -it ollama nvidia-smi` which will return information about your GPU (driver versions match and it's working) or it will return `Failed to initialize NVML: Unknown Error`. If you receive an error, stop any ollama instance `docker stop ollama` and remove the container `docker rm ollama`. You can then re-run `run.sh` which will completely re-build the container. 
 
 
 # TODOs:
