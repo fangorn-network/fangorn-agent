@@ -1,12 +1,14 @@
 import dotenv from "dotenv";
 
-import { AppConfig, FangornConfig } from "@fangorn-network/sdk";
-import { Hex } from "viem";
+import { FangornConfig } from "@fangorn-network/sdk";
+import { createWalletClient, Hex, http } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
 
 dotenv.config();
 
 const key = process.env.ETH_PRIVATE_KEY as Hex;
 if (!key) throw new Error("No private key found");
+
 const envChain = process.env.CHAIN;
 console.log("chain: ", envChain);
 if (!envChain) throw new Error("No chain specified");
@@ -21,10 +23,6 @@ if (!pinataGateway) throw new Error("No pinataGateway provided");
 
 const domain = process.env.DOMAIN ? process.env.DOMAIN : "localhost";
 
-const dataSourceRegistryContractAddress = process.env.DATASOURCE_CONTRACT as Hex
-
-if (!dataSourceRegistryContractAddress) throw new Error("DATASOURCE_CONTRACT env var not set")
-
 const usdcContractAddress = process.env.USDC_CONTRACT as Hex
 
 if (!usdcContractAddress) throw new Error("No usdcContractAddress provided")
@@ -37,31 +35,21 @@ const facilitatorAddress = process.env.FACILITATOR_PUBKEY as Hex;
 
 if (!facilitatorAddress) throw new Error("facilitator address not set")
 
-const settlementRegistryContractAddress = process.env.SETTLEMENT_CONTRACT as Hex
 
-if (!settlementRegistryContractAddress) throw new Error("settlement registry contract address not set")
-
-const schemaRegistryContractAddress = process.env.SCHEMA_CONTRACT as Hex
-
-if (!schemaRegistryContractAddress) throw new Error("schem registry contract address not set")
 
 const resourceServerUrl = process.env.RESOURCE_SERVER_URL
 
 if (!resourceServerUrl) throw new Error("resourceServerUrl not defined")
 
-export const appConfig: AppConfig = {
-  dataSourceRegistryContractAddress,
-  schemaRegistryContractAddress,
-  settlementRegistryContractAddress,
-  chainName: chainConfig.chainName,
+const walletClient = createWalletClient({
+  account: privateKeyToAccount(key),
   chain: chainConfig.chain,
-  rpcUrl: chainConfig.rpcUrl,
-  caip2: chainConfig.caip2
-}
+  transport: http(chainConfig.rpcUrl),
+})
 
 export const fangornMiddlewareConfig = {
-  privateKey: key,
-  config: appConfig,
+  walletClient: walletClient as any,
+  config: chainConfig,
   usdcContractAddress,
   usdcDomainName,
   facilitatorAddress,
@@ -74,7 +62,7 @@ export const fangornToolboxConfig = {
 
 export const agent0SdkConfig = {
 	pinataJwt,
-	appConfig,
+	chainConfig,
 	key
 }
 

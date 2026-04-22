@@ -4,7 +4,7 @@ import { Toolbox } from "../../types.js";
 import { arbitrumSepoliaChainId } from "../../../constants.js";
 import { SDK } from "agent0-sdk";
 import { getAgent0Sdk } from "./utils.js";
-import { agent0SdkConfig, appConfig } from "../../../config.js";
+import { agent0SdkConfig } from "../../../config.js";
 
 export class Agent0Toolbox implements Toolbox {
   private agent0Sdk: SDK;
@@ -12,9 +12,9 @@ export class Agent0Toolbox implements Toolbox {
 
   static async init(): Promise<Agent0Toolbox> {
 
-		const {pinataJwt, appConfig, key} = agent0SdkConfig;
+		const {pinataJwt, chainConfig, key} = agent0SdkConfig;
 
-    const agent0Sdk = getAgent0Sdk(appConfig, key, pinataJwt);
+    const agent0Sdk = getAgent0Sdk(chainConfig, key, pinataJwt);
 
 
     return new Agent0Toolbox(agent0Sdk);

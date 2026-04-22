@@ -25,7 +25,7 @@ export const FileEntriesBlock = ({ files: entries }: FileEntriesBlockProps) => (
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div style={{ maxWidth: "60%" }}>
               <div style={{ fontSize: 13, fontWeight: 500, color: "var(--color-text-primary, #fafafa)" }}>
-                {plainFields[0]?.value ?? file.tag ?? `File ${ctx.globalIndex + 1}`}
+                {plainFields[0]?.value ?? file.name ?? `File ${ctx.globalIndex + 1}`}
               </div>
               {plainFields[1] && (
                 <div style={{ fontSize: 11, color: "var(--color-text-secondary, #8a8a8a)", marginTop: 2 }}>

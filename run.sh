@@ -9,7 +9,8 @@ HOST_PORT=11434
 CONTAINER_PORT=11434
 MODEL="qwen3.5:9b"
 WAIT_TIMEOUT=30
-WEB_PORT=3001           # port for the chat UI
+WEB_PORT=3001      # port for the chat UI
+USE_WEB="false"
 
 # ─────────────────────────────────────────────
 # Start or restart the Ollama container (only if using ollama)
@@ -60,7 +61,9 @@ fi
 # ─────────────────────────────────────────────
 echo "🔨 Building Fangorn Agent..."
 
-npm run build
+cd agent
+
+pnpm build
 
 if [ $? -ne 0 ]; then
   echo "❌ Build failed. Exiting."
@@ -69,23 +72,32 @@ fi
 
 echo "✅ Build successful."
 
-echo "🖥️ Starting up UI..."
-
-cd web-app
-npm run dev & UI_PID=$!
-
-cleanup() {
-  echo "🛑 Shutting down..."
-  kill $UI_PID 2>/dev/null
-  exit 0
-}
-trap cleanup SIGINT SIGTERM
-
-cd ../
-
 # ─────────────────────────────────────────────
 # Start the Web Server
 # ─────────────────────────────────────────────
 echo "🌐 Starting web chat server at http://localhost:${WEB_PORT}..."
 
-LLM="$LLM" OLLAMA_PORT="$HOST_PORT" MODEL="$MODEL" PORT="$WEB_PORT" node build/server.js
+LLM="$LLM" OLLAMA_PORT="$HOST_PORT" MODEL="$MODEL" PORT="$WEB_PORT" node build/server.js & AGENT_PID=$!
+
+if [ "$USE_WEB" = "true" ]; then
+	cd ../web-app
+
+	echo "🖥️ Starting up UI..."
+
+	pnpm dev & UI_PID=$!
+
+else
+	echo "Not running dedicated webapp"
+fi
+
+cleanup() {
+  echo "🛑 Shutting down..."
+  kill $AGENT_PID 2>/dev/null
+  [ -n "$UI_PID" ] && kill $UI_PID 2>/dev/null
+  wait
+  exit 0
+}
+
+trap cleanup SIGINT SIGTERM
+
+wait
