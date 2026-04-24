@@ -9,7 +9,7 @@ import { fangornMiddlewareConfig, fangornToolboxConfig } from "../../../config.j
 export class FangornToolbox implements Toolbox {
     
   private fangornClient: FangornX402Middleware;
-  public name: string = "fangorn_toolbox";
+  public name: string = "x402f_toolbox";
 
 	dataContextProvider: (() => any) | null = null;
 
@@ -47,32 +47,32 @@ export class FangornToolbox implements Toolbox {
   }
 
   public getToolboxAsTool(): DynamicStructuredTool {
-    const fangornAgentToolboxTool = tool(
+    const x402fToolboxTool = tool(
       async () => {
-        console.log("console.log - agent called fangornAgentToolboxTool tool");
+        console.log("console.log - agent called x402fToolboxTool tool");
 
         return JSON.stringify({
           status: 200,
           statusText: "OK",
           result:
-            "x402Fangorn tools are now available. You now have access to: fangorn_fetch. Re-plan and use them to complete the task.",
+            "x402f tools are now available. You now have access to: x402f_fetch. Re-plan and use them to complete the task.",
         });
       },
       {
         name: this.name,
         description:
-          "Activates the Fangorn toolbox, which provides tools for purchasing and decrypting files. Call this whenever the user wants to buy or decrypt a resource. Once called, you will gain access to the fangorn_fetch tool.",
+          "Activates the x402f toolbox, which provides tools for purchasing and decrypting files. Call this whenever the user wants to buy or decrypt a resource. Once called, you will gain access to the x402f_fetch tool.",
         schema: z.object({}),
       },
     );
-    return fangornAgentToolboxTool;
+    return x402fToolboxTool;
   }
 
   public getTools(): DynamicStructuredTool[] {
-    const fangornFetch = tool(
+    const x402fFetch = tool(
       async ({ owner, schemaName, name }) => {
         console.log(
-          `console.log - Agent called fangornFetch tool with args: owner: ${owner}, file name: ${name}, and schemaName: ${schemaName}`,
+          `console.log - Agent called x402fFetch tool with args: owner: ${owner}, file name: ${name}, and schemaName: ${schemaName}`,
         );
 
         const hexId = owner as Hex;
@@ -104,9 +104,9 @@ export class FangornToolbox implements Toolbox {
         }
       },
       {
-        name: "fangorn_fetch",
+        name: "x402f_fetch",
         description:
-          "Purchases and decrypts a file from the Fangorn network. Use this when the user wants to obtain a specific encrypted file. You must first inspect the ManifestState data to extract the three required parameters. To find them: 'owner' comes from the 'owner' field inside the PricingResource (field.price.owner) on the encrypted field the user wants. 'schemaName' comes from the 'schema_name' field on the top-level ManifestState object. 'name' comes from the 'name' field on the FileEntry that contains the encrypted field.",
+          "Purchases and decrypts a files using x402 and x402f. Use this when the user wants to obtain a specific encrypted file. You must first inspect the ManifestState data to extract the three required parameters. To find them: 'owner' comes from the 'owner' field inside the PricingResource (field.price.owner) on the encrypted field the user wants. 'schemaName' comes from the 'schema_name' field on the top-level ManifestState object. 'name' comes from the 'name' field on the FileEntry that contains the encrypted field.",
         schema: z.object({
           owner: z
             .string()
@@ -121,6 +121,6 @@ export class FangornToolbox implements Toolbox {
       },
     );
 
-    return [fangornFetch];
+    return [x402fFetch];
   }
 }

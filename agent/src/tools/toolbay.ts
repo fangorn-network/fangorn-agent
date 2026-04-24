@@ -4,6 +4,7 @@ import { initializeToolbox, Toolbox } from "./types.js";
 import { McpToolbox } from "./toolboxes/mcpToolbox/mcpToolbox.js";
 import { FangornToolbox } from "./toolboxes/fangornToolbox/fangornToolbox.js";
 import type { FileEntry, ManifestState, SchemaState } from "@fangorn-network/client-types";
+import { fangornAgentConfig } from "../config.js";
 
 // Examples of a toolbox:
 // Web3 toolbox: wallets, signing, funds, etc.
@@ -33,29 +34,29 @@ export class ToolBay {
   static async initToolbay(dataContextProvider: () => any): Promise<ToolBay> {
     const toolboxes = [];
 
-    const fangornMcpUrl = process.env.FANGORN_MCP_URL ?? "http://localhost:4000"
-    const mcpToolbox = await McpToolbox.init(
-      {
-        fangornMcp: {
-          transport: "http",
-          url: fangornMcpUrl
-        }
-      },
-      "mcp_toolbox"
-    )
-
-    if (process.env.USE_GMAIL) {
-        const gmailToolbox = await initializeToolbox(GmailToolbox)
-        toolboxes.push(gmailToolbox);
-    } else {
-			console.warn("Gmail tools are not being added.")
+		if (fangornAgentConfig.useMcp) {
+    	const fangornMcpUrl = process.env.FANGORN_MCP_URL ?? "http://localhost:4000"
+    	const mcpToolbox = await McpToolbox.init(
+    	  {
+    	    fangornMcp: {
+    	      transport: "http",
+    	      url: fangornMcpUrl
+    	    }
+    	  },
+    	  "mcp_toolbox"
+    	)
+    	toolboxes.push(mcpToolbox)
 		}
+
+    if (fangornAgentConfig.useGmail) {
+      const gmailToolbox = await initializeToolbox(GmailToolbox)
+      toolboxes.push(gmailToolbox);
+    } 
 
     const fangornToolbox = await initializeToolbox(FangornToolbox)
 		const fangornToolboxImpl = fangornToolbox as FangornToolbox
 		fangornToolboxImpl.setDataContextProvider(dataContextProvider)
 
-    toolboxes.push(mcpToolbox)
     toolboxes.push(fangornToolbox)
 
     return new ToolBay(toolboxes);

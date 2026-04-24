@@ -7,6 +7,7 @@ import { ChatOllama } from "@langchain/ollama";
 import { ToolBay, McpUiResult } from "./tools/toolbay.js";
 import { ChatAnthropic } from "@langchain/anthropic"
 import { BaseMessage, HumanMessage, SystemMessage, ToolMessage } from "langchain";
+import { fangornAgentConfig } from "./config.js";
 
 export interface AgentResponse {
   text: string;
@@ -141,11 +142,18 @@ async invokeAgent(query: string): Promise<AgentResponse> {
 		const systemMessage = new SystemMessage(systemPrompt.content);
     const userMessage = new HumanMessage(query);
 
-    // The messages that the agent should have to preserve conversations
-    // within the same session
-    const messages: BaseMessage[] = [
-      systemMessage, ...this.shortTermMemory, userMessage
-    ]
+		let messages: BaseMessage[]
+		if(fangornAgentConfig.useMemory) {
+			// The messages that the agent should have to preserve conversations
+    	// within the same session
+			messages = [
+      	systemMessage, ...this.shortTermMemory, userMessage
+    	]
+		} else {
+			messages = [
+      	systemMessage, userMessage
+    	]
+		}
 
 		const newMessagesIndex = messages.length
 
@@ -201,9 +209,12 @@ async invokeAgent(query: string): Promise<AgentResponse> {
         }
         const mcpResults = this.toolbay.consumeMcpResults();
         retryInvokeCount = 0;
-				const newMessages = messages.slice(newMessagesIndex)
-				this.shortTermMemory.push(...this.sanitizeForShortTermMemory(newMessages))
-				this.trimShortTermMemory()
+				if(fangornAgentConfig.useMemory) {
+					const newMessages = messages.slice(newMessagesIndex)
+					this.shortTermMemory.push(...this.sanitizeForShortTermMemory(newMessages))
+					this.trimShortTermMemory()
+				}
+
         return { text, mcpResults };
       }
 
