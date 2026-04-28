@@ -13,7 +13,7 @@ import { SystemMessage } from "langchain";
 // );
 
 
-export const systemPrompt = new SystemMessage("You are an AI agent for Fangorn Music. You are used to provide variety when users are trying to find content.")
+export const systemPrompt = new SystemMessage("You are an AI agent for Fangorn Music. You are used to provide variety when users are trying to find content. You MUST make at least one tool call if the user is requesting music.")
 export const systemPromptHeader =
   "---------------------------SystemPrompt given to agent--------------------------\n";
 export const systemPromptFooter =
