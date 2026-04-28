@@ -12,14 +12,6 @@ export type McpTransportConfig = Connection;
 /**
  * McpToolbox adapts one or more MCP servers into the Fangorn Toolbox
  * system using LangChain's `@langchain/mcp-adapters`.
- *
- * `MultiServerMCPClient.getTools()` returns LangChain-native
- * `StructuredTool` instances directly, so there is no need for manual
- * JSON Schema → Zod conversion or raw MCP SDK plumbing.
- *
- * Because it implements the `Toolbox` interface it plugs straight into the
- * ToolBay's hot-swap mechanism — the agent sees a single toolbox tool,
- * and only when it calls that tool do the individual MCP tools get injected.
  */
 export class McpToolbox implements Toolbox {
   public name: string;
@@ -94,8 +86,8 @@ export class McpToolbox implements Toolbox {
       {
         name: this.name,
         description:
-          `Access MCP tools: ${toolList}. ` +
-          `Call this first before attempting to use any of these tools.`,
+          `Activate MCP tools: ${toolList}. ` +
+          `Use this tool first before attempting to use any of the contained tools.`,
         schema: z.object({}),
       },
     );

@@ -17,16 +17,17 @@ async function main() {
 
   // Make agent accessible in the route handler
   app.locals.agent = agent;
+	app.locals.toolList = toolList;
 
   app.post("/chat", async (req, res) => {
-    const { message, dataContext } = req.body;
+    const { message, dataContext, toolNameList } = req.body;
 		console.log(`req.body: ${JSON.stringify(req.body, null, 2)}`)
 		app.locals.dataContext = dataContext
     console.log(`received message: ${message}`)
     if (!message) return res.status(400).json({ error: "No message provided" });
     try {
 			
-      const { text, mcpResults } = await agent.invokeAgent(message);
+      const { text, mcpResults } = await agent.invokeAgent(message, toolNameList);
       agent.resetToolbay();
 			app.locals.dataContext = {}
       res.json({

@@ -5,6 +5,7 @@ import { McpToolbox } from "./toolboxes/mcpToolbox/mcpToolbox.js";
 import { FangornToolbox } from "./toolboxes/fangornToolbox/fangornToolbox.js";
 import type { FileEntry, ManifestState, SchemaState } from "@fangorn-network/client-types";
 import { fangornAgentConfig } from "../config.js";
+import { buildFangornMusicPromptResponse, buildFullAgenticPromptResponse } from "../prompts.js";
 
 // Examples of a toolbox:
 // Web3 toolbox: wallets, signing, funds, etc.
@@ -94,13 +95,8 @@ export class ToolBay {
         if (resultType !== "non-standard") {
           const count = Array.isArray(data) ? data.length : 1;
           const summary = this.buildSummary(data, resultType);
-         result = [
-          `${count} ${resultType.replace(/_/g, " ")} retrieved successfully.`,
-          `Summary: ${summary}`,
-          `The full data is being displayed to the user in the UI. `,
-  					`Use the summary above to form a natural language response.`,
-  					`Always describe results in plain sentences or bullet points, never as raw JSON or code blocks.`,
-           ].join("\n");
+         	result = buildFangornMusicPromptResponse(count, resultType, summary)
+					console.log(`result summary given to agent: ${JSON.stringify(result, null, 2)}`)
         } else {
           console.log("It was non-standard")
           console.log("resultType")
@@ -114,6 +110,9 @@ export class ToolBay {
         console.log(`[ToolBay] Could not parse MCP result for UI forwarding. Raw type: ${typeof result}, preview: ${String(result).slice(0, 200)}`);
       }
     }
+
+		console.log("Tool call was executed. Here are the results:")
+		console.log(JSON.stringify(result, null, 2))
 
     return result;
   }
