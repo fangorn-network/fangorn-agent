@@ -4,6 +4,7 @@ export interface Toolbox {
   name: string;
   getTools(): DynamicStructuredTool[];
   getToolboxAsTool(): DynamicStructuredTool;
+	getToolsByName(toolNames: string[]): Map<String,DynamicStructuredTool>;
 }
 
 export interface AsyncFactory<T> {

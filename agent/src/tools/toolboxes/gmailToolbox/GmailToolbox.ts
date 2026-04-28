@@ -28,6 +28,15 @@ export class GmailToolbox implements Toolbox {
 
   }
 
+	getToolsByName(toolNames: string[]): Map<String, DynamicStructuredTool> {
+		const matchingToolMap = new Map(
+			this.getTools()
+			.filter((tool) => toolNames.includes(tool.name))
+			.map(tool => [tool.name, tool])
+		)
+		return matchingToolMap
+	}
+
   getTools(): DynamicStructuredTool[] {
     const sendEmail = tool(
       async ({recipient, subject, message}) => {

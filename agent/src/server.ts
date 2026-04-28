@@ -25,6 +25,8 @@ async function main() {
     console.log(`received message: ${message}`)
     if (!message) return res.status(400).json({ error: "No message provided" });
     try {
+
+			console.log(`toolNameList: ${toolNameList}`)
 			
       const { text, mcpResults } = await agent.invokeAgent(message, toolNameList);
       agent.resetToolbay();

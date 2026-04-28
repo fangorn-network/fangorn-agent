@@ -24,6 +24,15 @@ export class Agent0Toolbox implements Toolbox {
     this.agent0Sdk = agent0Sdk;
   }
 
+	getToolsByName(toolNames: string[]): Map<String, DynamicStructuredTool> {
+		const matchingToolMap = new Map(
+			this.getTools()
+			.filter((tool) => toolNames.includes(tool.name))
+			.map(tool => [tool.name, tool])
+		)
+		return matchingToolMap
+	}
+
   public getToolboxAsTool(): DynamicStructuredTool {
     const agent0ToolboxTool = tool(
       async () => {

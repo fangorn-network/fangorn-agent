@@ -136,7 +136,7 @@ private truncateToolContent(content: string, maxLen: number = 500): string {
   return content.slice(0, maxLen) + "... [truncated]";
 }
 
-async invokeAgent(query: string, toolNameList?: string[]): Promise<AgentResponse> {
+async invokeAgent(query: string, toolNameList: string[]): Promise<AgentResponse> {
     // const messages: any[] = [systemPrompt, { role: "user", content: query }];
 
 		const systemMessage = new SystemMessage(systemPrompt.content);
@@ -163,6 +163,8 @@ async invokeAgent(query: string, toolNameList?: string[]): Promise<AgentResponse
 
     let retryInvokeCount = 0;
 		let retryToolCallCount = 0;
+
+		this.toolbay.activateTools(toolNameList)
 
     while (true) {
 
@@ -215,8 +217,8 @@ async invokeAgent(query: string, toolNameList?: string[]): Promise<AgentResponse
 					this.trimShortTermMemory()
 				}
 
-				console.log("The agent's full response")
-				console.log(JSON.stringify(fullMessage, null, 2))
+				// console.log("The agent's full response")
+				// console.log(JSON.stringify(fullMessage, null, 2))
 
 				console.log("The agent's text response:")
 				console.log(text)

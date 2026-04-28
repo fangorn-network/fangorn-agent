@@ -22,8 +22,8 @@ export interface McpUiResult {
 }
 
 export class ToolBay {
-  private currentTools: Map<string, DynamicStructuredTool> = new Map();
-  private toolboxes: Map<string, Toolbox> = new Map();
+  private currentTools: Map<String, DynamicStructuredTool> = new Map();
+	private toolboxes: (Toolbox | McpToolbox)[]
 
   // Accumulated MCP results that should be forwarded to the frontend
   private mcpData: McpUiResult = {};
@@ -63,21 +63,26 @@ export class ToolBay {
     return new ToolBay(toolboxes);
   }
 
-  // Initially, there will only be toolboxes available as tool calls
-  constructor(toolboxes: Toolbox[]) {
-    toolboxes.forEach((tb) => {
-      this.toolboxes.set(tb.name, tb);
-      this.currentTools.set(tb.name, tb.getToolboxAsTool());
-    });
+  constructor(toolboxes: (Toolbox | McpToolbox)[]) {
+		this.toolboxes = toolboxes
   }
 
-  async invokeToolcall(toolName: string, toolArgs: any[]): Promise<any> {
-    const tool = this.currentTools.get(toolName);
+	async activateTools(toolNames: string[]) {
+		this.dirty = true
+		let activeTools = this.toolboxes.map((tb) => tb.getToolsByName(toolNames))
+		this.currentTools = new Map(activeTools.flatMap(m => [...m]))
+		console.log("activeTools:", activeTools.map(m => [...m.keys()]));
+		console.log("currentTools:", [...this.currentTools.keys()]);
+	}
 
-    if (this.toolboxes.has(toolName)) {
-      const toolbox = this.toolboxes.get(toolName);
-      this.inject(toolbox!.getTools(), toolName);
-    }
+  async invokeToolcall(toolName: string, toolArgs: any[]): Promise<any> {
+
+		if (!this.currentTools.has(toolName)) {
+			console.error("Tool called that doesn't exist.")
+			throw new Error(`Tool with name ${toolName} doesn't exist.`)
+		}
+
+    const tool = this.currentTools.get(toolName);
 
     console.log(`Executing tool: ${toolName}`);
     let result = await tool!.invoke(toolArgs);
@@ -170,15 +175,15 @@ export class ToolBay {
   }
 }
 
-  inject(newTools: DynamicStructuredTool[], toolToRemove?: string) {
-    newTools.forEach((t) => this.currentTools.set(t.name, t));
+  // inject(newTools: DynamicStructuredTool[], toolToRemove?: string) {
+  //   newTools.forEach((t) => this.currentTools.set(t.name, t));
 
-    if (toolToRemove) {
-      console.log("removing toolbox from avaialable tools");
-      this.currentTools.delete(toolToRemove);
-    }
-    this.dirty = true;
-  }
+  //   if (toolToRemove) {
+  //     console.log("removing toolbox from avaialable tools");
+  //     this.currentTools.delete(toolToRemove);
+  //   }
+  //   this.dirty = true;
+  // }
 
   containsTool(toolName: string) {
     return this.currentTools.has(toolName);
