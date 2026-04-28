@@ -17,7 +17,6 @@ async function main() {
 
   // Make agent accessible in the route handler
   app.locals.agent = agent;
-	app.locals.toolList = toolList;
 
   app.post("/chat", async (req, res) => {
     const { message, dataContext, toolNameList } = req.body;
