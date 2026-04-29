@@ -240,4 +240,9 @@ export class ToolBay {
     this.mcpData = {}
     return data;
   }
+
+	public getAllToolNames(): string[] {
+		return this.toolboxes.flatMap((tb) => tb.getTools().map((t) => `${t.name}: ${t.description}`))
+	}
+
 }

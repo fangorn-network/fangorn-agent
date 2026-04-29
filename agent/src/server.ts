@@ -51,6 +51,14 @@ async function main() {
     }
   });
 
+	app.get("/tools", async (req, res) => {
+		console.log("Request to retrieve tool names receieved")
+		const toolInfo = agent.getAllToolNames()
+		console.log(toolInfo)
+		res.json({
+			response: toolInfo
+		})
+	})
   const PORT = process.env.PORT ?? 3001;
   app.listen(PORT, () => {
     console.log(`Chat endpoint running at http://localhost:${PORT}`);

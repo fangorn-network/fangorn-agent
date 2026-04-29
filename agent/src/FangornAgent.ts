@@ -262,4 +262,8 @@ async invokeAgent(query: string, toolNameList: string[]): Promise<AgentResponse>
   public resetToolbay() {
     this.toolbay.resetToolBay();
   }
+
+	public getAllToolNames(): string[] {
+		return this.toolbay.getAllToolNames();
+	}
 }
