@@ -16,3 +16,7 @@ export async function initializeToolbox(
 ): Promise<Toolbox> {
   return factory.init();
 }
+
+export interface DataContext {
+	excludeIds?: string[]
+}

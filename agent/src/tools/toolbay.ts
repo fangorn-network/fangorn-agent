@@ -1,6 +1,6 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { GmailToolbox } from "./toolboxes/gmailToolbox/GmailToolbox.js";
-import { initializeToolbox, Toolbox } from "./types.js";
+import { DataContext, initializeToolbox, Toolbox } from "./types.js";
 import { McpToolbox } from "./toolboxes/mcpToolbox/mcpToolbox.js";
 import { FangornToolbox } from "./toolboxes/fangornToolbox/fangornToolbox.js";
 import type { FileEntry, ManifestState, SchemaState } from "@fangorn-network/client-types";
@@ -32,7 +32,9 @@ export class ToolBay {
   // that the model will have new tools bound on first invocation.
   private dirty = true;
 
-  static async initToolbay(dataContextProvider: () => any): Promise<ToolBay> {
+	dataContextProvider: (() => DataContext) | null = null;
+
+  static async initToolbay(dataContextProvider: () => DataContext): Promise<ToolBay> {
     const toolboxes = [];
 
 		if (fangornAgentConfig.useMcp) {
@@ -60,11 +62,14 @@ export class ToolBay {
 
     toolboxes.push(fangornToolbox)
 
-    return new ToolBay(toolboxes);
+    return new ToolBay(toolboxes, dataContextProvider);
   }
 
-  constructor(toolboxes: (Toolbox | McpToolbox)[]) {
+  constructor(toolboxes: (Toolbox | McpToolbox)[], dataContextProvider: () => DataContext) {
 		this.toolboxes = toolboxes
+		console.log("Setting dataContextProvider")
+		console.log(dataContextProvider())
+		this.dataContextProvider = dataContextProvider
   }
 
 	async activateTools(toolNames: string[]) {
@@ -75,14 +80,35 @@ export class ToolBay {
 		console.log("currentTools:", [...this.currentTools.keys()]);
 	}
 
-  async invokeToolcall(toolName: string, toolArgs: any[]): Promise<any> {
+	private getExcludedIds(): string[] {
+    if (!this.dataContextProvider) {
+			console.error("No data provider has been set")
+      throw new Error("No data provider set");
+    }
+		const dataContext = this.dataContextProvider()
+    return dataContext.excludeIds ?? [""];
+  }
 
+
+  async invokeToolcall(toolName: string, toolArgs: any): Promise<any> {
+
+		console.log("Hi there")
 		if (!this.currentTools.has(toolName)) {
 			console.error("Tool called that doesn't exist.")
 			throw new Error(`Tool with name ${toolName} doesn't exist.`)
 		}
 
     const tool = this.currentTools.get(toolName);
+
+		const excludeIds = this.getExcludedIds();
+
+		if(excludeIds.length > 0) {
+			console.log("TODO: There were IDS to be excluded. Implement adding tools to tool args.")
+			// Example of toolArgs:
+			// {"fieldName":"genre","fieldValue":"Jazz","caseSensitive":false,"first":9}
+			// this so if we wanted to exclude file ids we would do something like
+			// toolArgs["exludeIds"] = excludeIds
+		}
 
     console.log(`Executing tool: ${toolName}`);
     let result = await tool!.invoke(toolArgs);
@@ -175,6 +201,7 @@ export class ToolBay {
   }
 }
 
+	// Old Impl where agent activated tools that we may need in the future
   // inject(newTools: DynamicStructuredTool[], toolToRemove?: string) {
   //   newTools.forEach((t) => this.currentTools.set(t.name, t));
 
@@ -201,9 +228,6 @@ export class ToolBay {
   resetToolBay() {
     console.log("console.log - reset toolbay");
     this.currentTools.clear();
-    this.toolboxes.forEach((tb) =>
-      this.currentTools.set(tb.name, tb.getToolboxAsTool()),
-    );
     this.dirty = true;
   }
 

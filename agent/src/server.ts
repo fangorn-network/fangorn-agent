@@ -1,14 +1,23 @@
 import express from "express";
 import cors from "cors";
 import { FangornAgent } from "./FangornAgent.js";
+import { DataContext } from "./tools/types.js";
 
 const app = express();
 app.use(cors());
 app.use(express.json({limit: '10mb'}));
 
+declare global {
+  namespace Express {
+    interface Locals {
+      dataContext: DataContext
+    }
+  }
+}
+
 async function main() {
 	app.locals.dataContext = {}
-	const dataContextProvider = (() => {
+	const dataContextProvider: () => DataContext = (() => {
 		return app.locals.dataContext
 	})
   const agent = await FangornAgent.create(dataContextProvider);
@@ -21,7 +30,7 @@ async function main() {
   app.post("/chat", async (req, res) => {
     const { message, dataContext, toolNameList } = req.body;
 		console.log(`req.body: ${JSON.stringify(req.body, null, 2)}`)
-		app.locals.dataContext = dataContext
+		app.locals.dataContext = dataContext ?? {}
     console.log(`received message: ${message}`)
     if (!message) return res.status(400).json({ error: "No message provided" });
     try {

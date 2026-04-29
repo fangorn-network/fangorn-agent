@@ -8,6 +8,7 @@ import { ToolBay, McpUiResult } from "./tools/toolbay.js";
 import { ChatAnthropic } from "@langchain/anthropic"
 import { BaseMessage, HumanMessage, SystemMessage, ToolMessage } from "langchain";
 import { fangornAgentConfig } from "./config.js";
+import { DataContext } from "./tools/types.js";
 
 export interface AgentResponse {
   text: string;
@@ -33,7 +34,7 @@ export class FangornAgent {
 	private shortTermMemory: BaseMessage[];
 	private memoryBudget: number;
 
-  static async create(dataContextProvider: () => any): Promise<FangornAgent> {
+  static async create(dataContextProvider: () => DataContext): Promise<FangornAgent> {
     const toolbay = await ToolBay.initToolbay(dataContextProvider);
     return new FangornAgent(toolbay);
   }
@@ -137,7 +138,6 @@ private truncateToolContent(content: string, maxLen: number = 500): string {
 }
 
 async invokeAgent(query: string, toolNameList: string[]): Promise<AgentResponse> {
-    // const messages: any[] = [systemPrompt, { role: "user", content: query }];
 
 		const systemMessage = new SystemMessage(systemPrompt.content);
     const userMessage = new HumanMessage(query);
@@ -217,9 +217,6 @@ async invokeAgent(query: string, toolNameList: string[]): Promise<AgentResponse>
 					this.trimShortTermMemory()
 				}
 
-				// console.log("The agent's full response")
-				// console.log(JSON.stringify(fullMessage, null, 2))
-
 				console.log("The agent's text response:")
 				console.log(text)
 
@@ -241,6 +238,7 @@ async invokeAgent(query: string, toolNameList: string[]): Promise<AgentResponse>
         let result: any;
 
         try {
+					console.log("HELLO WORLD IM GOING TO INOKE")
           result = await this.toolbay.invokeToolcall(
             toolCall.name,
             toolCall.args,

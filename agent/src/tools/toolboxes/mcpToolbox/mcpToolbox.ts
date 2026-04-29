@@ -2,7 +2,7 @@ import { DynamicStructuredTool, tool } from "langchain";
 import { MultiServerMCPClient } from "@langchain/mcp-adapters";
 import type { Connection } from "@langchain/mcp-adapters";
 import { z } from "zod";
-import { Toolbox } from "../../types.js";
+import { DataContext, Toolbox } from "../../types.js";
 
 // Re-export the library's Connection type for convenience
 export type McpTransportConfig = Connection;
@@ -16,8 +16,11 @@ export type McpTransportConfig = Connection;
 export class McpToolbox implements Toolbox {
   public name: string;
   private mcpClient: MultiServerMCPClient;
-  private langchainTools: DynamicStructuredTool[] = [];
-  private toolNames: string[] = [];
+  private langchainTools: DynamicStructuredTool[];
+  private toolNames: string[];
+	private toolsWithExclude: Map<string, string>;
+
+	dataContextProvider: (() => DataContext) | null = null;
 
   // ── Factory (AsyncFactory<Toolbox>) ────────────────────────────────────
 
@@ -40,13 +43,37 @@ export class McpToolbox implements Toolbox {
       additionalToolNamePrefix: "",
     });
     const tools = await client.getTools();
-    const toolNames = tools.map((t) => t.name);
+		const toolsWithExclude: Map<string, string> = new Map()
+		const toolNames: string[] = []
+		// Here, we intercept the returned tools to
+		// see if there are input fields the agent shouldn't
+		// know about or that we don't want it to mess up.
+		const sanitizedTools = tools.map((t) => {
+			// console.log(`schema: \n ${JSON.stringify(t.schema)}`)
+			const schema = t.schema
+
+			if(typeof schema === "object" && schema !== null && "properties" in schema) {
+				let properties = schema.properties
+				if("excludeIds" in properties) {
+					const {excludeIds, ...otherProps} = properties
+					schema.properties = otherProps
+					console.log("New Properties:")
+					console.log(schema.properties)
+					t.schema = schema
+					// In the future, "excludeIds" should be the name of the field that is excluded
+					toolsWithExclude.set(t.name, "excludeIds")
+				}
+			}
+			toolNames.push(t.name)
+			return t
+		})
 
     return new McpToolbox(
       toolboxName,
       client,
-      tools as DynamicStructuredTool[],
+      sanitizedTools,
       toolNames,
+			toolsWithExclude
     );
   }
 
@@ -57,11 +84,13 @@ export class McpToolbox implements Toolbox {
     mcpClient: MultiServerMCPClient,
     langchainTools: DynamicStructuredTool[],
     toolNames: string[],
+		toolsWithExclude: Map<string, string>
   ) {
     this.name = name;
     this.mcpClient = mcpClient;
     this.langchainTools = langchainTools;
     this.toolNames = toolNames;
+		this.toolsWithExclude = toolsWithExclude;
   }
 
   // ── Toolbox interface ──────────────────────────────────────────────────
