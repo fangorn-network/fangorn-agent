@@ -238,7 +238,6 @@ async invokeAgent(query: string, toolNameList: string[]): Promise<AgentResponse>
         let result: any;
 
         try {
-					console.log("HELLO WORLD IM GOING TO INOKE")
           result = await this.toolbay.invokeToolcall(
             toolCall.name,
             toolCall.args,

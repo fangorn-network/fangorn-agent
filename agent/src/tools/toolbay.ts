@@ -6,6 +6,7 @@ import { FangornToolbox } from "./toolboxes/fangornToolbox/fangornToolbox.js";
 import type { FileEntry, ManifestState, SchemaState } from "@fangorn-network/client-types";
 import { fangornAgentConfig } from "../config.js";
 import { buildFangornMusicPromptResponse, buildFullAgenticPromptResponse } from "../prompts.js";
+import { TasteToolbox } from "./toolboxes/tasteToolbox/tasteToolbox.js";
 
 // Examples of a toolbox:
 // Web3 toolbox: wallets, signing, funds, etc.
@@ -56,6 +57,9 @@ export class ToolBay {
       toolboxes.push(gmailToolbox);
     } 
 
+		const tasteToolbox = await initializeToolbox(TasteToolbox)
+		toolboxes.push(tasteToolbox)
+
     const fangornToolbox = await initializeToolbox(FangornToolbox)
 		const fangornToolboxImpl = fangornToolbox as FangornToolbox
 		fangornToolboxImpl.setDataContextProvider(dataContextProvider)
@@ -73,11 +77,14 @@ export class ToolBay {
   }
 
 	async activateTools(toolNames: string[]) {
-		this.dirty = true
-		let activeTools = this.toolboxes.map((tb) => tb.getToolsByName(toolNames))
-		this.currentTools = new Map(activeTools.flatMap(m => [...m]))
-		console.log("activeTools:", activeTools.map(m => [...m.keys()]));
-		console.log("currentTools:", [...this.currentTools.keys()]);
+		if (toolNames.length > 0) {
+			this.dirty = true
+			let activeTools = this.toolboxes.map((tb) => tb.getToolsByName(toolNames))
+			this.currentTools = new Map(activeTools.flatMap(m => [...m]))
+			console.log("currentTools:", [...this.currentTools.keys()]);
+		} else {
+			console.warn("No tools activated. The agent will not use tools on this request.")
+		}
 	}
 
 	private getExcludedIds(): string[] {
@@ -92,7 +99,6 @@ export class ToolBay {
 
   async invokeToolcall(toolName: string, toolArgs: any): Promise<any> {
 
-		console.log("Hi there")
 		if (!this.currentTools.has(toolName)) {
 			console.error("Tool called that doesn't exist.")
 			throw new Error(`Tool with name ${toolName} doesn't exist.`)
