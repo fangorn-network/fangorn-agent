@@ -44,6 +44,8 @@ export function useFangornAgent() {
     const displayMessage = options?.displayMessage;
 		const dataContext = options?.dataContext;
 
+		const toolNameList = ["read_taste_for_update", "update_taste"]
+
     if (!silent) {
       const userEntry: ChatEntry = {
         id: ++entryId,
@@ -71,7 +73,8 @@ export function useFangornAgent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           message,
-					dataContext
+					dataContext,
+					toolNameList
         }),
       });
 
