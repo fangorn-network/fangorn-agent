@@ -86,7 +86,7 @@ export class ToolBay {
       throw new Error("No data provider set");
     }
 		const dataContext = this.dataContextProvider()
-    return dataContext.excludeIds ?? [""];
+    return dataContext.excludeIds ?? [];
   }
 
 
@@ -104,6 +104,7 @@ export class ToolBay {
 
 		if(excludeIds.length > 0) {
 			console.log("TODO: There were IDS to be excluded. Implement adding tools to tool args.")
+			console.log("Excluded ids: ", excludeIds)
 			// Example of toolArgs:
 			// {"fieldName":"genre","fieldValue":"Jazz","caseSensitive":false,"first":9}
 			// this so if we wanted to exclude file ids we would do something like
