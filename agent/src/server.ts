@@ -36,8 +36,13 @@ async function main() {
     try {
 
 			console.log(`toolNameList: ${toolNameList}`)
+
+			let toolNameListFinal = []
+			if (toolNameList) {
+				toolNameListFinal = toolNameList
+			}
 			
-      const { text, mcpResults } = await agent.invokeAgent(message, toolNameList);
+      const { text, mcpResults } = await agent.invokeAgent(message, toolNameListFinal);
       agent.resetToolbay();
 			app.locals.dataContext = {}
       res.json({
