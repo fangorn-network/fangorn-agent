@@ -3,10 +3,10 @@ import { GmailToolbox } from "./toolboxes/gmailToolbox/GmailToolbox.js";
 import { DataContext, initializeToolbox, Toolbox } from "./types.js";
 import { McpToolbox } from "./toolboxes/mcpToolbox/mcpToolbox.js";
 import { FangornToolbox } from "./toolboxes/fangornToolbox/fangornToolbox.js";
-import type { FileEntry, ManifestState, SchemaState } from "@fangorn-network/client-types";
 import { fangornAgentConfig } from "../config.js";
 import { buildFangornMusicPromptResponse, buildFullAgenticPromptResponse } from "../prompts.js";
 import { TasteToolbox } from "./toolboxes/tasteToolbox/tasteToolbox.js";
+import { buildSummary } from "./utils.js";
 
 // Examples of a toolbox:
 // Web3 toolbox: wallets, signing, funds, etc.
@@ -24,7 +24,8 @@ export interface McpUiResult {
 
 export class ToolBay {
   private currentTools: Map<String, DynamicStructuredTool> = new Map();
-	private toolboxes: (Toolbox | McpToolbox)[]
+	private toolboxes: Toolbox[]
+	private agenticToolboxMapping: Map<string, number> = new Map();
 
   // Accumulated MCP results that should be forwarded to the frontend
   private mcpData: McpUiResult = {};
@@ -33,10 +34,12 @@ export class ToolBay {
   // that the model will have new tools bound on first invocation.
   private dirty = true;
 
+	private agenticChat = false;
+
 	dataContextProvider: (() => DataContext) | null = null;
 
   static async initToolbay(dataContextProvider: () => DataContext): Promise<ToolBay> {
-    const toolboxes = [];
+    const toolboxes: Toolbox[] = [];
 
 		if (fangornAgentConfig.useMcp) {
     	const fangornMcpUrl = process.env.FANGORN_MCP_URL ?? "http://localhost:4000"
@@ -69,14 +72,24 @@ export class ToolBay {
     return new ToolBay(toolboxes, dataContextProvider);
   }
 
-  constructor(toolboxes: (Toolbox | McpToolbox)[], dataContextProvider: () => DataContext) {
+  constructor(toolboxes: Toolbox[], dataContextProvider: () => DataContext) {
 		this.toolboxes = toolboxes
-		console.log("Setting dataContextProvider")
-		console.log(dataContextProvider())
+		toolboxes.forEach((tb, index) => 
+			this.agenticToolboxMapping.set(tb.name, index)
+		)
 		this.dataContextProvider = dataContextProvider
   }
 
+	async activateAgenticTools() {
+		console.log("Agentic tools activated. The agent has full control over tools and toolboxes.")
+		this.toolboxes.forEach((tb) => {
+      this.currentTools.set(tb.name, tb.getToolboxAsTool());
+    });
+		this.agenticChat = true
+	}
+
 	async activateTools(toolNames: string[]) {
+		console.log(`Specific tools activated: ${toolNames}`)
 		if (toolNames.length > 0) {
 			this.dirty = true
 			let activeTools = this.toolboxes.map((tb) => tb.getToolsByName(toolNames))
@@ -99,6 +112,12 @@ export class ToolBay {
 
   async invokeToolcall(toolName: string, toolArgs: any): Promise<any> {
 
+		if (this.agenticChat && this.agenticToolboxMapping.has(toolName)) {
+			const toolboxIndex = this.agenticToolboxMapping.get(toolName)
+			const toolbox = this.toolboxes.at(toolboxIndex!)
+			this.inject(toolbox!.getTools(), toolName)
+		}
+
 		if (!this.currentTools.has(toolName)) {
 			console.error("Tool called that doesn't exist.")
 			throw new Error(`Tool with name ${toolName} doesn't exist.`)
@@ -118,6 +137,7 @@ export class ToolBay {
 		}
 
     console.log(`Executing tool: ${toolName}`);
+
     let result = await tool!.invoke(toolArgs);
 		const parsed = JSON.parse(result)
 		let displayData = parsed.displayData
@@ -132,7 +152,7 @@ export class ToolBay {
 
         if (resultType !== "non-standard") {
           const count = Array.isArray(data) ? data.length : 1;
-          const summary = this.buildSummary(data, resultType);
+          const summary = buildSummary(data, resultType);
          	result = buildFangornMusicPromptResponse(count, resultType, summary)
 					console.log(`result summary given to agent: ${JSON.stringify(result, null, 2)}`)
         } else {
@@ -154,70 +174,15 @@ export class ToolBay {
 
     return result;
   }
-  private buildSummary(data: any, resultType: string): string {
-  if (!Array.isArray(data)) return JSON.stringify(data).slice(0, 500);
-  
-  switch (resultType) {
-		case "schemas": {
-		  console.log("got schema states")
-		  const owners = [...new Set(data.map((s: SchemaState) => s.owner))];
-		  const schemaFields = data
-		    .filter((s: SchemaState) => (s.versions?.length ?? 0) > 0)
-		    .map((s: SchemaState) => {
-		      const fieldNames = [...new Set(
-		        s.versions?.[s.versions.length - 1]?.fields?.map((f: any) => f.name) ?? []
-		      )];
-		      return `${s.name} [${fieldNames.join(", ")}]`;
-		    });
-		  return `Owners: ${owners.join(", ")}; Schemas: ${schemaFields.join("; ")}`;
-		}
-		case "manifest_states": {
-		  const owners = [...new Set(data.map((ms: ManifestState) => ms.owner))];
-		  const manifests = data.map((ms: ManifestState) => {
-		    const fields = [...new Set(
-		      ms.manifest?.files?.flatMap((fe: FileEntry) =>
-		        fe.fileFields?.map((f: any) => f.name) ?? []
-		      ) ?? []
-		    )];
-		    const values = [...new Set(
-		      ms.manifest?.files?.flatMap((fe: FileEntry) =>
-		        fe.fileFields?.map((f: any) => f.acc === "plain" ? f.value : "[encrypted]") ?? []
-		      ) ?? []
-		    )];
-		    return `${ms.schemaName} v${ms.version} [fields: ${fields.join(", ")}] [values: ${values.join(", ")}]`;
-		  });
-		  return `Owners: ${owners.join(", ")}; Manifests: ${manifests.join("; ")}`;
-		}
-    case "file_entries": {
-			console.log("got Files")
-  		const fieldNames = [...new Set(
-  		  data.flatMap((fe: FileEntry) =>
-  		    fe.fileFields?.map((f: any) => f.name) ?? []
-  		  )
-  		)];
-  		const fieldValues = [...new Set(
-  		  data.flatMap((fe: FileEntry) =>
-  		    fe.fileFields?.map((f: any) => f.acc === "plain" ? f.value : "[encrypted]") ?? []
-  		  )
-  		)];
-  		return `Field names: ${fieldNames.join(", ")}; Field values: ${fieldValues.join(", ")}`;
+
+  inject(newTools: DynamicStructuredTool[], toolToRemove?: string) {
+    newTools.forEach((t) => this.currentTools.set(t.name, t));
+    if (toolToRemove) {
+      console.log("removing toolbox from avaialable tools");
+      this.currentTools.delete(toolToRemove);
     }
-    default:
-			console.log(`Result type was: ${resultType}`)
-      return `${data.length} items`;
+    this.dirty = true;
   }
-}
-
-	// Old Impl where agent activated tools that we may need in the future
-  // inject(newTools: DynamicStructuredTool[], toolToRemove?: string) {
-  //   newTools.forEach((t) => this.currentTools.set(t.name, t));
-
-  //   if (toolToRemove) {
-  //     console.log("removing toolbox from avaialable tools");
-  //     this.currentTools.delete(toolToRemove);
-  //   }
-  //   this.dirty = true;
-  // }
 
   containsTool(toolName: string) {
     return this.currentTools.has(toolName);
@@ -236,6 +201,7 @@ export class ToolBay {
     console.log("console.log - reset toolbay");
     this.currentTools.clear();
     this.dirty = true;
+		this.agenticChat = false
   }
 
   /**

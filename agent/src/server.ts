@@ -1,7 +1,8 @@
 import express from "express";
 import cors from "cors";
-import { FangornAgent } from "./FangornAgent.js";
+import { AgentResponse, FangornAgent } from "./FangornAgent.js";
 import { DataContext } from "./tools/types.js";
+import { Agent } from "agent0-sdk";
 
 const app = express();
 app.use(cors());
@@ -27,27 +28,24 @@ async function main() {
   // Make agent accessible in the route handler
   app.locals.agent = agent;
 
-  app.post("/chat", async (req, res) => {
+  app.post("/limitedChat", async (req, res) => {
     const { message, dataContext, toolNameList } = req.body;
 		console.log(`req.body: ${JSON.stringify(req.body, null, 2)}`)
 		app.locals.dataContext = dataContext ?? {}
     console.log(`received message: ${message}`)
     if (!message) return res.status(400).json({ error: "No message provided" });
     try {
-
 			console.log(`toolNameList: ${toolNameList}`)
-
 			let toolNameListFinal = []
 			if (toolNameList) {
 				toolNameListFinal = toolNameList
 			}
-			
-      const { text, mcpResults } = await agent.invokeAgent(message, toolNameListFinal);
+      const agentResponse: AgentResponse = await agent.limitedAgenticChat(message, toolNameListFinal);
       agent.reset()
 			app.locals.dataContext = {}
       res.json({
-        response: text,
-        mcpResults: mcpResults ??  undefined,
+        response: agentResponse.text,
+        mcpResults: agentResponse.mcpResults ??  undefined,
       });
       // console.log(`The response got turned into JSON and here it is parsed as a string: ${JSON.stringify(res)}`)
     } catch (err) {
@@ -56,8 +54,34 @@ async function main() {
     }
   });
 
-	app.post("/update-taste", async (req, res) => {
+	app.post("/fullChat", async (req, res) => {
+    const { message, dataContext, toolNameList } = req.body;
+		console.log(`req.body: ${JSON.stringify(req.body, null, 2)}`)
+		app.locals.dataContext = dataContext ?? {}
+    console.log(`received message: ${message}`)
+    if (!message) return res.status(400).json({ error: "No message provided" });
+    try {
+			console.log(`toolNameList: ${toolNameList}`)
+			let toolNameListFinal = []
+			if (toolNameList) {
+				toolNameListFinal = toolNameList
+			}
+      const agentResponse: AgentResponse = await agent.fullAgenticChat(message);
+      agent.reset()
+			app.locals.dataContext = {}
+      res.json({
+        response: agentResponse.text,
+        mcpResults: agentResponse.mcpResults ??  undefined,
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Agent error" });
+    }
+  });
+
+	app.post("/findSimilar", async (req, res) => {
 		const {data} = req.body
+		agent.findSimilar(data)
 	})
 
 	app.get("/tools", async (req, res) => {

@@ -1,4 +1,4 @@
-import { SystemMessage } from "langchain";
+import { HumanMessage, SystemMessage } from "langchain";
 
 // export const systemPrompt = new SystemMessage(
 // "You are a helpful personal AI agent. \
@@ -35,4 +35,9 @@ export function buildFangornMusicPromptResponse(count: number, resultType: strin
 		`Summary: ${summary}\n` +
 		`Use the summary above to form a natural language response.\n`
 	) 
+}
+
+export function buildFindSimilarPrompt(data: any): HumanMessage {
+	const prompt = `Based on the tags ${data.tags} and vibes ${data.context}, create one tag you think captures the essence of this data.`
+	return new HumanMessage(prompt)
 }
