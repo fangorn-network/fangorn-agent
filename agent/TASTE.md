@@ -1,1 +1,1 @@
-"The user dislikes songs by Billie Eilish that combine dark moods with an energetic feel. They appreciate variety in music recommendations."
+"User dislikes Billie Eilish songs that combine dark moods with energetic feel. They appreciate variety in music recommendations and are looking for a beach-appropriate song."

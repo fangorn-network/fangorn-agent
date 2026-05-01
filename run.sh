@@ -7,12 +7,12 @@ LLM="ollama" # Options: ollama (locally running), anthropic
 CONTAINER_NAME="ollama"
 HOST_PORT=11434
 CONTAINER_PORT=11434
-MODEL="qwen3.5:9b"
+MODEL="qwen3.5:0.8b"
 WAIT_TIMEOUT=30
 WEB_PORT=3001      # port for the chat UI
-USE_WEB="false"
+USE_WEB="true"  
 
-# ─────────────────────────────────────────────
+# ─────────────────────────────────────────────d
 # Start or restart the Ollama container (only if using ollama)
 # ─────────────────────────────────────────────
 if [ "$LLM" = "ollama" ]; then

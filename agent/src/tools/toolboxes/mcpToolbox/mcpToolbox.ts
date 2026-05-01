@@ -100,6 +100,7 @@ export class McpToolbox implements Toolbox {
   }
 
 	getToolsByName(toolNames: string[]): Map<String, DynamicStructuredTool> {
+    if (!toolNames) return new Map()
 		const matchingToolMap = new Map(
 			this.langchainTools
 			.filter((tool) => toolNames.includes(tool.name))
