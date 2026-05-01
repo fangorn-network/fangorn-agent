@@ -43,7 +43,7 @@ async function main() {
 			}
 			
       const { text, mcpResults } = await agent.invokeAgent(message, toolNameListFinal);
-      agent.resetToolbay();
+      agent.reset()
 			app.locals.dataContext = {}
       res.json({
         response: text,
@@ -55,6 +55,10 @@ async function main() {
       res.status(500).json({ error: "Agent error" });
     }
   });
+
+	app.post("/update-taste", async (req, res) => {
+		const {data} = req.body
+	})
 
 	app.get("/tools", async (req, res) => {
 		console.log("Request to retrieve tool names receieved")
