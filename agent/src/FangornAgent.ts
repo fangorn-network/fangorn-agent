@@ -10,9 +10,8 @@ import { fangornAgentConfig } from "./config.js";
 import { DataContext } from "./tools/types.js";
 import { FangornSTM } from "./memory.js";
 import { FangornAgentModel, getModelType } from "./llm.js";
-import { promptAgent } from "./utils.js";
 
-export interface AgentResponse {
+export interface FangornAgentResponse {
   text: string;
   mcpResults: McpUiResult;
 }
@@ -46,21 +45,30 @@ export class FangornAgent {
     console.log(systemPromptFooter);
   }
 
-	// Chat with the full agent. It decides what tools it will use for which task via activation of toolboxes.
-	// This is only suitable for agents with strong multi-step reasoning skills. STM is always enabled
-	// in this mode
-	async fullAgenticChat(query: string): Promise<AgentResponse> {
+	/** 
+	 * Chat with the full agent. It decides what tools it will use for which task via activation of toolboxes.
+	 * This is only suitable for agents with strong multi-step reasoning skills. STM is always enabled
+	 * in this mode.
+	 * @param query The message to begin agent interaction with.
+	 * @returns 
+	 */
+	async fullAgenticChat(query: string): Promise<FangornAgentResponse> {
+		console.log("FullAgenticChat: Message receieved");
 		this.toolbay.activateAgenticTools();
 		const systemMessage = new SystemMessage(systemPrompt.content);
 	  const userMessage = new HumanMessage(query);
 		const messages = this.shortTermMemory.getInitialSTM(systemMessage, userMessage);
-	  console.log("Query received");
 	  let modelWithTools = this.model.bindTools(this.toolbay.consumeDirty());
 	  return await this.agentLoop(modelWithTools, messages, true)
 	}
 
-	// Chat with the agent by giving them a subset of tools to work with.
-	async limitedAgenticChat(query: string, toolNameList: string[]): Promise<AgentResponse> {
+	/**
+	 * Chat with the agent by giving them a subset of tools to work with. STM is enabled my setting USE_MEMORY=true. 
+	 * @param query 
+	 * @param toolNameList 
+	 * @returns 
+	 */
+	async limitedAgenticChat(query: string, toolNameList: string[]): Promise<FangornAgentResponse> {
 		console.log(`LimitedChat: Agent will have ${toolNameList.length == 0 ? "no" : toolNameList} tools enabled`)
 		const systemMessage = new SystemMessage(systemPrompt.content);
     const userMessage = new HumanMessage(query);
@@ -78,6 +86,12 @@ export class FangornAgent {
 		return await this.agentLoop(modelWithTools, messages, fangornAgentConfig.useMemory)
 	}
 
+	/**
+	 * Find data that is similar to the data provided. Uses no short term memory
+	 * and uses a pre-determined algorithm with the LLM to produce diverse results.
+	 * 
+	 * @param data Reference data for discovery
+	 */
 	async findSimilar(data: any) {
 		const toolNameList = ["choose_tag"]
 		this.toolbay.activateTools(toolNameList)
@@ -97,12 +111,22 @@ export class FangornAgent {
 
 	}
 
-	private async agentLoop (modelWithTools: any, messages: BaseMessage[], stmEnabled: boolean = false): Promise<AgentResponse> {
+	/**
+	 * The main agent loop
+	 * @param model The model which may or may not have tools bound to it
+	 * @param messages The messages to prompt the agent with
+	 * @param stmEnabled Whether or not the agent will have short term memory
+	 * @returns 
+	 */
+	private async agentLoop (model: any, messages: BaseMessage[], stmEnabled: boolean = false): Promise<FangornAgentResponse> {
 		let promptAgentCount = 0;
 		while (true) {
+			if(this.toolbay.isDirty()) {
+				model = this.model.bindTools(this.toolbay.consumeDirty())
+			}
 			let agenticChoices: any = null;
 			try {
-				agenticChoices = await promptAgent(modelWithTools, messages)
+				agenticChoices = await this.promptModel(model, messages)
 			} catch (err: any) {
 				promptAgentCount++
 				if (promptAgentCount >= MAX_INVOKE_RETRIES) {
@@ -122,6 +146,23 @@ export class FangornAgent {
       console.log("Intercepting tool calls:", agenticChoices.tool_calls);
 			this.performToolCalls(agenticChoices, messages)
     }
+	}
+
+	private async promptModel(model: any, messages: BaseMessage[]) {
+		let fullMessage: any | null
+    try {
+      const stream = await model.stream(messages);
+      for await (const chunk of stream) {
+        if (!fullMessage) {
+          fullMessage = chunk;
+        } else {
+          fullMessage = fullMessage.concat(chunk);
+        }
+      }
+    } catch (err: any) {
+			throw err
+    }
+		return fullMessage
 	}
 
 	private async performToolCalls(agenticChoices: any, messages: BaseMessage[]) {
@@ -155,7 +196,7 @@ export class FangornAgent {
     }
 	}
 
-	private processAgentResponse(agenticChoices: any, messages: BaseMessage[], stmEnabled: boolean): AgentResponse {
+	private processAgentResponse(agenticChoices: any, messages: BaseMessage[], stmEnabled: boolean): FangornAgentResponse {
 		console.log("console.log - Model returned final response");
 		let text: string;
 		if (typeof agenticChoices.content === "string") {

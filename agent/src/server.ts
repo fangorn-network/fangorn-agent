@@ -1,6 +1,6 @@
 import express from "express";
 import cors from "cors";
-import { AgentResponse, FangornAgent } from "./FangornAgent.js";
+import { FangornAgentResponse, FangornAgent } from "./FangornAgent.js";
 import { DataContext } from "./tools/types.js";
 import { Agent } from "agent0-sdk";
 
@@ -40,7 +40,7 @@ async function main() {
 			if (toolNameList) {
 				toolNameListFinal = toolNameList
 			}
-      const agentResponse: AgentResponse = await agent.limitedAgenticChat(message, toolNameListFinal);
+      const agentResponse: FangornAgentResponse = await agent.limitedAgenticChat(message, toolNameListFinal);
       agent.reset()
 			app.locals.dataContext = {}
       res.json({
@@ -66,7 +66,7 @@ async function main() {
 			if (toolNameList) {
 				toolNameListFinal = toolNameList
 			}
-      const agentResponse: AgentResponse = await agent.fullAgenticChat(message);
+      const agentResponse: FangornAgentResponse = await agent.fullAgenticChat(message);
       agent.reset()
 			app.locals.dataContext = {}
       res.json({

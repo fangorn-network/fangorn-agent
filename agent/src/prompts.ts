@@ -38,6 +38,6 @@ export function buildFangornMusicPromptResponse(count: number, resultType: strin
 }
 
 export function buildFindSimilarPrompt(data: any): HumanMessage {
-	const prompt = `Based on the tags ${data.tags} and vibes ${data.context}, create one tag you think captures the essence of this data.`
+	const prompt = `Based on the tags ${data.tags} and context ${data.context} use ONLY one word that you think captures the vibes.`
 	return new HumanMessage(prompt)
 }
