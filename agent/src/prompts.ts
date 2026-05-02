@@ -48,7 +48,7 @@ export const chooseFiltersSystemPrompt = new SystemMessage("You return 8 words i
 
 export function buildChooseFiltersPrompt(taste: string): HumanMessage {
 
-	const prompt = `This is your music taste: ${taste}. Choose 8 words for genres that come to mind.`
+	const prompt = `Your music taste: ${taste}. Choose 8 words for genres that come to mind.`
 
 	return new HumanMessage(prompt)
 
