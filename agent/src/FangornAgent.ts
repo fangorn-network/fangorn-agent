@@ -125,7 +125,7 @@ export class FangornAgent {
 
 		console.log("Return filters called")
 
-		const taste = "I love the bands the red hot chili peppers, queen, mitski, and dispatch"
+		const taste = "I enjoy a wide range of genres and my preferences shift based on my mood and setting. My primary interests include hip-hop, classic rock, psychedelic rock, and 90s R&B. I'm drawn to mainstream pop in social settings and lean toward moody R&B and soul during more reflective moments. I actively seek out emerging and underground artists through streaming platforms. I have no strong genre loyalty and prioritize how music sounds and resonates with me over genre labels"
 		const prompt = buildChooseFiltersPrompt(taste)
 
 		let messages = [chooseFiltersSystemPrompt, prompt]
