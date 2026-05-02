@@ -28,7 +28,7 @@ async function main() {
   // Make agent accessible in the route handler
   app.locals.agent = agent;
 
-  app.post("/limitedChat", async (req, res) => {
+  app.post("/tool-scoped-chat", async (req, res) => {
     const { message, dataContext, toolNameList } = req.body;
 		console.log(`req.body: ${JSON.stringify(req.body, null, 2)}`)
 		app.locals.dataContext = dataContext ?? {}
@@ -40,7 +40,7 @@ async function main() {
 			if (toolNameList) {
 				toolNameListFinal = toolNameList
 			}
-      const agentResponse: FangornAgentResponse = await agent.limitedAgenticChat(message, toolNameListFinal);
+      const agentResponse: FangornAgentResponse = await agent.toolScopedAgenticChat(message, toolNameListFinal);
       agent.reset()
 			app.locals.dataContext = {}
       res.json({
@@ -54,7 +54,7 @@ async function main() {
     }
   });
 
-	app.post("/fullChat", async (req, res) => {
+	app.post("/all-tool-chat", async (req, res) => {
     const { message, dataContext, toolNameList } = req.body;
 		console.log(`req.body: ${JSON.stringify(req.body, null, 2)}`)
 		app.locals.dataContext = dataContext ?? {}
@@ -79,9 +79,15 @@ async function main() {
     }
   });
 
-	app.post("/findSimilar", async (req, res) => {
+	app.post("/find-similar", async (req, res) => {
 		const {data} = req.body
-		agent.findSimilar(data)
+		const agentResponse: FangornAgentResponse = await agent.findSimilar(data)
+		agent.reset()
+		app.locals.dataContext = {}
+		res.json({
+			response: agentResponse.text,
+			mcpResults: agentResponse.mcpResults ?? undefined
+		})
 	})
 
 	app.get("/tools", async (req, res) => {

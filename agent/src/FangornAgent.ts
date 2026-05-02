@@ -1,8 +1,9 @@
 import {
 	buildFindSimilarPrompt,
-  systemPrompt,
+  agenticSystemPrompt,
   systemPromptFooter,
   systemPromptHeader,
+	findSimilarSystemPrompt,
 } from "./prompts.js";
 import { ToolBay, McpUiResult } from "./tools/toolbay.js";
 import { BaseMessage, HumanMessage, SystemMessage, ToolMessage } from "langchain";
@@ -41,7 +42,7 @@ export class FangornAgent {
 
     // Display systemPrompt info
     console.log(systemPromptHeader);
-    console.log(systemPrompt);
+    console.log(agenticSystemPrompt);
     console.log(systemPromptFooter);
   }
 
@@ -55,7 +56,7 @@ export class FangornAgent {
 	async fullAgenticChat(query: string): Promise<FangornAgentResponse> {
 		console.log("FullAgenticChat: Message receieved");
 		this.toolbay.activateAgenticTools();
-		const systemMessage = new SystemMessage(systemPrompt.content);
+		const systemMessage = new SystemMessage(agenticSystemPrompt.content);
 	  const userMessage = new HumanMessage(query);
 		const messages = this.shortTermMemory.getInitialSTM(systemMessage, userMessage);
 	  let modelWithTools = this.model.bindTools(this.toolbay.consumeDirty());
@@ -68,9 +69,9 @@ export class FangornAgent {
 	 * @param toolNameList 
 	 * @returns 
 	 */
-	async limitedAgenticChat(query: string, toolNameList: string[]): Promise<FangornAgentResponse> {
+	async toolScopedAgenticChat(query: string, toolNameList: string[]): Promise<FangornAgentResponse> {
 		console.log(`LimitedChat: Agent will have ${toolNameList.length == 0 ? "no" : toolNameList} tools enabled`)
-		const systemMessage = new SystemMessage(systemPrompt.content);
+		const systemMessage = new SystemMessage(agenticSystemPrompt.content);
     const userMessage = new HumanMessage(query);
 		let messages: BaseMessage[];
 		if(fangornAgentConfig.useMemory) {
@@ -92,10 +93,11 @@ export class FangornAgent {
 	 * 
 	 * @param data Reference data for discovery
 	 */
-	async findSimilar(data: any) {
-		const toolNameList = ["choose_tag"]
-		this.toolbay.activateTools(toolNameList)
-		const modelWithTools = this.model.bindTools(this.toolbay.consumeDirty())
+	async findSimilar(data: any): Promise<FangornAgentResponse> {
+		// const toolNameList = ["choose_tag"]
+		// this.toolbay.activateTools(toolNameList)
+		// const modelWithTools = this.model.bindTools(this.toolbay.consumeDirty())
+		// const modelWithStructuredOutput = this.model.withStructuredOutput(vibeWordsSchema)
 		const prompt = buildFindSimilarPrompt(data)
 
 		// Idea: We prompt the agent to choose one word that captures the "Vibe"
@@ -103,8 +105,14 @@ export class FangornAgent {
 		// call the choose_tag tool and break the agent loop. We then
 		// query for files based on that tag. If there are results, we
 		// smile, if there are none, we re-prompt the agent.
-		let messages = [systemPrompt, prompt]
-		await this.agentLoop(modelWithTools, messages)
+		let messages = [findSimilarSystemPrompt, prompt]
+		let agentResponse = await this.agentLoop(this.model, messages)
+
+		let searchWords = agentResponse.text.split(",")
+
+		console.log(`The agent's response: ${searchWords}`)
+
+		return {text: searchWords.join(), mcpResults: {}}
 
 		// The agent has called the tool and exited. Now we need to query the client
 		// Once we have data, we can re-bind the agent with more tools?

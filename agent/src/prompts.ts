@@ -13,7 +13,7 @@ import { HumanMessage, SystemMessage } from "langchain";
 // );
 
 
-export const systemPrompt = new SystemMessage("You are an AI agent for Fangorn Music. You are used to provide variety when users are trying to find content. You MUST make at least one tool call if the user is requesting music.")
+export const agenticSystemPrompt = new SystemMessage("You are an AI agent for Fangorn Music. You are used to provide variety when users are trying to find content. You MUST make at least one tool call if the user is requesting music.")
 export const systemPromptHeader =
   "---------------------------SystemPrompt given to agent--------------------------\n";
 export const systemPromptFooter =
@@ -37,7 +37,10 @@ export function buildFangornMusicPromptResponse(count: number, resultType: strin
 	) 
 }
 
+export const findSimilarSystemPrompt = new SystemMessage("You return 3 words in the fashion: word1, word2, word3. These words are based on the requirements of the prompt.")
+
 export function buildFindSimilarPrompt(data: any): HumanMessage {
-	const prompt = `Based on the tags ${data.tags} and context ${data.context} use ONLY one word that you think captures the vibes.`
+	// const prompt = `Based on the tags ${data.tags} and context ${data.context} use ONLY one word that you think captures the vibes.`
+	const prompt = `Based on the tags [relaxed, energetic, longing] and context [rainy-day, love, beauty] choose three music genres that capture the vibes.`
 	return new HumanMessage(prompt)
 }
