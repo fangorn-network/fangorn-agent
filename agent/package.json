@@ -5,10 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
-    "dev": "npx tsx src/index.ts",
-    "dev:web": "npx tsx src/server.ts",
-    "format": "prettier . --write",
-    "search": "npx tsx searchAgents.ts"
+    "format": "prettier . --write"
   },
   "lint-staged": {
     "*": "prettier --ignore-unknown --write"

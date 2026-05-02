@@ -54,85 +54,8 @@ The Express.js server for communicating with the agent.
 
 This is the core of the agent and where the agent loop runs and the toolbay is initialized
 
-### types.ts
-This contains two interfaces and a factory function:
-1. `Toolboxes`: This interface enables tools to be grouped under a broader category. A toolbox exposes two functions:
-    - `getTools()`: this returns all of the tools that are in the toolbox.
-    - `getToolboxAsTool()`: this returns the toolbox as a callable tool itself. This primes the model to re-plan when a tool hotswap is going to occur. It also enables us to perform the hotswap itself.
-2. `AsyncFactory<T>`: This interface ensures that Toolboxes implement a static init function. This allows for tools with asynchronous dependencies to be created (see `x402fToolbox.ts`)
-3. `initializeToolbox()`: This function is used by the toolbay to create the toolboxes and their tools.
-
-## Toolboxes
-### Why a Toolbox
-When building the intial agent for the Arbitrum hackathon, it was noted that when a smaller LLM receives too many tools, it seems to get "confused" and "forgets" how to call tools. One solution we are exploring is "compressing" the tool context by introducing Toolboxes. 
-
-### What is a Toolbox
-Simply put, a Toolbox allows for lazy loading of tools by giving a brief summary of what the tools do.
-
-### How does it work
-The Toolbox and ToolBay work in conjunction with each other to enable "hotswapping" tools. You can see that we do not use the typical `createAgent` function offered by LangChain, but instead use the model directly. This is because once an agent is created via `createAgent`, there is no way to hotswap tools outside of re-creating the agent. However, the models do expose a function called `bindTools` which allows for the available tools to be updated for a model directly. We, therefore, expose the agent loop and check if the agent intends to use tools. 
-
-If tool usage is intended, we intercept the tool call and check if it is calling a Toolbox. If it is, we update the `currentTools` field in the ToolBay with the tools within the specified toolbox, and then allow the Toolbox "tool" to be called directly by the agent. The Toolbox tool simply returns a response to the agent to let it know that it has new tools available and that it should re-plan with these new tools. When the agent event loop goes back to the top, we check if the toolbay is marked as "dirty" (new tools are available), if it is we re-bind the tools to the model.
-
-### fangornToolbox
-This toolbox offers the necessary tools to complete the `x402f` protocol's flow.
-
-Here is the "tool" that is returned by the `getToolboxAsTool` function:
-```
-  public getToolboxAsTool(): DynamicStructuredTool {
-    const fangornAgentToolboxTool = tool(
-      async () => {
-        console.log("console.log - agent called fangornAgentToolboxTool tool");
-
-        return JSON.stringify({
-          status: 200,
-          statusText: "OK",
-          result:
-            "x402Fangorn tools are now available. You now have access to: fangorn_fetch. Re-plan and use them to complete the task.",
-        });
-      },
-      {
-        name: this.name,
-        description:
-          "Activates the Fangorn toolbox, which provides tools for purchasing and decrypting files. Call this whenever the user wants to buy or decrypt a resource. Once called, you will gain access to the fangorn_fetch tool.",
-        schema: z.object({}),
-      },
-    );
-    return fangornAgentToolboxTool;
-  }
-```
-
-You can see that it doesn't actually *do* anything other than let the agent know that it has new tools. By the time the agent has received this response, the magic really already occurred because the tools have already been updated, the toolbay has been marked as dirty, and agent has been prompted to start the agent loop from the beginning with the dirty toolbay (and thus new tools).
-
-#### Tools
-
-1. **fangornFetch(owner, schemaName, tag)**: This tool allows the agent to use the Fangorn x402 middleware in order to fulfill the x402f requirements.
-
-### mcpToolbox
-This toolbox integrates MCP functionality into the toolbox pattern. What tools are available depends on which MCP server you are connected to.
-
-### agent0Toolbox (currently non-functional)
-This toolbox provides the ability to discover agents registered on-chain. 
-
-#### Tools
-1. **searchAgents(agentName)**: This tool is used by the agent to find other agents by their human readable name. It currently assumes that the human readable name is unique. The human is responsible for specifying the target agent's human readable name in their query.
-2. **getAgentCard(a2aEndpoint)**: This allows the agent to retrieve the target agent's agent card as advertised in the `a2a` field. It assumes that the `a2a` field provides the base URL and that the agent card is located at `/.well-known/agent-card.json`
-
-
-### GmailToolbox
-This toolbox is currently just a wrapper around one tool, but will later implement more email functionality.
-
-#### Tools
-
-1. **sendEmail(recipient, subject, message)**: This tool allows for an email to be sent to a specific recipient with a subject and message. It uses OAuth2.0 for agent authorization.
-
-### searchAgents.ts
-
-Agent lookup on Arbitrum Sepolia via the agent-0 sdk
-`npm run search`
-
-#### run_agent.sh
-This runs the LLM within the Docker container, builds and starts the agent, then prompts for user input once everything is ready.
+#### run.sh
+This runs the LLM within the Docker container, builds and starts the agent.
 
 > **Note:** If you have an issue with port 11434 being taken, verify that Ollama (not the container) isn't starting on system startup and taking that port.
 

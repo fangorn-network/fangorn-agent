@@ -35,8 +35,6 @@ const facilitatorAddress = process.env.FACILITATOR_PUBKEY as Hex;
 
 if (!facilitatorAddress) throw new Error("facilitator address not set")
 
-
-
 const resourceServerUrl = process.env.RESOURCE_SERVER_URL
 
 if (!resourceServerUrl) throw new Error("resourceServerUrl not defined")
