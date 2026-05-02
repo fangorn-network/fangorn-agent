@@ -1,7 +1,6 @@
 import { useState, ReactNode, CSSProperties } from "react";
 import { CardChatConfig, CardChatInput } from "../Chat/Chat";
 
-
 export interface BaseCardProps {
   /** Whether this card is currently selected / expanded */
   isActive?: boolean;
@@ -75,20 +74,26 @@ export const BaseCard = ({
     >
       {children}
 
-      {chat && (
-        <CardChatInput chat={chat} onChatSent={handleChatSent} />
-      )}
+      {chat && <CardChatInput chat={chat} onChatSent={handleChatSent} />}
     </div>
   );
 };
 
 export const ThreadIndicator = ({ color }: { color: string }) => (
-  <span style={{ fontSize: 9, color, fontFamily: "var(--font-mono, monospace)" }}>
+  <span
+    style={{ fontSize: 9, color, fontFamily: "var(--font-mono, monospace)" }}
+  >
     ● thread
   </span>
 );
 
-export const ExpandChevron = ({ isExpanded, size = 11 }: { isExpanded: boolean; size?: number }) => (
+export const ExpandChevron = ({
+  isExpanded,
+  size = 11,
+}: {
+  isExpanded: boolean;
+  size?: number;
+}) => (
   <span
     style={{
       fontSize: size,
@@ -121,7 +126,9 @@ export const DetailRow = ({
       gap: 8,
     }}
   >
-    <span style={{ color: "var(--color-text-secondary, #8a8a8a)", flexShrink: 0 }}>
+    <span
+      style={{ color: "var(--color-text-secondary, #8a8a8a)", flexShrink: 0 }}
+    >
       {label}
     </span>
     <span

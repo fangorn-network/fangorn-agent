@@ -6,7 +6,13 @@ export interface ChatEntry {
   role: "user" | "claude" | "system" | "mcp-result";
   message?: string;
   displayMessage?: string;
-  resultType?: "schemas" | "schema_entries" | "manifest_states" | "manifests" | "files" | "fields";
+  resultType?:
+    | "schemas"
+    | "schema_entries"
+    | "manifest_states"
+    | "manifests"
+    | "files"
+    | "fields";
   data?: any;
   /** Short label shown above contextual messages, e.g. "Re: fangorn.music.v1" */
   contextLabel?: string;
@@ -19,7 +25,7 @@ export interface SendOptions {
   contextLabel?: string;
   displayMessage?: string;
   contextType?: "schema" | "manifest" | "file";
-	dataContext?: string;
+  dataContext?: string;
 }
 
 interface AgentState {
@@ -37,90 +43,94 @@ export function useFangornAgent() {
     chatHistory: [],
   });
 
-  const sendMessage = useCallback(async (message: string, options?: SendOptions) => {
-    const silent = options?.silent ?? false;
-    const contextLabel = options?.contextLabel;
-    const contextType = options?.contextType;
-    const displayMessage = options?.displayMessage;
-		const dataContext = options?.dataContext;
+  const sendMessage = useCallback(
+    async (message: string, options?: SendOptions) => {
+      const silent = options?.silent ?? false;
+      const contextLabel = options?.contextLabel;
+      const contextType = options?.contextType;
+      const displayMessage = options?.displayMessage;
+      const dataContext = options?.dataContext;
 
-		const toolNameList = ["read_taste_for_update", "update_taste"]
+      const toolNameList = ["read_taste_for_update", "update_taste"];
 
-    if (!silent) {
-      const userEntry: ChatEntry = {
-        id: ++entryId,
-        role: "user",
-        message,
-        displayMessage: displayMessage,
-        contextLabel,
-        contextType,
-      };
-
-      setState((prev) => ({
-        ...prev,
-        loading: true,
-        error: null,
-        chatHistory: [...prev.chatHistory, userEntry],
-      }));
-    } else {
-      setState((prev) => ({ ...prev, loading: true, error: null }));
-    }
-
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_AGENT_URL || "http://localhost:3001";
-			// find-similar, all-tool-chat, tool-scoped-chat
-      const res = await fetch(`${apiUrl}/get-filters`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
+      if (!silent) {
+        const userEntry: ChatEntry = {
+          id: ++entryId,
+          role: "user",
           message,
-					dataContext,
-					toolNameList
-        }),
-      });
-
-      if (!res.ok) throw new Error(`Agent returned ${res.status}`);
-      const data = await res.json();
-
-      const newEntries: ChatEntry[] = [];
-
-      // Add the LLM's text response if present
-      if (data.response) {
-        newEntries.push({
-          id: ++entryId,
-          role: "claude",
-          message: data.response,
+          displayMessage: displayMessage,
           contextLabel,
           contextType,
-        });
+        };
+
+        setState((prev) => ({
+          ...prev,
+          loading: true,
+          error: null,
+          chatHistory: [...prev.chatHistory, userEntry],
+        }));
+      } else {
+        setState((prev) => ({ ...prev, loading: true, error: null }));
       }
 
-      // Add the MCP result if present
-      if (data.mcpResults) {
-        const result = data.mcpResults;
-        newEntries.push({
-          id: ++entryId,
-          role: "mcp-result",
-          resultType: result.resultType,
-          data: result.data,
-          contextLabel,
-          contextType,
+      try {
+        const apiUrl =
+          process.env.NEXT_PUBLIC_AGENT_URL || "http://localhost:3001";
+        // find-similar, all-tool-chat, tool-scoped-chat
+        const res = await fetch(`${apiUrl}/get-filters`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            message,
+            dataContext,
+            toolNameList,
+          }),
         });
-      }
 
-      setState((prev) => ({
-        loading: false,
-        error: null,
-        chatHistory: [...prev.chatHistory, ...newEntries],
-      }));
-    } catch (err: any) {
-      setState((prev) => ({
-        ...prev,
-        loading: false,
-        error: "Unable to reach the Fangorn Agent. Make sure it is running.",
-      }));
-    }
-  }, []);
+        if (!res.ok) throw new Error(`Agent returned ${res.status}`);
+        const data = await res.json();
+
+        const newEntries: ChatEntry[] = [];
+
+        // Add the LLM's text response if present
+        if (data.response) {
+          newEntries.push({
+            id: ++entryId,
+            role: "claude",
+            message: data.response,
+            contextLabel,
+            contextType,
+          });
+        }
+
+        // Add the MCP result if present
+        if (data.mcpResults) {
+          const result = data.mcpResults;
+          newEntries.push({
+            id: ++entryId,
+            role: "mcp-result",
+            resultType: result.resultType,
+            data: result.data,
+            contextLabel,
+            contextType,
+          });
+        }
+
+        setState((prev) => ({
+          loading: false,
+          error: null,
+          chatHistory: [...prev.chatHistory, ...newEntries],
+        }));
+      } catch (err: any) {
+        setState((prev) => ({
+          ...prev,
+          loading: false,
+          error: "Unable to reach the Fangorn Agent. Make sure it is running.",
+        }));
+      }
+    },
+    [],
+  );
 
   return { ...state, sendMessage };
 }

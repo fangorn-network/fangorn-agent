@@ -1,9 +1,9 @@
 import { DynamicStructuredTool, tool } from "langchain";
 import { Toolbox } from "../../types.js";
 import { z } from "zod";
-import { google } from 'googleapis';
-import { gmailConfig } from '../../config.js'
-import { encodeEmail } from './utils.js'
+import { google } from "googleapis";
+import { gmailConfig } from "../../config.js";
+import { encodeEmail } from "./utils.js";
 
 export class GmailToolbox implements Toolbox {
   public name = "gmail_toolbox";
@@ -15,39 +15,37 @@ export class GmailToolbox implements Toolbox {
   }
 
   constructor() {
-
     const auth = new google.auth.OAuth2(
       gmailConfig.gmailClientId,
       gmailConfig.gmailClientSecret,
-      gmailConfig.gmailRefreshToken
+      gmailConfig.gmailRefreshToken,
     );
 
     auth.setCredentials({ refresh_token: process.env.GMAIL_REFRESH_TOKEN });
 
-    this.gmailClient = google.gmail({ version: 'v1', auth });
-
+    this.gmailClient = google.gmail({ version: "v1", auth });
   }
 
-	getToolsByName(toolNames: string[]): Map<String, DynamicStructuredTool> {
-		const matchingToolMap = new Map(
-			this.getTools()
-			.filter((tool) => toolNames.includes(tool.name))
-			.map(tool => [tool.name, tool])
-		)
-		return matchingToolMap
-	}
+  getToolsByName(toolNames: string[]): Map<String, DynamicStructuredTool> {
+    const matchingToolMap = new Map(
+      this.getTools()
+        .filter((tool) => toolNames.includes(tool.name))
+        .map((tool) => [tool.name, tool]),
+    );
+    return matchingToolMap;
+  }
 
   getTools(): DynamicStructuredTool[] {
     const sendEmail = tool(
-      async ({recipient, subject, message}) => {
+      async ({ recipient, subject, message }) => {
         console.log("console.log - agent called fangornAgentToolboxTool tool");
 
         const res = await this.gmailClient.users.messages.send({
-            userId: 'me',
-            requestBody: {raw: encodeEmail(recipient, subject, message)}
-        })
+          userId: "me",
+          requestBody: { raw: encodeEmail(recipient, subject, message) },
+        });
 
-        console.log(`res: ${JSON.stringify(res, null, 2)}`)
+        console.log(`res: ${JSON.stringify(res, null, 2)}`);
 
         return JSON.stringify({
           status: 200,
@@ -57,13 +55,19 @@ export class GmailToolbox implements Toolbox {
         });
       },
       {
-        name: 'send_email',
+        name: "send_email",
         description:
           "Send an email to a specific email address with a message and subject",
         schema: z.object({
-            recipient: z.string().describe("Who to send the email to"),
-            subject: z.string().describe("The subject of the email. If no subject is provided, create your own."),
-            message: z.string().describe("The message to be sent to the recipient.")
+          recipient: z.string().describe("Who to send the email to"),
+          subject: z
+            .string()
+            .describe(
+              "The subject of the email. If no subject is provided, create your own.",
+            ),
+          message: z
+            .string()
+            .describe("The message to be sent to the recipient."),
         }),
       },
     );

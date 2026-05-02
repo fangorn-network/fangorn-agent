@@ -7,23 +7,20 @@ import { Toolbox } from "../../types.js";
 import { fangornMiddlewareConfig, fangornToolboxConfig } from "../../config.js";
 
 export class FangornToolbox implements Toolbox {
-    
   private fangornClient: FangornX402Middleware;
   public name: string = "x402f_toolbox";
 
-	dataContextProvider: (() => any) | null = null;
+  dataContextProvider: (() => any) | null = null;
 
   static async init(): Promise<FangornToolbox> {
-
-
     const fangornClient = await FangornX402Middleware.create({
-			walletClient: fangornMiddlewareConfig.walletClient,
-			config: fangornMiddlewareConfig.config,
-			usdcContractAddress: fangornMiddlewareConfig.usdcContractAddress,
-			usdcDomainName: fangornMiddlewareConfig.usdcDomainName,
-			facilitatorAddress: fangornMiddlewareConfig.facilitatorAddress,
-			domain: fangornMiddlewareConfig.domain
-		})
+      walletClient: fangornMiddlewareConfig.walletClient,
+      config: fangornMiddlewareConfig.config,
+      usdcContractAddress: fangornMiddlewareConfig.usdcContractAddress,
+      usdcDomainName: fangornMiddlewareConfig.usdcDomainName,
+      facilitatorAddress: fangornMiddlewareConfig.facilitatorAddress,
+      domain: fangornMiddlewareConfig.domain,
+    });
 
     return new FangornToolbox(fangornClient);
   }
@@ -32,23 +29,21 @@ export class FangornToolbox implements Toolbox {
     this.fangornClient = fangornClient;
   }
 
-	public setDataContextProvider(dataContextProvider: () => any) {
+  public setDataContextProvider(dataContextProvider: () => any) {
+    this.dataContextProvider = dataContextProvider;
+  }
 
-		this.dataContextProvider = dataContextProvider;
+  getToolsByName(toolNames: string[]): Map<String, DynamicStructuredTool> {
+    const matchingToolMap = new Map(
+      this.getTools()
+        .filter((tool) => toolNames.includes(tool.name))
+        .map((tool) => [tool.name, tool]),
+    );
+    return matchingToolMap;
+  }
 
-	}
-
-	getToolsByName(toolNames: string[]): Map<String, DynamicStructuredTool> {
-		const matchingToolMap = new Map(
-			this.getTools()
-			.filter((tool) => toolNames.includes(tool.name))
-			.map(tool => [tool.name, tool])
-		)
-		return matchingToolMap
-	}
-
-	// Unused for now, but keeping here for the future
-	private getData(): any {
+  // Unused for now, but keeping here for the future
+  private getData(): any {
     if (!this.dataContextProvider) {
       throw new Error("No data provider set");
     }
@@ -87,16 +82,16 @@ export class FangornToolbox implements Toolbox {
         const hexId = owner as Hex;
 
         const result = await this.fangornClient.fetchResource({
-            owner: hexId,
-            schemaName,
-            name,
-            baseUrl: fangornToolboxConfig.resourceServerUrl
+          owner: hexId,
+          schemaName,
+          name,
+          baseUrl: fangornToolboxConfig.resourceServerUrl,
         });
 
         if (result.success) {
-					console.log("Fetch was successful")
+          console.log("Fetch was successful");
           const dataContents = result.data!;
-          fs.mkdirSync('./Downloads', { recursive: true });
+          fs.mkdirSync("./Downloads", { recursive: true });
           fs.writeFileSync(`./Downloads/${name}`, dataContents, "binary");
           return JSON.stringify({
             status: 200,
@@ -104,7 +99,7 @@ export class FangornToolbox implements Toolbox {
             result: `Notify the user that the requested file has been downloaded to Downloads/${name}. No further tool calls are required.`,
           });
         } else {
-					console.log("Fetch failed")
+          console.log("Fetch failed");
           return JSON.stringify({
             status: 500,
             result:
@@ -119,13 +114,19 @@ export class FangornToolbox implements Toolbox {
         schema: z.object({
           owner: z
             .string()
-            .describe("The address of the resource owner. Found at field.price.owner on the encrypted field the user wants to purchase."),
+            .describe(
+              "The address of the resource owner. Found at field.price.owner on the encrypted field the user wants to purchase.",
+            ),
           schemaName: z
             .string()
-            .describe("The name of the schema this manifest belongs to. Found at manifestState.schema_name."),
+            .describe(
+              "The name of the schema this manifest belongs to. Found at manifestState.schema_name.",
+            ),
           name: z
             .string()
-            .describe("The file identifier. Found at fileEntry.tag on the FileEntry containing the target encrypted field."),
+            .describe(
+              "The file identifier. Found at fileEntry.tag on the FileEntry containing the target encrypted field.",
+            ),
         }),
       },
     );

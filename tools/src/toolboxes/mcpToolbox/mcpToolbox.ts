@@ -18,9 +18,9 @@ export class McpToolbox implements Toolbox {
   private mcpClient: MultiServerMCPClient;
   private langchainTools: DynamicStructuredTool[];
   private toolNames: string[];
-	private toolsWithExclude: Map<string, string>;
+  private toolsWithExclude: Map<string, string>;
 
-	dataContextProvider: (() => DataContext) | null = null;
+  dataContextProvider: (() => DataContext) | null = null;
 
   // ── Factory (AsyncFactory<Toolbox>) ────────────────────────────────────
 
@@ -43,37 +43,41 @@ export class McpToolbox implements Toolbox {
       additionalToolNamePrefix: "",
     });
     const tools = await client.getTools();
-		const toolsWithExclude: Map<string, string> = new Map()
-		const toolNames: string[] = []
-		// Here, we intercept the returned tools to
-		// see if there are input fields the agent shouldn't
-		// know about or that we don't want it to mess up.
-		const sanitizedTools = tools.map((t) => {
-			// console.log(`schema: \n ${JSON.stringify(t.schema)}`)
-			const schema = t.schema
+    const toolsWithExclude: Map<string, string> = new Map();
+    const toolNames: string[] = [];
+    // Here, we intercept the returned tools to
+    // see if there are input fields the agent shouldn't
+    // know about or that we don't want it to mess up.
+    const sanitizedTools = tools.map((t) => {
+      // console.log(`schema: \n ${JSON.stringify(t.schema)}`)
+      const schema = t.schema;
 
-			if(typeof schema === "object" && schema !== null && "properties" in schema) {
-				let properties = schema.properties
-				if("excludeIds" in properties) {
-					const {excludeIds, ...otherProps} = properties
-					schema.properties = otherProps
-					console.log("New Properties:")
-					console.log(schema.properties)
-					t.schema = schema
-					// In the future, "excludeIds" should be the name of the field that is excluded
-					toolsWithExclude.set(t.name, "excludeIds")
-				}
-			}
-			toolNames.push(t.name)
-			return t
-		})
+      if (
+        typeof schema === "object" &&
+        schema !== null &&
+        "properties" in schema
+      ) {
+        let properties = schema.properties;
+        if ("excludeIds" in properties) {
+          const { excludeIds, ...otherProps } = properties;
+          schema.properties = otherProps;
+          console.log("New Properties:");
+          console.log(schema.properties);
+          t.schema = schema;
+          // In the future, "excludeIds" should be the name of the field that is excluded
+          toolsWithExclude.set(t.name, "excludeIds");
+        }
+      }
+      toolNames.push(t.name);
+      return t;
+    });
 
     return new McpToolbox(
       toolboxName,
       client,
       sanitizedTools,
       toolNames,
-			toolsWithExclude
+      toolsWithExclude,
     );
   }
 
@@ -84,13 +88,13 @@ export class McpToolbox implements Toolbox {
     mcpClient: MultiServerMCPClient,
     langchainTools: DynamicStructuredTool[],
     toolNames: string[],
-		toolsWithExclude: Map<string, string>
+    toolsWithExclude: Map<string, string>,
   ) {
     this.name = name;
     this.mcpClient = mcpClient;
     this.langchainTools = langchainTools;
     this.toolNames = toolNames;
-		this.toolsWithExclude = toolsWithExclude;
+    this.toolsWithExclude = toolsWithExclude;
   }
 
   // ── Toolbox interface ──────────────────────────────────────────────────
@@ -99,14 +103,14 @@ export class McpToolbox implements Toolbox {
     return this.langchainTools;
   }
 
-	getToolsByName(toolNames: string[]): Map<String, DynamicStructuredTool> {
-		const matchingToolMap = new Map(
-			this.langchainTools
-			.filter((tool) => toolNames.includes(tool.name))
-			.map(tool => [tool.name, tool])
-		)
-		return matchingToolMap
-	}
+  getToolsByName(toolNames: string[]): Map<String, DynamicStructuredTool> {
+    const matchingToolMap = new Map(
+      this.langchainTools
+        .filter((tool) => toolNames.includes(tool.name))
+        .map((tool) => [tool.name, tool]),
+    );
+    return matchingToolMap;
+  }
 
   getToolboxAsTool(): DynamicStructuredTool {
     const toolList = this.toolNames.join(", ");

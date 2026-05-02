@@ -18,7 +18,7 @@ export function useChatContext() {
 export interface CardChatConfig {
   /** Build the context object sent with the message */
   buildContext: () => Record<string, unknown>;
-	dataContext?: string;
+  dataContext?: string;
   /** Label shown in the chat thread, e.g. "Re: Schema Foo" */
   contextLabel: string;
   /** "schema" | "manifest" | "file" etc. */
@@ -26,7 +26,6 @@ export interface CardChatConfig {
   /** Placeholder text for the input */
   placeholder?: string;
 }
-
 
 /* ═══════════════════════════════════════════════════════════
    CardChatInput (internal — rendered by BaseCard when chat is set)
@@ -45,16 +44,13 @@ export const CardChatInput = ({
   const submit = () => {
     if (!value.trim()) return;
     const dataContext = chat.buildContext();
-		const dataContextString = JSON.stringify(dataContext)
-    sendMessage(
-      `In regards to: ${dataContextString}: ${value}`,
-      {
-        contextLabel: chat.contextLabel,
-        contextType: chat.contextType,
-        displayMessage: value,
-				dataContext: dataContextString
-      }
-    );
+    const dataContextString = JSON.stringify(dataContext);
+    sendMessage(`In regards to: ${dataContextString}: ${value}`, {
+      contextLabel: chat.contextLabel,
+      contextType: chat.contextType,
+      displayMessage: value,
+      dataContext: dataContextString,
+    });
     setValue("");
     onChatSent?.();
   };
@@ -84,7 +80,9 @@ export const CardChatInput = ({
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && submit()}
-          placeholder={chat.placeholder ?? `Ask about this ${chat.contextType}...`}
+          placeholder={
+            chat.placeholder ?? `Ask about this ${chat.contextType}...`
+          }
           style={{
             flex: 1,
             border: "none",

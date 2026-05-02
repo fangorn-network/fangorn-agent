@@ -6,164 +6,172 @@ import { dirname, resolve } from "path";
 import { fileURLToPath } from "url";
 
 export class TasteToolbox implements Toolbox {
+  public name = "taste_toolbox";
 
-	public name = "taste_toolbox"
+  private dirName = dirname(fileURLToPath(import.meta.url));
+  private tasteMdRelativePath = "../../../../TASTE.md";
+  private hasReadTaste = false;
 
-	private dirName = dirname(fileURLToPath(import.meta.url));
-	private tasteMdRelativePath = "../../../../TASTE.md"
-	private hasReadTaste = false
+  static async init(): Promise<TasteToolbox> {
+    return new TasteToolbox();
+  }
 
-	static async init(): Promise<TasteToolbox> {
-		return new TasteToolbox();
-	}
+  constructor() {}
 
-	constructor() {}
+  getToolsByName(toolNames: string[]): Map<String, DynamicStructuredTool> {
+    const matchingToolMap = new Map(
+      this.getTools()
+        .filter((tool) => toolNames.includes(tool.name))
+        .map((tool) => [tool.name, tool]),
+    );
+    return matchingToolMap;
+  }
 
-	getToolsByName(toolNames: string[]): Map<String, DynamicStructuredTool> {
-		const matchingToolMap = new Map(
-			this.getTools()
-			.filter((tool) => toolNames.includes(tool.name))
-			.map(tool => [tool.name, tool])
-		)
-		return matchingToolMap
-	}
+  getTools(): DynamicStructuredTool[] {
+    const readTaste = tool(
+      async () => {
+        console.log("console.log - agent called readTaste tool");
 
-	getTools(): DynamicStructuredTool[] {
-		const readTaste = tool(
-			async () => {
-				console.log("console.log - agent called readTaste tool");
+        try {
+          const content = readFileSync(
+            resolve(this.dirName, this.tasteMdRelativePath),
+            "utf-8",
+          );
 
-				try {
+          console.log("CONTENT:");
+          console.log(content);
 
-				const content = readFileSync(resolve(this.dirName, this.tasteMdRelativePath), "utf-8");
+          // this.hasReadTaste = true
+          return JSON.stringify({
+            status: 200,
+            statusText: "OK",
+            result: `What you know about the user's music taste: ${content}`,
+          });
+        } catch (e) {
+          console.log(e);
+        }
+      },
+      {
+        name: "read_taste",
+        description: "Learn about what the user likes.",
+        schema: z.object(),
+      },
+    );
 
+    const readTasteForUpdate = tool(
+      async ({ newTasteInfo }) => {
+        console.log("console.log - agent called readTasteForUpdate tool");
 
-				console.log("CONTENT:")
-				console.log(content)
+        console.log("");
 
-				// this.hasReadTaste = true
-				return JSON.stringify({
-					status: 200,
-					statusText: "OK",
-					result:
-						`What you know about the user's music taste: ${content}`,
-				});
-				}
-				catch(e) {
-					console.log(e)
-				}
-			},
-			{
-				name: 'read_taste',
-				description:
-					"Learn about what the user likes.",
-				schema: z.object()
-			},
-		);
+        if (newTasteInfo.includes("read_taste_for_update")) {
+          return "This is not new taste info";
+        }
+        try {
+          const content = readFileSync(
+            resolve(this.dirName, this.tasteMdRelativePath),
+            "utf-8",
+          );
 
-		const readTasteForUpdate = tool(
-			async ({newTasteInfo}) => {
-				console.log("console.log - agent called readTasteForUpdate tool");
+          console.log("CONTENT:");
+          console.log(content);
 
-				console.log("")
+          this.hasReadTaste = true;
+          return JSON.stringify({
+            status: 200,
+            statusText: "OK",
+            result: `Summarize the following: ${content} ${newTasteInfo}`,
+          });
+        } catch (e) {
+          console.log(e);
+        }
+      },
+      {
+        name: "read_taste_for_update",
+        description: "Learn about what the user likes.",
+        schema: z.object({
+          newTasteInfo: z
+            .string()
+            .describe(
+              "The new information you received regarding the user's taste.",
+            ),
+        }),
+      },
+    );
 
-				if (newTasteInfo.includes("read_taste_for_update")) {
-					return "This is not new taste info"
-				}
-				try {
+    const updateTaste = tool(
+      async ({ newTasteSummary }) => {
+        console.log("console.log - agent called updateTaste tool");
+        console.log(newTasteSummary);
+        console.log(JSON.stringify(newTasteSummary));
 
-				const content = readFileSync(resolve(this.dirName, this.tasteMdRelativePath), "utf-8");
+        console.log("Has read taste: ", this.hasReadTaste);
 
+        if (!this.hasReadTaste) {
+          console.log(
+            "Returning: Re-plan where you use the read_taste_for_update tool first",
+          );
+          return JSON.stringify({
+            status: 422,
+            statusText: "Unprocessable Content",
+            result:
+              "Your call was well formed, but you need to use the read_taste_for_update tool first.",
+          });
+        }
 
-				console.log("CONTENT:")
-				console.log(content)
+        try {
+          writeFileSync(
+            resolve(this.dirName, this.tasteMdRelativePath),
+            JSON.stringify(newTasteSummary),
+            "utf-8",
+          );
+          const content = readFileSync(
+            resolve(this.dirName, this.tasteMdRelativePath),
+            "utf-8",
+          );
+          console.log("new taste summary: ", content);
+          this.hasReadTaste = false;
+          return JSON.stringify({
+            status: 200,
+            statusText: "OK",
+            result: "Taste updated successfully.",
+          });
+        } catch (e) {
+          console.log(e);
+        }
+      },
+      {
+        name: "update_taste",
+        description: "Update what you know about the user's taste.",
+        schema: z.object({
+          newTasteSummary: z
+            .string()
+            .describe("The summary you've created about the user's taste."),
+        }),
+      },
+    );
+    return [readTaste, readTasteForUpdate, updateTaste];
+  }
 
-				this.hasReadTaste = true
-				return JSON.stringify({
-					status: 200,
-					statusText: "OK",
-					result:
-						`Summarize the following: ${content} ${newTasteInfo}`,
-				});
-				}
-				catch(e) {
-					console.log(e)
-				}
-			},
-			{
-				name: 'read_taste_for_update',
-				description:
-					"Learn about what the user likes.",
-				schema: z.object({
-					newTasteInfo: z.string().describe("The new information you received regarding the user's taste.")
-				})
-			},
-		);
+  public getToolboxAsTool(): DynamicStructuredTool {
+    const tasteToolboxTool = tool(
+      async () => {
+        console.log("console.log - agent called tasteToolboxTool tool");
 
-		const updateTaste = tool(
-			async ({newTasteSummary}) => {
-				console.log("console.log - agent called updateTaste tool");
-				console.log(newTasteSummary)
-				console.log(JSON.stringify(newTasteSummary))
-
-				console.log("Has read taste: ", this.hasReadTaste)
-
-				if(!this.hasReadTaste) {
-					console.log("Returning: Re-plan where you use the read_taste_for_update tool first")
-					return JSON.stringify({
-						status: 422,
-						statusText: "Unprocessable Content",
-						result:
-							"Your call was well formed, but you need to use the read_taste_for_update tool first.",
-					});
-				}
-
-				try {
-					writeFileSync(resolve(this.dirName, this.tasteMdRelativePath), JSON.stringify(newTasteSummary), "utf-8")
-					const content = readFileSync(resolve(this.dirName, this.tasteMdRelativePath), "utf-8");
-					console.log("new taste summary: ", content)
-					this.hasReadTaste = false
-					return JSON.stringify({
-						status: 200,
-						statusText: "OK",
-						result:
-							"Taste updated successfully.",
-					});
-				} catch(e) {
-					console.log(e)
-				}
-			},
-			{
-				name: 'update_taste',
-				description:
-					"Update what you know about the user's taste.",
-				schema: z.object({
-						newTasteSummary: z.string().describe("The summary you've created about the user's taste.")
-				}),
-			},
-		);
-		return [readTaste, readTasteForUpdate, updateTaste];
-	}
-
-	public getToolboxAsTool(): DynamicStructuredTool {
-		const tasteToolboxTool = tool(
-			async () => {
-				console.log("console.log - agent called tasteToolboxTool tool");
-
-				return JSON.stringify({
-					status: 200,
-					statusText: "OK",
-					result:
-						"Taste tools are now available. You now have access to: read_taste and update_taste. Re-plan and use them to complete the task.",
-				});
-			},
-			{
-				name: this.name,
-				description:
-					"Access tools that allow you to learn about the user's taste and update what you know about it.",
-				schema: z.object({}),
-			},
-		);
-		return tasteToolboxTool;
-	}
+        return JSON.stringify({
+          status: 200,
+          statusText: "OK",
+          result:
+            "Taste tools are now available. You now have access to: read_taste and update_taste. Re-plan and use them to complete the task.",
+        });
+      },
+      {
+        name: this.name,
+        description:
+          "Access tools that allow you to learn about the user's taste and update what you know about it.",
+        schema: z.object({}),
+      },
+    );
+    return tasteToolboxTool;
+  }
 }

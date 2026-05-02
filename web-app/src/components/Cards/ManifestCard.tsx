@@ -1,11 +1,7 @@
 import { useState } from "react";
 import type { ManifestState, FileEntry } from "@fangorn-network/client-types";
 import { Pill, EncryptedBadge, truncAddr } from "../primitives";
-import {
-  BaseCard,
-  ExpandChevron,
-  ExpandedSection,
-} from "./BaseCard";
+import { BaseCard, ExpandChevron, ExpandedSection } from "./BaseCard";
 import { CardChatConfig } from "../Chat/Chat";
 import { FileEntryRow } from "./FileEntryCard";
 
@@ -30,7 +26,7 @@ interface ManifestCardProps {
   onToggle: () => void;
   selectedFileIndex: number | null;
   onFileSelect: (fileIndex: number | null) => void;
-} 
+}
 
 export const ManifestCard = ({
   index,
@@ -46,7 +42,10 @@ export const ManifestCard = ({
   const fileCount = files.length;
   const totalFilePages = Math.max(1, Math.ceil(fileCount / FILES_PER_PAGE));
   const filePageStart = (filePage - 1) * FILES_PER_PAGE;
-  const visibleFiles = files.slice(filePageStart, filePageStart + FILES_PER_PAGE);
+  const visibleFiles = files.slice(
+    filePageStart,
+    filePageStart + FILES_PER_PAGE,
+  );
 
   const chat: CardChatConfig = {
     contextType: "manifest",
@@ -54,7 +53,7 @@ export const ManifestCard = ({
     placeholder: "Ask about this manifest...",
     buildContext: () => ({
       id: manifestState.id,
-			type: "manifest",
+      type: "manifest",
       owner: manifestState.owner,
       schemaName: manifestState.schemaName,
       schemaId: manifestState.schemaId,
@@ -70,7 +69,13 @@ export const ManifestCard = ({
       chat={isExpanded ? chat : undefined}
     >
       {/* ── Header ── */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+        }}
+      >
         <div style={{ maxWidth: "65%" }}>
           <div
             style={{
@@ -102,7 +107,13 @@ export const ManifestCard = ({
       </div>
 
       {/* ── Subtitle ── */}
-      <div style={{ fontSize: 11, color: "var(--color-text-tertiary, #5a5a5a)", marginTop: 3 }}>
+      <div
+        style={{
+          fontSize: 11,
+          color: "var(--color-text-tertiary, #5a5a5a)",
+          marginTop: 3,
+        }}
+      >
         {manifestState.version}
         {manifestState.manifestCid && (
           <span> · CID: {truncAddr(manifestState.manifestCid)}</span>
@@ -124,7 +135,12 @@ export const ManifestCard = ({
           </div>
 
           {fileCount === 0 ? (
-            <div style={{ fontSize: 12, color: "var(--color-text-tertiary, #5a5a5a)" }}>
+            <div
+              style={{
+                fontSize: 12,
+                color: "var(--color-text-tertiary, #5a5a5a)",
+              }}
+            >
               No files in this manifest.
             </div>
           ) : (
@@ -139,7 +155,11 @@ export const ManifestCard = ({
                       fileIndex={globalFileIdx}
                       isSelected={selectedFileIndex === globalFileIdx}
                       onSelect={() =>
-                        onFileSelect(selectedFileIndex === globalFileIdx ? null : globalFileIdx)
+                        onFileSelect(
+                          selectedFileIndex === globalFileIdx
+                            ? null
+                            : globalFileIdx,
+                        )
                       }
                     />
                   );
@@ -191,7 +211,8 @@ export const ManifestCard = ({
                     style={{
                       border: "none",
                       background: "none",
-                      cursor: filePage >= totalFilePages ? "default" : "pointer",
+                      cursor:
+                        filePage >= totalFilePages ? "default" : "pointer",
                       color:
                         filePage >= totalFilePages
                           ? "var(--color-text-tertiary, #5a5a5a)"

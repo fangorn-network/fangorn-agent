@@ -11,11 +11,9 @@ export class Agent0Toolbox implements Toolbox {
   public name: string = "agent0-toolbox";
 
   static async init(): Promise<Agent0Toolbox> {
-
-		const {pinataJwt, chainConfig, key} = agent0SdkConfig;
+    const { pinataJwt, chainConfig, key } = agent0SdkConfig;
 
     const agent0Sdk = getAgent0Sdk(chainConfig, key, pinataJwt);
-
 
     return new Agent0Toolbox(agent0Sdk);
   }
@@ -24,14 +22,14 @@ export class Agent0Toolbox implements Toolbox {
     this.agent0Sdk = agent0Sdk;
   }
 
-	getToolsByName(toolNames: string[]): Map<String, DynamicStructuredTool> {
-		const matchingToolMap = new Map(
-			this.getTools()
-			.filter((tool) => toolNames.includes(tool.name))
-			.map(tool => [tool.name, tool])
-		)
-		return matchingToolMap
-	}
+  getToolsByName(toolNames: string[]): Map<String, DynamicStructuredTool> {
+    const matchingToolMap = new Map(
+      this.getTools()
+        .filter((tool) => toolNames.includes(tool.name))
+        .map((tool) => [tool.name, tool]),
+    );
+    return matchingToolMap;
+  }
 
   public getToolboxAsTool(): DynamicStructuredTool {
     const agent0ToolboxTool = tool(
@@ -83,7 +81,8 @@ export class Agent0Toolbox implements Toolbox {
       },
       {
         name: "search_agents_erc_8004",
-        description: "Finds agents that can complete user requests and retrieves their ERC-8004 entry.",
+        description:
+          "Finds agents that can complete user requests and retrieves their ERC-8004 entry.",
         schema: z.object({
           agentName: z.string().describe("The name of the agent to find."),
         }),
@@ -110,7 +109,9 @@ export class Agent0Toolbox implements Toolbox {
         schema: z.object({
           a2aUrl: z
             .string()
-            .describe("The https url advertised in the a2a field of the ERC-8004 entry."),
+            .describe(
+              "The https url advertised in the a2a field of the ERC-8004 entry.",
+            ),
         }),
       },
     );

@@ -8,7 +8,9 @@ interface SchemaBlockProps {
 }
 
 export const SchemaBlock = ({ schemaStates: schemas }: SchemaBlockProps) => {
-  const [threadedSchemas, setThreadedSchemas] = useState<Set<string>>(new Set());
+  const [threadedSchemas, setThreadedSchemas] = useState<Set<string>>(
+    new Set(),
+  );
 
   const handleChatSent = (schemaName: string) => {
     setThreadedSchemas((prev) => new Set(prev).add(schemaName));
@@ -19,7 +21,7 @@ export const SchemaBlock = ({ schemaStates: schemas }: SchemaBlockProps) => {
       items={schemas}
       pageSize={5}
       itemNoun="template"
-			itemNounPlural="templates"
+      itemNounPlural="templates"
       getKey={(s) => s.name}
       renderCard={(s: SchemaState, ctx: CardRenderContext) => {
         const versions = s.versions ?? [];
@@ -35,7 +37,12 @@ export const SchemaBlock = ({ schemaStates: schemas }: SchemaBlockProps) => {
               onSelect={ctx.toggleExpand}
             />
             {ctx.isExpanded && (
-              <div style={{ animation: "fangornFadeIn 0.3s ease-out", marginTop: 8 }}>
+              <div
+                style={{
+                  animation: "fangornFadeIn 0.3s ease-out",
+                  marginTop: 8,
+                }}
+              >
                 <SchemaDetailCard
                   schema={s}
                   onChatSent={() => handleChatSent(s.name)}

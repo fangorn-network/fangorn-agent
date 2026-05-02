@@ -1,2 +1,2 @@
-export * from "./toolbay.js"
-export * from "./types.js"
+export * from "./toolbay.js";
+export * from "./types.js";

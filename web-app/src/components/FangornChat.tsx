@@ -1,20 +1,20 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { FileEntry, ManifestState, SchemaState } from "@fangorn-network/client-types";
-import { Bubble, CONTEXT_COLORS, TypingDots } from "./primitives";
 import {
-  SchemaBlock,
-  ManifestStatesBlock,
-  FileEntriesBlock,
-} from "./index";
+  FileEntry,
+  ManifestState,
+  SchemaState,
+} from "@fangorn-network/client-types";
+import { Bubble, CONTEXT_COLORS, TypingDots } from "./primitives";
+import { SchemaBlock, ManifestStatesBlock, FileEntriesBlock } from "./index";
 import { ChatEntry, SendOptions } from "@/hooks/useFangornAgent";
 import { ChatProvider } from "./Chat/Chat";
 
 interface ReplyContext {
   contextLabel: string;
-  contextType: "schema" | "manifest" | "file" ;
-	dataContext: any;
+  contextType: "schema" | "manifest" | "file";
+  dataContext: any;
 }
 
 interface FangornChatProps {
@@ -55,7 +55,7 @@ export default function FangornChat({
     setReplyContext({
       contextLabel: entry.contextLabel,
       contextType: entry.contextType as ReplyContext["contextType"],
-			dataContext: entry.data
+      dataContext: entry.data,
     });
 
     // Focus the input
@@ -67,22 +67,27 @@ export default function FangornChat({
   };
 
   const handleSubmit = () => {
-  const trimmed = input.trim();
-  if (!trimmed || loading) return;
+    const trimmed = input.trim();
+    if (!trimmed || loading) return;
 
-  sendMessage(trimmed, replyContext ? {
-    contextLabel: replyContext.contextLabel,
-    contextType: replyContext.contextType,
-    displayMessage: trimmed,
-    dataContext: replyContext.dataContext,
-  } : undefined);
+    sendMessage(
+      trimmed,
+      replyContext
+        ? {
+            contextLabel: replyContext.contextLabel,
+            contextType: replyContext.contextType,
+            displayMessage: trimmed,
+            dataContext: replyContext.dataContext,
+          }
+        : undefined,
+    );
 
-  setReplyContext(null);
-  setInput("");
-  if (inputRef.current) {
-    inputRef.current.style.height = "auto";
-  }
-};
+    setReplyContext(null);
+    setInput("");
+    if (inputRef.current) {
+      inputRef.current.style.height = "auto";
+    }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -98,8 +103,12 @@ export default function FangornChat({
   const renderEntry = (entry: ChatEntry) => {
     if (entry.role === "user") {
       return (
-        <Bubble key={entry.id} role="user"
-          contextLabel={entry.contextLabel} contextType={entry.contextType}>
+        <Bubble
+          key={entry.id}
+          role="user"
+          contextLabel={entry.contextLabel}
+          contextType={entry.contextType}
+        >
           {entry.displayMessage || entry.message}
         </Bubble>
       );
@@ -107,9 +116,20 @@ export default function FangornChat({
 
     if (entry.role === "claude") {
       return (
-        <div key={entry.id} style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 4 }}>
-          <Bubble role="claude"
-            contextLabel={entry.contextLabel} contextType={entry.contextType}>
+        <div
+          key={entry.id}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            gap: 4,
+          }}
+        >
+          <Bubble
+            role="claude"
+            contextLabel={entry.contextLabel}
+            contextType={entry.contextType}
+          >
             {entry.message}
           </Bubble>
           {/* Reply button — only on context-tagged claude messages */}
@@ -122,14 +142,20 @@ export default function FangornChat({
                 cursor: "pointer",
                 fontSize: 10,
                 fontWeight: 500,
-                color: CONTEXT_COLORS[entry.contextType] || "var(--color-text-tertiary, #5a5a5a)",
+                color:
+                  CONTEXT_COLORS[entry.contextType] ||
+                  "var(--color-text-tertiary, #5a5a5a)",
                 fontFamily: "var(--font-mono, monospace)",
                 padding: "2px 4px",
                 opacity: 0.7,
                 transition: "opacity 0.15s",
               }}
-              onMouseEnter={(e) => { (e.target as HTMLElement).style.opacity = "1"; }}
-              onMouseLeave={(e) => { (e.target as HTMLElement).style.opacity = "0.7"; }}
+              onMouseEnter={(e) => {
+                (e.target as HTMLElement).style.opacity = "1";
+              }}
+              onMouseLeave={(e) => {
+                (e.target as HTMLElement).style.opacity = "0.7";
+              }}
             >
               ↩ Reply
             </button>
@@ -139,22 +165,41 @@ export default function FangornChat({
     }
 
     if (entry.role === "system") {
-      return <Bubble key={entry.id} role="system">{entry.message}</Bubble>;
+      return (
+        <Bubble key={entry.id} role="system">
+          {entry.message}
+        </Bubble>
+      );
     }
 
     switch (entry.resultType) {
       case "schemas":
-        return <SchemaBlock key={entry.id} schemaStates={entry.data as SchemaState[]} />;
+        return (
+          <SchemaBlock
+            key={entry.id}
+            schemaStates={entry.data as SchemaState[]}
+          />
+        );
       case "manifest_states":
-        return <ManifestStatesBlock key={entry.id} manifestStates={entry.data as ManifestState[]} />;
+        return (
+          <ManifestStatesBlock
+            key={entry.id}
+            manifestStates={entry.data as ManifestState[]}
+          />
+        );
       case "files":
-        return <FileEntriesBlock key={entry.id} files={entry.data as FileEntry[]} />;
+        return (
+          <FileEntriesBlock key={entry.id} files={entry.data as FileEntry[]} />
+        );
       default:
         return null;
     }
   };
 
-  const replyBorderColor = replyContext ? CONTEXT_COLORS[replyContext.contextType] || "var(--color-border-primary, #3a3a3a)" : undefined;
+  const replyBorderColor = replyContext
+    ? CONTEXT_COLORS[replyContext.contextType] ||
+      "var(--color-border-primary, #3a3a3a)"
+    : undefined;
 
   return (
     <ChatProvider value={{ sendMessage }}>
@@ -304,10 +349,15 @@ export default function FangornChat({
                 onChange={(e) => {
                   setInput(e.target.value);
                   e.target.style.height = "auto";
-                  e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
+                  e.target.style.height =
+                    Math.min(e.target.scrollHeight, 120) + "px";
                 }}
                 onKeyDown={handleKeyDown}
-                placeholder={replyContext ? `Reply to ${replyContext.contextLabel}...` : "Ask something..."}
+                placeholder={
+                  replyContext
+                    ? `Reply to ${replyContext.contextLabel}...`
+                    : "Ask something..."
+                }
                 rows={1}
                 disabled={loading}
                 style={{
@@ -330,12 +380,16 @@ export default function FangornChat({
                 disabled={!input.trim() || loading}
                 style={{
                   border: "none",
-                  background: input.trim() && !loading
-                    ? (replyContext ? replyBorderColor : "var(--color-text-primary, #fafafa)")
-                    : "var(--color-border-tertiary, #1e1e1e)",
-                  color: input.trim() && !loading
-                    ? "var(--color-background-primary, #141414)"
-                    : "var(--color-text-tertiary, #5a5a5a)",
+                  background:
+                    input.trim() && !loading
+                      ? replyContext
+                        ? replyBorderColor
+                        : "var(--color-text-primary, #fafafa)"
+                      : "var(--color-border-tertiary, #1e1e1e)",
+                  color:
+                    input.trim() && !loading
+                      ? "var(--color-background-primary, #141414)"
+                      : "var(--color-text-tertiary, #5a5a5a)",
                   borderRadius: 8,
                   padding: "6px 14px",
                   fontSize: 13,

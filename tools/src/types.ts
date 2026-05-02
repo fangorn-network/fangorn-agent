@@ -4,7 +4,7 @@ export interface Toolbox {
   name: string;
   getTools(): DynamicStructuredTool[];
   getToolboxAsTool(): DynamicStructuredTool;
-	getToolsByName(toolNames: string[]): Map<String,DynamicStructuredTool>;
+  getToolsByName(toolNames: string[]): Map<String, DynamicStructuredTool>;
 }
 
 export interface AsyncFactory<T> {
@@ -18,5 +18,5 @@ export async function initializeToolbox(
 }
 
 export interface DataContext {
-	excludeIds?: string[]
+  excludeIds?: string[];
 }

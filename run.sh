@@ -7,10 +7,14 @@ LLM="ollama" # Options: ollama (locally running), anthropic
 CONTAINER_NAME="ollama"
 HOST_PORT=11434
 CONTAINER_PORT=11434
-MODEL="qwen3.5:9b"
+# MODEL="qwen3.5:9b"
+MODEL="gemma4:e4b"
+# MODEL="qwen3.5:0.8b"
+# MODEL="qwen3:0.6b"
+# MODEL="gemma3:1b"
 WAIT_TIMEOUT=30
 WEB_PORT=3001      # port for the chat UI
-USE_WEB="false"
+USE_WEB="true"
 
 # ─────────────────────────────────────────────
 # Start or restart the Ollama container (only if using ollama)

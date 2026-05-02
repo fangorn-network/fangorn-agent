@@ -12,44 +12,55 @@ import { HumanMessage, SystemMessage } from "langchain";
 // Present information as if you are simply describing what kinds of data are available and what is in them."
 // );
 
-
-export const agenticSystemPrompt = new SystemMessage("You are an AI agent for Fangorn Music. You are used to provide variety when users are trying to find content. You MUST make at least one tool call if the user is requesting music.")
+export const agenticSystemPrompt = new SystemMessage(
+  "You are an AI agent for Fangorn Music. You are used to provide variety when users are trying to find content. You MUST make at least one tool call if the user is requesting music.",
+);
 export const systemPromptHeader =
   "---------------------------SystemPrompt given to agent--------------------------\n";
 export const systemPromptFooter =
   "\n-------------------------------------------------------------------------------";
 
-export function buildFullAgenticPromptResponse(count: number, resultType: string, summary: string) {
-	return (
-		`${count} ${resultType.replace(/_/g, " ")} retrieved successfully.\n` +
-		`Summary: ${summary}\n` +
-		`The full data is being displayed to the user in the UI.\n` +
-		`Use the summary above to form a natural language response.\n` +
-		`Always describe results in plain sentences or bullet points, never as raw JSON or code blocks.`
-	) 
+export function buildFullAgenticPromptResponse(
+  count: number,
+  resultType: string,
+  summary: string,
+) {
+  return (
+    `${count} ${resultType.replace(/_/g, " ")} retrieved successfully.\n` +
+    `Summary: ${summary}\n` +
+    `The full data is being displayed to the user in the UI.\n` +
+    `Use the summary above to form a natural language response.\n` +
+    `Always describe results in plain sentences or bullet points, never as raw JSON or code blocks.`
+  );
 }
 
-export function buildFangornMusicPromptResponse(count: number, resultType: string, summary: string) {
-	return (
-		`${count} ${resultType.replace(/_/g, " ")} retrieved successfully.\n` +
-		`Summary: ${summary}\n` +
-		`Use the summary above to form a natural language response.\n`
-	) 
+export function buildFangornMusicPromptResponse(
+  count: number,
+  resultType: string,
+  summary: string,
+) {
+  return (
+    `${count} ${resultType.replace(/_/g, " ")} retrieved successfully.\n` +
+    `Summary: ${summary}\n` +
+    `Use the summary above to form a natural language response.\n`
+  );
 }
 
-export const findSimilarSystemPrompt = new SystemMessage("You return 3 words in the fashion: word1, word2, word3. These words are based on the requirements of the prompt.")
+export const findSimilarSystemPrompt = new SystemMessage(
+  "You return 3 words in the fashion: word1, word2, word3. These words are based on the requirements of the prompt.",
+);
 
 export function buildFindSimilarPrompt(data: any): HumanMessage {
-	const prompt = `Based on the tags ${data.tags} and context ${data.context} use three words that you think capture the vibes.`
-	return new HumanMessage(prompt)
+  const prompt = `Based on the tags ${data.tags} and context ${data.context} use three words that you think capture the vibes.`;
+  return new HumanMessage(prompt);
 }
 
-export const chooseFiltersSystemPrompt = new SystemMessage("You return 8 words in the fashion: word1, word2, word3, ..., word8. These words are based on the requirements of the prompt")
+export const chooseFiltersSystemPrompt = new SystemMessage(
+  "You return 8 words in the fashion: word1, word2, word3, ..., word8. These words are based on the requirements of the prompt",
+);
 
 export function buildChooseFiltersPrompt(taste: string): HumanMessage {
+  const prompt = `Your music taste: ${taste}. Choose 8 words for genres that come to mind.`;
 
-	const prompt = `Your music taste: ${taste}. Choose 8 words for genres that come to mind.`
-
-	return new HumanMessage(prompt)
-
+  return new HumanMessage(prompt);
 }
