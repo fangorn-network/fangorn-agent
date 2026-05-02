@@ -69,7 +69,7 @@ export function useFangornAgent() {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_AGENT_URL || "http://localhost:3001";
 			// find-similar, all-tool-chat, tool-scoped-chat
-      const res = await fetch(`${apiUrl}/find-similar`, {
+      const res = await fetch(`${apiUrl}/get-filters`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 

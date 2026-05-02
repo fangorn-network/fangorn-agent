@@ -40,7 +40,16 @@ export function buildFangornMusicPromptResponse(count: number, resultType: strin
 export const findSimilarSystemPrompt = new SystemMessage("You return 3 words in the fashion: word1, word2, word3. These words are based on the requirements of the prompt.")
 
 export function buildFindSimilarPrompt(data: any): HumanMessage {
-	// const prompt = `Based on the tags ${data.tags} and context ${data.context} use ONLY one word that you think captures the vibes.`
-	const prompt = `Based on the tags [relaxed, energetic, longing] and context [rainy-day, love, beauty] choose three music genres that capture the vibes.`
+	const prompt = `Based on the tags ${data.tags} and context ${data.context} use three words that you think capture the vibes.`
 	return new HumanMessage(prompt)
+}
+
+export const chooseFiltersSystemPrompt = new SystemMessage("You return 8 words in the fashion: word1, word2, word3, ..., word8. These words are based on the requirements of the prompt")
+
+export function buildChooseFiltersPrompt(taste: string): HumanMessage {
+
+	const prompt = `This is your music taste: ${taste}. Choose 8 words for genres that come to mind.`
+
+	return new HumanMessage(prompt)
+
 }

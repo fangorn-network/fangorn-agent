@@ -89,6 +89,17 @@ async function main() {
 		})
 	})
 
+	app.post("/get-filters", async (req, res) => {
+		const {data} = req.body
+		const agentResponse: FangornAgentResponse = await agent.returnFilters(data)
+		agent.reset()
+		app.locals.dataContext = {}
+		res.json({
+			response: agentResponse.text,
+			mcpResults: agentResponse.mcpResults ?? undefined
+		})
+	})
+
 	app.get("/tools", async (req, res) => {
 		console.log("Request to retrieve tool names receieved")
 		const toolInfo = agent.getAllToolNames()

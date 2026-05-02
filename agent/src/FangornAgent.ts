@@ -4,6 +4,8 @@ import {
   systemPromptFooter,
   systemPromptHeader,
 	findSimilarSystemPrompt,
+	buildChooseFiltersPrompt,
+	chooseFiltersSystemPrompt,
 } from "./prompts.js";
 import { ToolBay, McpUiResult, DataContext } from "@fangorn-network/agent-tools";
 import { BaseMessage, HumanMessage, SystemMessage, ToolMessage } from "langchain";
@@ -97,8 +99,9 @@ export class FangornAgent {
 		// this.toolbay.activateTools(toolNameList)
 		// const modelWithTools = this.model.bindTools(this.toolbay.consumeDirty())
 		// const modelWithStructuredOutput = this.model.withStructuredOutput(vibeWordsSchema)
+		console.log("Find similar called")
 		const prompt = buildFindSimilarPrompt(data)
-
+		data = {tags: ["relaxed", "energetic", "longing"], context: ["rainy-day", "love", "beauty"]}
 		// Idea: We prompt the agent to choose one word that captures the "Vibe"
 		// based on the tags it has received. When it chooses its word, it will
 		// call the choose_tag tool and break the agent loop. We then
@@ -115,6 +118,24 @@ export class FangornAgent {
 
 		// The agent has called the tool and exited. Now we need to query the client
 		// Once we have data, we can re-bind the agent with more tools?
+
+	}
+
+	async returnFilters(data: any): Promise<FangornAgentResponse> {
+
+		console.log("Return filters called")
+
+		const taste = "I love the bands the red hot chili peppers, queen, mitski, and dispatch"
+		const prompt = buildChooseFiltersPrompt(taste)
+
+		let messages = [chooseFiltersSystemPrompt, prompt]
+		let agentResponse = await this.agentLoop(this.model, messages)
+
+		let searchWords = agentResponse.text.split(",")
+
+		console.log(`The agent's response: ${searchWords}`)
+
+		return {text: searchWords.join(), mcpResults: {}}
 
 	}
 
