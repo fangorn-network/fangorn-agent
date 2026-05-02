@@ -38,7 +38,7 @@ function extractFieldOptions(manifests: ManifestState[]): Map<string, string[]> 
 
   // Convert Sets to sorted arrays
   const result = new Map<string, string[]>();
-  for (const [name, values] of fieldMap) {
+  for (const [name, values] of Array.from(fieldMap)) {
     const sorted = Array.from(values).sort((a, b) =>
       a.localeCompare(b, undefined, { sensitivity: "base" })
     );

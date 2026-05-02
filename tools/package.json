@@ -1,5 +1,5 @@
 {
-  "name": "@fangorn-network/agent-tools",
+  "name": "agent-tools",
   "version": "1.0.0",
   "description": "",
   "main": "build/index.js",

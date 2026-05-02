@@ -59,9 +59,7 @@ fi
 # ─────────────────────────────────────────────
 # Build the Fangorn Agent
 # ─────────────────────────────────────────────
-echo "🔨 Building Fangorn Agent..."
-
-cd agent
+echo "🔨 Building Fangorn Agent and Tools..."
 
 pnpm build
 
@@ -71,6 +69,8 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "✅ Build successful."
+
+cd agent
 
 # ─────────────────────────────────────────────
 # Start the Web Server
