@@ -5,10 +5,9 @@ import {
   systemPromptHeader,
 	findSimilarSystemPrompt,
 } from "./prompts.js";
-import { ToolBay, McpUiResult } from "./tools/toolbay.js";
+import { ToolBay, McpUiResult, DataContext } from "@fangorn-network/agent-tools";
 import { BaseMessage, HumanMessage, SystemMessage, ToolMessage } from "langchain";
 import { fangornAgentConfig } from "./config.js";
-import { DataContext } from "./tools/types.js";
 import { FangornSTM } from "./memory.js";
 import { FangornAgentModel, getModelType } from "./llm.js";
 
@@ -145,7 +144,6 @@ export class FangornAgent {
         continue;
 			}
       messages.push(agenticChoices);
-			console.log(`agenticChoices: ${agenticChoices}`)
 
 			// No tools are going to be called, process the final response
       if (!agenticChoices.tool_calls?.length) {

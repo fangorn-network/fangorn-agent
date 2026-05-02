@@ -1,8 +1,7 @@
 import express from "express";
 import cors from "cors";
 import { FangornAgentResponse, FangornAgent } from "./FangornAgent.js";
-import { DataContext } from "./tools/types.js";
-import { Agent } from "agent0-sdk";
+import { DataContext } from "@fangorn-network/agent-tools";
 
 const app = express();
 app.use(cors());
