@@ -3,6 +3,7 @@ import { MultiServerMCPClient } from "@langchain/mcp-adapters";
 import type { Connection } from "@langchain/mcp-adapters";
 import { z } from "zod";
 import { DataContext, Toolbox } from "../../types.js";
+import { getToolsByName } from "../utils.js";
 
 // Re-export the library's Connection type for convenience
 export type McpTransportConfig = Connection;
@@ -103,14 +104,10 @@ export class McpToolbox implements Toolbox {
     return this.langchainTools;
   }
 
-  getToolsByName(toolNames: string[]): Map<String, DynamicStructuredTool> {
-    const matchingToolMap = new Map(
-      this.langchainTools
-        .filter((tool) => toolNames.includes(tool.name))
-        .map((tool) => [tool.name, tool]),
-    );
-    return matchingToolMap;
-  }
+	getToolsByName(toolNames: string[]): Map<String, DynamicStructuredTool> {
+		const matchingToolMap = getToolsByName(this.getTools(), toolNames)
+		return matchingToolMap;
+	}
 
   getToolboxAsTool(): DynamicStructuredTool {
     const toolList = this.toolNames.join(", ");

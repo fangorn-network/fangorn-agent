@@ -4,6 +4,7 @@ import { z } from "zod";
 import { google } from "googleapis";
 import { gmailConfig } from "../../config.js";
 import { encodeEmail } from "./utils.js";
+import { getToolsByName } from "../utils.js";
 
 export class GmailToolbox implements Toolbox {
   public name = "gmail_toolbox";
@@ -26,14 +27,10 @@ export class GmailToolbox implements Toolbox {
     this.gmailClient = google.gmail({ version: "v1", auth });
   }
 
-  getToolsByName(toolNames: string[]): Map<String, DynamicStructuredTool> {
-    const matchingToolMap = new Map(
-      this.getTools()
-        .filter((tool) => toolNames.includes(tool.name))
-        .map((tool) => [tool.name, tool]),
-    );
-    return matchingToolMap;
-  }
+	getToolsByName(toolNames: string[]): Map<String, DynamicStructuredTool> {
+		const matchingToolMap = getToolsByName(this.getTools(), toolNames)
+		return matchingToolMap;
+	}
 
   getTools(): DynamicStructuredTool[] {
     const sendEmail = tool(
