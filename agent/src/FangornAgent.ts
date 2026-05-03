@@ -18,7 +18,7 @@ import {
   SystemMessage,
   ToolMessage,
 } from "langchain";
-import { fangornAgentConfig } from "./config.js";
+import { fangornToolChoices, useMemory } from "./config.js";
 import { FangornSTM } from "./memory.js";
 import { FangornAgentModel, getModelType } from "./llm.js";
 
@@ -38,7 +38,7 @@ export class FangornAgent {
   static async create(
     dataContextProvider: () => DataContext,
   ): Promise<FangornAgent> {
-    const toolbay = await ToolBay.initToolbay(dataContextProvider);
+    const toolbay = await ToolBay.initToolbay(dataContextProvider, fangornToolChoices);
     return new FangornAgent(toolbay);
   }
 
@@ -94,7 +94,7 @@ export class FangornAgent {
     const systemMessage = new SystemMessage(agenticSystemPrompt.content);
     const userMessage = new HumanMessage(query);
     let messages: BaseMessage[];
-    if (fangornAgentConfig.useMemory) {
+    if (useMemory) {
       messages = this.shortTermMemory.getInitialSTM(systemMessage, userMessage);
     } else {
       messages = [systemMessage, userMessage];
@@ -105,7 +105,7 @@ export class FangornAgent {
     return await this.agentLoop(
       modelWithTools,
       messages,
-      fangornAgentConfig.useMemory,
+      useMemory,
     );
   }
 

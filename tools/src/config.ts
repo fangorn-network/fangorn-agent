@@ -75,27 +75,3 @@ export const gmailConfig = {
   gmailRefreshToken,
   agentSignoff,
 };
-
-const useGmail = process.env.USE_GMAIL
-  ? process.env.USE_GMAIL === "true"
-  : false;
-const useMcp = process.env.USE_MCP ? process.env.USE_MCP === "true" : false;
-const useMemory = process.env.USE_MEMORY
-  ? process.env.USE_MEMORY === "true"
-  : false;
-
-console.log(`The agent ${useGmail ? "will" : "will not"} use Gmail`);
-console.log(`The agent ${useMcp ? "will" : "will not"} use MCP tools`);
-console.log(
-  `The agent ${
-    useMemory
-      ? "will use short term memory"
-      : "will not use short term memory and will not remember any previous interactions in the same session"
-  }`,
-);
-
-export const fangornAgentConfig = {
-  useGmail,
-  useMcp,
-  useMemory,
-};

@@ -1,12 +1,10 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { GmailToolbox } from "./toolboxes/gmailToolbox/GmailToolbox.js";
-import { DataContext, initializeToolbox, Toolbox } from "./types.js";
+import { DataContext, FangornToolChoices, initializeToolbox, Toolbox } from "./types.js";
 import { McpToolbox } from "./toolboxes/mcpToolbox/mcpToolbox.js";
 import { FangornToolbox } from "./toolboxes/fangornToolbox/fangornToolbox.js";
-import { fangornAgentConfig } from "./config.js";
 import {
   buildFangornMusicPromptResponse,
-  buildFullAgenticPromptResponse,
 } from "./prompts.js";
 import { TasteToolbox } from "./toolboxes/tasteToolbox/tasteToolbox.js";
 import { buildSummary } from "./utils.js";
@@ -43,10 +41,11 @@ export class ToolBay {
 
   static async initToolbay(
     dataContextProvider: () => DataContext,
+		fangornToolChoices: FangornToolChoices,
   ): Promise<ToolBay> {
     const toolboxes: Toolbox[] = [];
 
-    if (fangornAgentConfig.useMcp) {
+    if (fangornToolChoices.useMcp) {
       const fangornMcpUrl =
         process.env.FANGORN_MCP_URL ?? "http://localhost:4000";
       const mcpToolbox = await McpToolbox.init(
@@ -60,20 +59,20 @@ export class ToolBay {
       );
       toolboxes.push(mcpToolbox);
     }
-
-    if (fangornAgentConfig.useGmail) {
+    if (fangornToolChoices.useGmail) {
       const gmailToolbox = await initializeToolbox(GmailToolbox);
       toolboxes.push(gmailToolbox);
     }
-
-    const tasteToolbox = await initializeToolbox(TasteToolbox);
-    toolboxes.push(tasteToolbox);
-
-    const fangornToolbox = await initializeToolbox(FangornToolbox);
-    const fangornToolboxImpl = fangornToolbox as FangornToolbox;
-    fangornToolboxImpl.setDataContextProvider(dataContextProvider);
-
-    toolboxes.push(fangornToolbox);
+		if (fangornToolChoices.useTasteTools) {
+    	const tasteToolbox = await initializeToolbox(TasteToolbox);
+    	toolboxes.push(tasteToolbox);
+		}
+		if (fangornToolChoices.useFangornTools) {
+    	const fangornToolbox = await initializeToolbox(FangornToolbox);
+    	const fangornToolboxImpl = fangornToolbox as FangornToolbox;
+    	fangornToolboxImpl.setDataContextProvider(dataContextProvider);
+    	toolboxes.push(fangornToolbox);
+		}
 
     return new ToolBay(toolboxes, dataContextProvider);
   }

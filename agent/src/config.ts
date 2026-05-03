@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import { FangornToolChoices } from "@fangorn-network/agent-tools";
 
 dotenv.config();
 
@@ -6,9 +7,11 @@ const useGmail = process.env.USE_GMAIL
   ? process.env.USE_GMAIL === "true"
   : false;
 const useMcp = process.env.USE_MCP ? process.env.USE_MCP === "true" : false;
-const useMemory = process.env.USE_MEMORY
+export const useMemory = process.env.USE_MEMORY
   ? process.env.USE_MEMORY === "true"
   : false;
+export const useFangornTools = process.env.USE_FANGORN_TOOLS ? process.env.USE_FANGORN_TOOLS === "true" : false
+export const useTasteTools = process.env.USE_TASTE_TOOLS ? process.env.USE_TASTE_TOOLS === "true" : false
 
 console.log(`The agent ${useGmail ? "will" : "will not"} use Gmail`);
 console.log(`The agent ${useMcp ? "will" : "will not"} use MCP tools`);
@@ -20,8 +23,9 @@ console.log(
   } `,
 );
 
-export const fangornAgentConfig = {
+export const fangornToolChoices: FangornToolChoices = {
   useGmail,
   useMcp,
-  useMemory,
+	useFangornTools,
+	useTasteTools
 };

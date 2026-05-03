@@ -20,3 +20,10 @@ export async function initializeToolbox(
 export interface DataContext {
   excludeIds?: string[];
 }
+
+export interface FangornToolChoices {
+	useGmail: boolean,
+	useMcp: boolean,
+	useTasteTools: boolean,
+	useFangornTools: boolean
+}
