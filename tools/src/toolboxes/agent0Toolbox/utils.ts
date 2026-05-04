@@ -6,14 +6,13 @@ import {
   arbitrumSepoliaSubgraphOverrides,
   arbitrumSepoliaSubgraphUrl,
 } from "../../constants.js";
+import { Agent0SdkToolConfig } from "../../types.js";
 
 export function getAgent0Sdk(
-  config: any,
-  privateKey: string,
-  pinataJwt: string,
+	agent0SdkToolConfig: Agent0SdkToolConfig
 ) {
   let agent0Sdk;
-  if (config.chain.id === arbitrumSepoliaChainId) {
+  if (agent0SdkToolConfig.chainConfig.chain.id === arbitrumSepoliaChainId) {
     agent0Sdk = new SDK({
       chainId: arbitrumSepoliaChainId,
       rpcUrl: arbitrumSepoliaRpcUrl,
@@ -21,16 +20,16 @@ export function getAgent0Sdk(
       registryOverrides: arbitrumSepoliaRegistryOverrides,
       subgraphOverrides: arbitrumSepoliaSubgraphOverrides,
       ipfs: "pinata",
-      pinataJwt,
-      privateKey,
+      pinataJwt: agent0SdkToolConfig.pinataJwt,
+      privateKey: agent0SdkToolConfig.key,
     });
   } else {
     agent0Sdk = new SDK({
-      chainId: config.chain.id,
-      rpcUrl: config.chain.rpcUrls.default.http[0],
+      chainId: agent0SdkToolConfig.chainConfig.chain.id,
+      rpcUrl: agent0SdkToolConfig.chainConfig.chain.rpcUrls.default.http[0],
       ipfs: "pinata",
-      pinataJwt,
-      privateKey,
+      pinataJwt: agent0SdkToolConfig.chainConfig.pinataJwt,
+      privateKey: agent0SdkToolConfig.chainConfig.key,
     });
   }
   return agent0Sdk;

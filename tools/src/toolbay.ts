@@ -1,6 +1,6 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { GmailToolbox } from "./toolboxes/gmailToolbox/GmailToolbox.js";
-import { DataContext, FangornToolChoices, initializeToolbox, Toolbox } from "./types.js";
+import { DataContext, FangornAgentToolConfig, initializeToolbox, Toolbox } from "./types.js";
 import { McpToolbox } from "./toolboxes/mcpToolbox/mcpToolbox.js";
 import { FangornToolbox } from "./toolboxes/fangornToolbox/fangornToolbox.js";
 import {
@@ -41,34 +41,34 @@ export class ToolBay {
 
   static async initToolbay(
     dataContextProvider: () => DataContext,
-		fangornToolChoices: FangornToolChoices,
+		fangornAgentToolConfig: FangornAgentToolConfig,
   ): Promise<ToolBay> {
     const toolboxes: Toolbox[] = [];
 
-    if (fangornToolChoices.useMcp) {
+    if (fangornAgentToolConfig.mcpServerConfig.enabled) {
       const fangornMcpUrl =
-        process.env.FANGORN_MCP_URL ?? "http://localhost:4000";
+        fangornAgentToolConfig.mcpServerConfig.mcpServerUrls ?? ["http://localhost:4000"];
       const mcpToolbox = await McpToolbox.init(
         {
           fangornMcp: {
             transport: "http",
-            url: fangornMcpUrl,
+            url: fangornMcpUrl[0],
           },
         },
         "mcp_toolbox",
       );
       toolboxes.push(mcpToolbox);
     }
-    if (fangornToolChoices.useGmail) {
-      const gmailToolbox = await initializeToolbox(GmailToolbox);
+    if (fangornAgentToolConfig.gmailConfig.enabled) {
+      const gmailToolbox = await initializeToolbox(GmailToolbox, fangornAgentToolConfig);
       toolboxes.push(gmailToolbox);
     }
-		if (fangornToolChoices.useTasteTools) {
-    	const tasteToolbox = await initializeToolbox(TasteToolbox);
+		if (fangornAgentToolConfig.useTasteTools) {
+    	const tasteToolbox = await initializeToolbox(TasteToolbox, fangornAgentToolConfig);
     	toolboxes.push(tasteToolbox);
 		}
-		if (fangornToolChoices.useFangornTools) {
-    	const fangornToolbox = await initializeToolbox(FangornToolbox);
+		if (fangornAgentToolConfig.fangornToolConfig.enabled) {
+    	const fangornToolbox = await initializeToolbox(FangornToolbox, fangornAgentToolConfig);
     	const fangornToolboxImpl = fangornToolbox as FangornToolbox;
     	fangornToolboxImpl.setDataContextProvider(dataContextProvider);
     	toolboxes.push(fangornToolbox);

@@ -1,18 +1,24 @@
 import { DynamicStructuredTool, tool } from "@langchain/core/tools";
 import { z } from "zod";
-import { Toolbox } from "../../types.js";
-import { x402fFetch } from "./tools.js";
+import { FangornAgentToolConfig, FangornToolConfig, Toolbox } from "../../types.js";
+import { createX402FetchTool } from "./tools.js";
 import { getToolsByName } from "../utils.js";
 
 export class FangornToolbox implements Toolbox {
   
 	public name: string = "x402f_toolbox";
+	private x402Fetch: DynamicStructuredTool
 
   dataContextProvider: (() => any) | null = null;
 
-  static async init(): Promise<FangornToolbox> {
-    return new FangornToolbox();
+  static async init(config: FangornAgentToolConfig): Promise<FangornToolbox> {
+		const x402Fetch = await createX402FetchTool(config.fangornToolConfig)
+    return new FangornToolbox(x402Fetch);
   }
+
+	constructor(x402Fetch: DynamicStructuredTool) {
+		this.x402Fetch = x402Fetch
+	}
 
   public setDataContextProvider(dataContextProvider: () => any) {
     this.dataContextProvider = dataContextProvider;
@@ -54,6 +60,6 @@ export class FangornToolbox implements Toolbox {
   }
 
   public getTools(): DynamicStructuredTool[] {
-    return [x402fFetch];
+    return [this.x402Fetch];
   }
 }

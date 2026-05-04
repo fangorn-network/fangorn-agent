@@ -1,8 +1,7 @@
 import { DynamicStructuredTool, tool } from "langchain";
-import { Toolbox } from "../../types.js";
+import { FangornAgentToolConfig, GmailToolConfig, Toolbox } from "../../types.js";
 import { z } from "zod";
 import { google } from "googleapis";
-import { gmailConfig } from "../../config.js";
 import { encodeEmail } from "./utils.js";
 import { getToolsByName } from "../utils.js";
 
@@ -11,18 +10,21 @@ export class GmailToolbox implements Toolbox {
 
   private gmailClient;
 
-  static async init(): Promise<GmailToolbox> {
-    return new GmailToolbox();
+	private agentSignoff;
+
+  static async init(config: FangornAgentToolConfig): Promise<GmailToolbox> {
+    return new GmailToolbox(config.gmailConfig);
   }
 
-  constructor() {
+  constructor(gmailToolConfig: GmailToolConfig) {
     const auth = new google.auth.OAuth2(
-      gmailConfig.gmailClientId,
-      gmailConfig.gmailClientSecret,
-      gmailConfig.gmailRefreshToken,
+      gmailToolConfig.gmailClientId,
+      gmailToolConfig.gmailClientSecret,
+      gmailToolConfig.gmailRefreshToken,
     );
 
-    auth.setCredentials({ refresh_token: process.env.GMAIL_REFRESH_TOKEN });
+    auth.setCredentials({ refresh_token: gmailToolConfig.gmailRefreshToken });
+		this.agentSignoff = gmailToolConfig.agentSignoff
 
     this.gmailClient = google.gmail({ version: "v1", auth });
   }
@@ -39,7 +41,7 @@ export class GmailToolbox implements Toolbox {
 
         const res = await this.gmailClient.users.messages.send({
           userId: "me",
-          requestBody: { raw: encodeEmail(recipient, subject, message) },
+          requestBody: { raw: encodeEmail(recipient, subject, message, this.agentSignoff) },
         });
 
         console.log(`res: ${JSON.stringify(res, null, 2)}`);

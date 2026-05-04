@@ -1,20 +1,22 @@
 import { tool } from "langchain";
-import { fangornMiddlewareConfig, fangornToolboxConfig } from "../../config.js";
 import { Hex } from "viem";
 import { FangornX402Middleware } from "@fangorn-network/fetch";
 import fs from "fs";
 import { z } from "zod"
+import { FangornToolConfig } from "../../types.js";
 
-const fangornClient = await FangornX402Middleware.create({
-  walletClient: fangornMiddlewareConfig.walletClient,
-  config: fangornMiddlewareConfig.config,
-  usdcContractAddress: fangornMiddlewareConfig.usdcContractAddress,
-  usdcDomainName: fangornMiddlewareConfig.usdcDomainName,
-  facilitatorAddress: fangornMiddlewareConfig.facilitatorAddress,
-  domain: fangornMiddlewareConfig.domain,
-});
+export async function createX402FetchTool(fangornToolConfig: FangornToolConfig) {
 
-export const x402fFetch = tool(
+	const fangornClient = await FangornX402Middleware.create({
+	  walletClient: fangornToolConfig.walletClient,
+	  config: fangornToolConfig.config,
+	  usdcContractAddress: fangornToolConfig.usdcContractAddress,
+	  usdcDomainName: fangornToolConfig.usdcDomainName,
+	  facilitatorAddress: fangornToolConfig.facilitatorAddress,
+	  domain: fangornToolConfig.domain,
+	});
+
+	const x402fFetch = tool(
   async ({ owner, schemaName, name }) => {
     console.log(
       `console.log - Agent called x402fFetch tool with args: owner: ${owner}, file name: ${name}, and schemaName: ${schemaName}`,
@@ -24,7 +26,7 @@ export const x402fFetch = tool(
       owner: hexId,
       schemaName,
       name,
-      baseUrl: fangornToolboxConfig.resourceServerUrl,
+      baseUrl: fangornToolConfig.resourceServerUrl,
     });
     if (result.success) {
       console.log("Fetch was successful");
@@ -68,3 +70,7 @@ export const x402fFetch = tool(
     }),
   },
 );
+
+return x402fFetch
+
+}

@@ -18,7 +18,7 @@ import {
   SystemMessage,
   ToolMessage,
 } from "langchain";
-import { fangornToolChoices, useMemory } from "./config.js";
+import { fangornAgentToolConfig, useMemory } from "./config.js";
 import { FangornSTM } from "./memory.js";
 import { FangornAgentModel, getModelType } from "./llm.js";
 
@@ -38,7 +38,7 @@ export class FangornAgent {
   static async create(
     dataContextProvider: () => DataContext,
   ): Promise<FangornAgent> {
-    const toolbay = await ToolBay.initToolbay(dataContextProvider, fangornToolChoices);
+    const toolbay = await ToolBay.initToolbay(dataContextProvider, fangornAgentToolConfig);
     return new FangornAgent(toolbay);
   }
 

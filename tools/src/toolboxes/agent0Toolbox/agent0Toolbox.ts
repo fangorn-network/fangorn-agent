@@ -1,15 +1,21 @@
 import { DynamicStructuredTool, tool } from "@langchain/core/tools";
 import { z } from "zod";
-import { Toolbox } from "../../types.js";
-import { getAgentCard, searchAgentsErc8004 } from "./tools.js";
+import { FangornAgentToolConfig, Toolbox } from "../../types.js";
+import { createAgent0Tools } from "./tools.js";
 import { getToolsByName } from "../utils.js";
 
 export class Agent0Toolbox implements Toolbox {
   public name: string = "agent0-toolbox";
+	private tools: DynamicStructuredTool[];
 
-  static async init(): Promise<Agent0Toolbox> {
-    return new Agent0Toolbox();
+  static async init(config: FangornAgentToolConfig): Promise<Agent0Toolbox> {
+		const tools: DynamicStructuredTool[] = createAgent0Tools(config.agent0SdkToolConfig)
+    return new Agent0Toolbox(tools);
   }
+
+	constructor(tools: DynamicStructuredTool[]) {
+		this.tools = tools
+	}
 
   getToolsByName(toolNames: string[]): Map<String, DynamicStructuredTool> {
     const matchingToolMap = getToolsByName(this.getTools(), toolNames)
@@ -39,6 +45,6 @@ export class Agent0Toolbox implements Toolbox {
   }
 
   public getTools(): DynamicStructuredTool[] {
-    return [searchAgentsErc8004, getAgentCard];
+    return this.tools;
   }
 }
