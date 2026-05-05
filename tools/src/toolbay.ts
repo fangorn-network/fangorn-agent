@@ -99,9 +99,7 @@ export class ToolBay {
     }
 
     console.log(`Executing tool: ${toolName}`);
-
     const result = await tool!.invoke(toolArgs);
-
 		const {finalResult, mcpData} = processToolResult(result, toolName)
 		
 		if (mcpData) this.mcpData = mcpData
