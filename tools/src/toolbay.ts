@@ -158,4 +158,16 @@ export class ToolBay {
 	public getAllToolBoxNames(): string[] {
 		return this.toolboxes.map((tb) => tb.name)
 	}
+
+	public getToolBoxToolNamesMap(): Map<string, string[]> {
+		const toolBoxToolNamesMap = new Map()
+		this.toolboxes.forEach((tb) => {
+			const tbName = tb.name
+			const tools = tb.getTools()
+			const toolNames = tools.map((t) => t.name)
+			console.log(`setting ${tbName}:${toolNames}`)
+			toolBoxToolNamesMap.set(tbName, toolNames)
+		})
+		return toolBoxToolNamesMap;
+	}
 }

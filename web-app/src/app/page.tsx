@@ -1,13 +1,25 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { useFangornAgent } from "@/hooks/useFangornAgent";
+import { useRef, useState } from "react";
+import { ChatMode, useFangornAgent } from "@/hooks/useFangornAgent";
 import FangornChat from "@/components/FangornChat";
 import Splash from "../components/Splash";
 import FangornHeader from "@/components/FangornHeader";
+import { useToolboxSelection } from "@/hooks/useToolboxSelection";
 
 export default function ExplorePage() {
-  const { chatHistory, loading, error, sendMessage } = useFangornAgent();
+  const toolbox = useToolboxSelection();
+  const [chatMode, setChatMode] = useState<ChatMode>("tool-scoped");
+	const toolNameListRef = useRef<string[]>(toolbox.selectedToolList);
+  toolNameListRef.current = toolbox.selectedToolList;
+ 
+  const chatModeRef = useRef<ChatMode>(chatMode);
+  chatModeRef.current = chatMode;
+ 
+  const { chatHistory, loading, error, sendMessage } = useFangornAgent({
+    toolNameListRef,
+    chatModeRef,
+  });
   const hasSent = useRef(false);
 
   // On mount, send the capability prompt exactly once (ref survives strict mode)
@@ -44,6 +56,9 @@ export default function ExplorePage() {
               loading={loading}
               error={error}
               sendMessage={sendMessage}
+							toolbox={toolbox}
+							chatMode={chatMode}
+      				onChatModeChange={setChatMode}
             />
           )}
         </div>

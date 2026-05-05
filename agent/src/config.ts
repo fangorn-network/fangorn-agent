@@ -6,20 +6,11 @@ import { privateKeyToAccount } from "viem/accounts";
 
 dotenv.config();
 
-const useGmail = process.env.USE_GMAIL
-  ? process.env.USE_GMAIL === "true"
-  : false;
-const useAgent0 = process.env.USE_AGENT0 ? process.env.USE_AGENT0 === "true" : false;
-const useMcp = process.env.USE_MCP ? process.env.USE_MCP === "true" : false;
-const mcpServerUrls = process.env.FANGORN_MCP_URL ? [process.env.FANGORN_MCP_URL] : [""]
+
 export const useMemory = process.env.USE_MEMORY
   ? process.env.USE_MEMORY === "true"
   : false;
-export const useFangornTools = process.env.USE_FANGORN_TOOLS ? process.env.USE_FANGORN_TOOLS === "true" : false
-export const useTasteTools = process.env.USE_TASTE_TOOLS ? process.env.USE_TASTE_TOOLS === "true" : false
 
-console.log(`The agent ${useGmail ? "will" : "will not"} use Gmail`);
-console.log(`The agent ${useMcp ? "will" : "will not"} use MCP tools`);
 console.log(
   `The agent ${
     useMemory
@@ -66,6 +57,18 @@ const walletClient = createWalletClient({
   chain: chainConfig.chain,
   transport: http(chainConfig.rpcUrl),
 });
+
+export const useFangornTools = process.env.USE_FANGORN_TOOLS ? process.env.USE_FANGORN_TOOLS === "true" : false
+export const useTasteTools = process.env.USE_TASTE_TOOLS ? process.env.USE_TASTE_TOOLS === "true" : false
+const useGmail = process.env.USE_GMAIL ? process.env.USE_GMAIL === "true" : false;
+const useAgent0 = process.env.USE_AGENT0 ? process.env.USE_AGENT0 === "true" : false;
+const useMcp = process.env.USE_MCP ? process.env.USE_MCP === "true" : false;
+const mcpServerUrls = process.env.FANGORN_MCP_URL ? [process.env.FANGORN_MCP_URL] : [""]
+
+console.log(`The agent ${useGmail ? "will" : "will not"} use Gmail`);
+console.log(`The agent ${useMcp ? "will" : "will not"} use MCP tools`);
+console.log(`The agent ${useAgent0 ? "will" : "will not"} use Agent0 tools`);
+console.log(`The agent ${useFangornTools ? "will" : "will not"} use x402f tools`);
 
 export const fangornToolConfig: FangornToolConfig = {
 	enabled: useFangornTools,

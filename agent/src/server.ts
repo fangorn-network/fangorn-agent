@@ -114,6 +114,22 @@ async function main() {
   app.listen(PORT, () => {
     console.log(`Chat endpoint running at http://localhost:${PORT}`);
   });
+
+	app.get("/toolbox-map", async (_req, res) => {
+  try {
+    const toolBoxMap: Map<string, string[]> = agent.getToolBoxToolNamesMap();
+		console.log(JSON.stringify(toolBoxMap))
+    // Convert Map to a plain object for JSON serialization
+    const payload: Record<string, string[]> = {};
+    toolBoxMap.forEach((toolNames, boxName) => {
+      payload[boxName] = toolNames;
+    });
+    res.json(payload);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to retrieve toolbox map" });
+  }
+});
 }
 
 main();

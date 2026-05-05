@@ -290,4 +290,8 @@ export class FangornAgent {
   public getAllToolNames(): string[] {
     return this.toolbay.getAllToolNames();
   }
+
+	public getToolBoxToolNamesMap(): Map<string, string[]> {
+		return this.toolbay.getToolBoxToolNamesMap()
+	}
 }

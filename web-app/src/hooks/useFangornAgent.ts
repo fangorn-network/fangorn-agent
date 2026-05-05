@@ -1,5 +1,15 @@
 // hooks/useFangornAgent.ts
-import { useState, useCallback } from "react";
+//
+// CHANGE SUMMARY vs your original:
+//   1. sendMessage now reads `toolNameList` from a ref you pass in,
+//      so the selected tools are always current without re-creating the callback.
+//   2. Removed the hardcoded `const toolNameList = ["send_email"]`.
+//   3. Added `toolNameListRef` parameter to the hook.
+//   4. Everything else is identical.
+
+import { useState, useCallback, MutableRefObject } from "react";
+
+export type ChatMode = "tool-scoped" | "full-agentic";
 
 export interface ChatEntry {
   id: number;
@@ -14,9 +24,7 @@ export interface ChatEntry {
     | "files"
     | "fields";
   data?: any;
-  /** Short label shown above contextual messages, e.g. "Re: fangorn.music.v1" */
   contextLabel?: string;
-  /** Entity type for color-coding the context border */
   contextType?: "schema" | "manifest" | "file" | "field";
 }
 
@@ -34,9 +42,23 @@ interface AgentState {
   chatHistory: ChatEntry[];
 }
 
+interface UseFangornAgentOptions {
+  /**
+   * A ref to the current list of selected tool names.
+   * Using a ref avoids re-creating the sendMessage callback on every selection change.
+   */
+  toolNameListRef: MutableRefObject<string[]>;
+  /**
+   * A ref to the current chat mode.
+   * "tool-scoped" hits /tool-scoped-chat with the selected tools.
+   * "full-agentic" hits /all-tool-chat with all tools available.
+   */
+  chatModeRef: MutableRefObject<ChatMode>;
+}
+
 let entryId = 0;
 
-export function useFangornAgent() {
+export function useFangornAgent({ toolNameListRef, chatModeRef }: UseFangornAgentOptions) {
   const [state, setState] = useState<AgentState>({
     loading: false,
     error: null,
@@ -51,14 +73,16 @@ export function useFangornAgent() {
       const displayMessage = options?.displayMessage;
       const dataContext = options?.dataContext;
 
-      const toolNameList = ["read_taste_for_update", "update_taste"];
+      // Read the current selection from the ref
+      const toolNameList = toolNameListRef.current;
+      const chatMode = chatModeRef.current;
 
       if (!silent) {
         const userEntry: ChatEntry = {
           id: ++entryId,
           role: "user",
           message,
-          displayMessage: displayMessage,
+          displayMessage,
           contextLabel,
           contextType,
         };
@@ -76,15 +100,19 @@ export function useFangornAgent() {
       try {
         const apiUrl =
           process.env.NEXT_PUBLIC_AGENT_URL || "http://localhost:3001";
-        // find-similar, all-tool-chat, tool-scoped-chat
-        const res = await fetch(`${apiUrl}/get-filters`, {
+
+        const endpoint =
+          chatMode === "full-agentic" ? "all-tool-chat" : "tool-scoped-chat";
+
+        const body =
+          chatMode === "full-agentic"
+            ? { message, dataContext }
+            : { message, dataContext, toolNameList };
+
+        const res = await fetch(`${apiUrl}/${endpoint}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            message,
-            dataContext,
-            toolNameList,
-          }),
+          body: JSON.stringify(body),
         });
 
         if (!res.ok) throw new Error(`Agent returned ${res.status}`);
@@ -92,7 +120,6 @@ export function useFangornAgent() {
 
         const newEntries: ChatEntry[] = [];
 
-        // Add the LLM's text response if present
         if (data.response) {
           newEntries.push({
             id: ++entryId,
@@ -103,7 +130,6 @@ export function useFangornAgent() {
           });
         }
 
-        // Add the MCP result if present
         if (data.mcpResults) {
           const result = data.mcpResults;
           newEntries.push({
@@ -129,7 +155,7 @@ export function useFangornAgent() {
         }));
       }
     },
-    [],
+    [toolNameListRef, chatModeRef],
   );
 
   return { ...state, sendMessage };

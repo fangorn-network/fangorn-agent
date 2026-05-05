@@ -8,8 +8,13 @@ import {
 } from "@fangorn-network/client-types";
 import { Bubble, CONTEXT_COLORS, TypingDots } from "./primitives";
 import { SchemaBlock, ManifestStatesBlock, FileEntriesBlock } from "./index";
-import { ChatEntry, SendOptions } from "@/hooks/useFangornAgent";
+import { ChatEntry, SendOptions, ChatMode } from "@/hooks/useFangornAgent";
 import { ChatProvider } from "./Chat/Chat";
+import ToolSelector from "./ToolSelector";
+import type { UseToolboxSelectionReturn } from "@/hooks/useToolboxSelection";
+
+// Re-export for convenience — callers that used the old type can keep working
+export type { UseToolboxSelectionReturn as ToolboxHook };
 
 interface ReplyContext {
   contextLabel: string;
@@ -22,6 +27,12 @@ interface FangornChatProps {
   loading: boolean;
   error: string | null;
   sendMessage: (message: string, options?: SendOptions) => void;
+  /** Pass the full return value of useToolboxSelection() */
+  toolbox: UseToolboxSelectionReturn;
+  /** Current chat mode */
+  chatMode: ChatMode;
+  /** Callback when the user toggles chat mode */
+  onChatModeChange: (mode: ChatMode) => void;
 }
 
 export default function FangornChat({
@@ -29,6 +40,9 @@ export default function FangornChat({
   loading,
   error,
   sendMessage,
+  toolbox,
+  chatMode,
+  onChatModeChange,
 }: FangornChatProps) {
   const [input, setInput] = useState("");
   const [replyContext, setReplyContext] = useState<ReplyContext | null>(null);
@@ -58,7 +72,6 @@ export default function FangornChat({
       dataContext: entry.data,
     });
 
-    // Focus the input
     inputRef.current?.focus();
   };
 
@@ -94,7 +107,6 @@ export default function FangornChat({
       e.preventDefault();
       handleSubmit();
     }
-    // Escape clears reply context
     if (e.key === "Escape" && replyContext) {
       clearReplyContext();
     }
@@ -132,7 +144,6 @@ export default function FangornChat({
           >
             {entry.message}
           </Bubble>
-          {/* Reply button — only on context-tagged claude messages */}
           {entry.contextLabel && entry.contextType && (
             <button
               onClick={() => handleReply(entry)}
@@ -331,6 +342,191 @@ export default function FangornChat({
               </div>
             )}
 
+            {/* ── Mode toggle + Tool selector row ── */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                marginBottom: 8,
+              }}
+            >
+              {/* Chat mode toggle */}
+              <button
+                onClick={() =>
+                  onChatModeChange(
+                    chatMode === "full-agentic" ? "tool-scoped" : "full-agentic",
+                  )
+                }
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 5,
+                  border: `0.5px solid ${
+                    chatMode === "full-agentic"
+                      ? "#c9a24f"
+                      : "var(--color-border-tertiary, #1e1e1e)"
+                  }`,
+                  borderRadius: 8,
+                  padding: "5px 10px",
+                  background:
+                    chatMode === "full-agentic"
+                      ? "rgba(201,162,79,0.1)"
+                      : "transparent",
+                  color:
+                    chatMode === "full-agentic"
+                      ? "#c9a24f"
+                      : "var(--color-text-tertiary, #5a5a5a)",
+                  fontSize: 12,
+                  fontWeight: 500,
+                  fontFamily: "var(--font-mono, monospace)",
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                  flexShrink: 0,
+                }}
+                title={
+                  chatMode === "full-agentic"
+                    ? "Full agentic mode — all tools available"
+                    : "Tool-scoped mode — only selected tools"
+                }
+              >
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  {chatMode === "full-agentic" ? (
+                    <>
+                      <circle cx="12" cy="12" r="3" />
+                      <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
+                    </>
+                  ) : (
+                    <path d="M12 3v18M3 12h18" />
+                  )}
+                </svg>
+                {chatMode === "full-agentic" ? "Full Agent" : "Scoped"}
+              </button>
+
+              {/* Tool selector — only visible in scoped mode */}
+              {chatMode === "tool-scoped" && (
+                <>
+                  <ToolSelector
+                    toolboxMap={toolbox.toolboxMap}
+                    selectedTools={toolbox.selectedTools}
+                    loading={toolbox.loading}
+                    error={toolbox.error}
+                    toggleTool={toolbox.toggleTool}
+                    toggleToolbox={toolbox.toggleToolbox}
+                    clearAll={toolbox.clearAll}
+                    selectAll={toolbox.selectAll}
+                  />
+
+                  {/* Quick summary of selected tools */}
+                  {toolbox.selectedToolList.length > 0 && (
+                    <span
+                      style={{
+                        fontSize: 10,
+                        color: "var(--color-text-tertiary, #5a5a5a)",
+                        fontFamily: "var(--font-mono, monospace)",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        maxWidth: "50%",
+                      }}
+                      title={toolbox.selectedToolList.join(", ")}
+                    >
+                      {toolbox.selectedToolList.slice(0, 3).join(", ")}
+                      {toolbox.selectedToolList.length > 3 &&
+                        ` +${toolbox.selectedToolList.length - 3}`}
+                    </span>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Full-agentic warning banner */}
+            {chatMode === "full-agentic" && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 7,
+                  padding: "7px 10px",
+                  marginBottom: 8,
+                  borderRadius: 8,
+                  borderLeft: "3px solid #c9a24f",
+                  background: "rgba(201,162,79,0.06)",
+                  animation: "fangornFadeIn 0.2s ease-out",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 13,
+                    lineHeight: 1,
+                    flexShrink: 0,
+                    marginTop: 1,
+                  }}
+                >
+                  ⚠
+                </span>
+                <span
+                  style={{
+                    fontSize: 11,
+                    color: "#c9a24f",
+                    fontFamily: "var(--font-mono, monospace)",
+                    lineHeight: 1.4,
+                  }}
+                >
+                  Full agentic mode requires an LLM with multi-step workflow
+                  capabilities. Responses may be <b>significantly</b> slower and consume more tokens.
+                </span>
+              </div>
+            )}
+
+            {/* Tool-scoped info banner */}
+            {chatMode === "tool-scoped" && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 7,
+                  padding: "7px 10px",
+                  marginBottom: 8,
+                  borderRadius: 8,
+                  borderLeft: "3px solid #7cb77a",
+                  background: "rgba(124,183,122,0.06)",
+                  animation: "fangornFadeIn 0.2s ease-out",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 12,
+                    lineHeight: 1,
+                    flexShrink: 0,
+                    marginTop: 1,
+                  }}
+                >
+                  ⛶
+                </span>
+                <span
+                  style={{
+                    fontSize: 11,
+                    color: "#7cb77a",
+                    fontFamily: "var(--font-mono, monospace)",
+                    lineHeight: 1.4,
+                  }}
+                >
+                  The agent will only use selected tools for interactions.
+                </span>
+              </div>
+            )}
+
+            {/* Text input + send button */}
             <div
               style={{
                 display: "flex",
