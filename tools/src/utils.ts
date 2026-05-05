@@ -3,6 +3,29 @@ import {
   ManifestState,
   SchemaState,
 } from "@fangorn-network/client-types";
+import { DataContext, FangornAgentToolConfig, Toolbox, ToolboxPlugin } from "./types.js";
+import { join } from "path";
+import { existsSync, readdirSync } from "fs";
+
+/** 
+ * Activate toolbox plugins. We expect toolbox plugins to be stored in the toolboxes directory with a toolbox directory of the same name.
+ * We also expect the naming convention *.plugin.{ts, js}
+ * IE: toolboxes/specificPluginToolbox/specificPluginToolbox.ts
+ * */ 
+export async function activateToolboxPlugins(config: FangornAgentToolConfig, dataContextProvider: (() => DataContext)): Promise<Toolbox[]> {
+	const toolboxesDir = join(__dirname, "toolboxes");
+	const toolboxes: Toolbox[] = [];
+	for (const dir of readdirSync(toolboxesDir, { withFileTypes: true })) {
+		if (!dir.isDirectory()) continue;
+		const pluginPath = join(toolboxesDir, dir.name, `${dir.name}.plugin`);
+		if (!existsSync(`${pluginPath}.ts`) && !existsSync(`${pluginPath}.js`)) continue;
+		const { default: plugin }: { default: ToolboxPlugin } = await import(pluginPath);
+		if (plugin.enabled(config)) {
+			toolboxes.push(await plugin.init(config, dataContextProvider));
+		}
+	}
+	return toolboxes
+}
 
 export function buildSummary(data: any, resultType: string): string {
   if (!Array.isArray(data)) return JSON.stringify(data).slice(0, 500);

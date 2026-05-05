@@ -12,6 +12,11 @@ export interface AsyncFactory<T> {
   init(config?: FangornAgentToolConfig): Promise<T>;
 }
 
+export interface ToolboxPlugin {
+  enabled(config: FangornAgentToolConfig): boolean;
+  init(config: FangornAgentToolConfig, dataContextProvider: () => DataContext): Promise<Toolbox>;
+}
+
 export async function initializeToolbox(
   factory: AsyncFactory<Toolbox>,
 	config?: FangornAgentToolConfig

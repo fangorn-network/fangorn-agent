@@ -1,14 +1,15 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { GmailToolbox } from "./toolboxes/gmailToolbox/GmailToolbox.js";
-import { DataContext, FangornAgentToolConfig, initializeToolbox, McpUiResult, Toolbox } from "./types.js";
+import { DataContext, FangornAgentToolConfig, initializeToolbox, McpUiResult, Toolbox, ToolboxPlugin } from "./types.js";
 import { McpToolbox } from "./toolboxes/mcpToolbox/mcpToolbox.js";
 import { FangornToolbox } from "./toolboxes/fangornToolbox/fangornToolbox.js";
 import {
   buildFangornMusicPromptResponse as buildShortenedPromptResponse,
 } from "./prompts.js";
 import { TasteToolbox } from "./toolboxes/tasteToolbox/tasteToolbox.js";
-import { buildSummary } from "./utils.js";
+import { buildSummary, activateToolboxPlugins } from "./utils.js";
 import { Agent0Toolbox } from "./toolboxes/agent0Toolbox/agent0Toolbox.js";
+
 
 // Examples of a toolbox:
 // Web3 toolbox: wallets, signing, funds, etc.
@@ -36,44 +37,10 @@ export class ToolBay {
 
   static async initToolbay(
     dataContextProvider: () => DataContext,
-		fangornAgentToolConfig: FangornAgentToolConfig,
+		config: FangornAgentToolConfig,
   ): Promise<ToolBay> {
-    const toolboxes: Toolbox[] = [];
-
-		if (fangornAgentToolConfig.fangornToolConfig.enabled) {
-    	const fangornToolbox = await initializeToolbox(FangornToolbox, fangornAgentToolConfig);
-    	const fangornToolboxImpl = fangornToolbox as FangornToolbox;
-    	fangornToolboxImpl.setDataContextProvider(dataContextProvider);
-    	toolboxes.push(fangornToolbox);
-		}
-    if (fangornAgentToolConfig.mcpServerConfig.enabled) {
-      const fangornMcpUrl =
-        fangornAgentToolConfig.mcpServerConfig.mcpServerUrls ?? ["http://localhost:4000"];
-      const mcpToolbox = await McpToolbox.init(
-        {
-          fangornMcp: {
-            transport: "http",
-            url: fangornMcpUrl[0],
-          },
-        },
-        "mcp_toolbox",
-      );
-      toolboxes.push(mcpToolbox);
-    }
-		if (fangornAgentToolConfig.agent0SdkToolConfig.enabled) {
-			const agent0Toolbox = await initializeToolbox(Agent0Toolbox, fangornAgentToolConfig);
-			toolboxes.push(agent0Toolbox)
-		}
-		if (fangornAgentToolConfig.useTasteTools) {
-    	const tasteToolbox = await initializeToolbox(TasteToolbox, fangornAgentToolConfig);
-    	toolboxes.push(tasteToolbox);
-		}
-    if (fangornAgentToolConfig.gmailConfig.enabled) {
-      const gmailToolbox = await initializeToolbox(GmailToolbox, fangornAgentToolConfig);
-      toolboxes.push(gmailToolbox);
-    }
-
-    return new ToolBay(toolboxes, dataContextProvider);
+		let toolboxes = await activateToolboxPlugins(config, dataContextProvider)
+  	return new ToolBay(toolboxes, dataContextProvider);
   }
 
   constructor(toolboxes: Toolbox[], dataContextProvider: () => DataContext) {
