@@ -11,6 +11,7 @@ import {
   ToolBay,
   McpUiResult,
   DataContext,
+	FangornAgentToolConfig,
 } from "@fangorn-network/agent-tools";
 import {
   BaseMessage,
@@ -18,7 +19,7 @@ import {
   SystemMessage,
   ToolMessage,
 } from "langchain";
-import { fangornAgentToolConfig, useMemory } from "./config.js";
+import { useMemory } from "./config.js";
 import { FangornSTM } from "./memory.js";
 import { FangornAgentModel, getModelType } from "./llm.js";
 
@@ -36,6 +37,7 @@ export class FangornAgent {
   private shortTermMemory: FangornSTM;
 
   static async create(
+		fangornAgentToolConfig: FangornAgentToolConfig,
     dataContextProvider: () => DataContext,
   ): Promise<FangornAgent> {
     const toolbay = await ToolBay.initToolbay(dataContextProvider, fangornAgentToolConfig);
