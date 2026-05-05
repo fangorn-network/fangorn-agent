@@ -1,5 +1,5 @@
 import { initializeToolbox, ToolboxPlugin } from "../../types.js";
-import { GmailToolbox } from "../gmailToolbox/GmailToolbox.js";
+import { GmailToolbox } from "./GmailToolbox.js";
 
 export default {
 	enabled: (config) => config.gmailConfig.enabled,

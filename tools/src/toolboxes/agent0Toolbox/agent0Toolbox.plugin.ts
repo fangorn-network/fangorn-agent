@@ -1,5 +1,5 @@
 import { initializeToolbox, type ToolboxPlugin } from "../../types.js";
-import { Agent0Toolbox } from "../../toolboxes/agent0Toolbox/agent0Toolbox.js";
+import { Agent0Toolbox } from "./agent0Toolbox.js";
 
 export default {
 	enabled: (config) => config.agent0SdkToolConfig.enabled,

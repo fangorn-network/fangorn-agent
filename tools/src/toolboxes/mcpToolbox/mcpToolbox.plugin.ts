@@ -1,5 +1,5 @@
 import { initializeToolbox, ToolboxPlugin } from "../../types.js";
-import { McpToolbox } from "../mcpToolbox/mcpToolbox.js";
+import { McpToolbox } from "./mcpToolbox.js";
 
 export default {
 	enabled: (config) => config.agent0SdkToolConfig.enabled,

@@ -1,5 +1,5 @@
 import { initializeToolbox, ToolboxPlugin } from "../../types.js";
-import { FangornToolbox } from "../fangornToolbox/fangornToolbox.js";
+import { FangornToolbox } from "./fangornToolbox.js";
 
 export default {
 	enabled: (config) => config.agent0SdkToolConfig.enabled,
