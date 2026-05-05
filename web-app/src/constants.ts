@@ -12,6 +12,7 @@ export const ACCENT_DARK = "#5aa3e8";
 export const typeColor = (t: string) => {
   if (t === "encrypted") return { bg: "#3d2e0e", fg: "#e8b84a" };
   if (t === "string") return { bg: "#0f2a4a", fg: "#5aa3e8" };
-  if (t === "number" || t === "integer") return { bg: "#1a3310", fg: "#7ec860" };
+  if (t === "number" || t === "integer")
+    return { bg: "#1a3310", fg: "#7ec860" };
   return { bg: "#2a1f4a", fg: "#a98be8" };
 };

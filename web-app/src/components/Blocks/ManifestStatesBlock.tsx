@@ -9,11 +9,15 @@ interface ManifestStatesBlockProps {
   manifestStates: ManifestState[];
 }
 
-export const ManifestStatesBlock = ({ manifestStates: manifests }: ManifestStatesBlockProps) => {
+export const ManifestStatesBlock = ({
+  manifestStates: manifests,
+}: ManifestStatesBlockProps) => {
   if (!manifests.length) return null;
 
   const [activeFilters, setActiveFilters] = useState<ActiveFilter[]>([]);
-  const [selectedFiles, setSelectedFiles] = useState<Record<number, number | null>>({});
+  const [selectedFiles, setSelectedFiles] = useState<
+    Record<number, number | null>
+  >({});
 
   const filtered = applyFilters(manifests, activeFilters);
 
@@ -27,7 +31,7 @@ export const ManifestStatesBlock = ({ manifestStates: manifests }: ManifestState
       items={filtered}
       pageSize={PAGE_SIZE}
       itemNoun="collection"
-			itemNounPlural="collections"
+      itemNounPlural="collections"
       getKey={(ms, i) => ms.id || i}
       isFiltered={activeFilters.length > 0}
       totalCount={manifests.length}

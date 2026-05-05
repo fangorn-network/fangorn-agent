@@ -10,6 +10,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "build"]
+  "include": ["src/**/*", "src/prompts.ts"],
+  "exclude": ["node_modules", "build", "src/**/*.test.ts", "src/test/**"]
 }

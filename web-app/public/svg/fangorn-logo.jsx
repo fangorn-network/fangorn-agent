@@ -14,4 +14,4 @@ export const FangornLogo = () => (
       className="text-fangorn-mist group-hover:text-white transition-colors duration-300"
     />
   </svg>
-)
+);

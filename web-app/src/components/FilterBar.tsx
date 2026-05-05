@@ -16,7 +16,9 @@ interface FilterBarProps {
  * Extracts all unique field names and their unique values from manifest data.
  * Returns a Map<fieldName, Set<value>>.
  */
-function extractFieldOptions(manifests: ManifestState[]): Map<string, string[]> {
+function extractFieldOptions(
+  manifests: ManifestState[],
+): Map<string, string[]> {
   const fieldMap = new Map<string, Set<string>>();
 
   for (const ms of manifests) {
@@ -30,7 +32,8 @@ function extractFieldOptions(manifests: ManifestState[]): Map<string, string[]> 
           fieldMap.set(name, new Set());
         }
 
-        const val = field.value ?? (field.acc !== "plain" ? "(encrypted)" : "(empty)");
+        const val =
+          field.value ?? (field.acc !== "plain" ? "(encrypted)" : "(empty)");
         fieldMap.get(name)!.add(val);
       }
     }
@@ -38,9 +41,9 @@ function extractFieldOptions(manifests: ManifestState[]): Map<string, string[]> 
 
   // Convert Sets to sorted arrays
   const result = new Map<string, string[]>();
-  for (const [name, values] of fieldMap) {
+  for (const [name, values] of Array.from(fieldMap)) {
     const sorted = Array.from(values).sort((a, b) =>
-      a.localeCompare(b, undefined, { sensitivity: "base" })
+      a.localeCompare(b, undefined, { sensitivity: "base" }),
     );
     result.set(name, sorted);
   }
@@ -56,7 +59,12 @@ interface FieldDropdownProps {
   onSelect: (value: string | null) => void;
 }
 
-const FieldDropdown = ({ fieldName, options, selectedValue, onSelect }: FieldDropdownProps) => {
+const FieldDropdown = ({
+  fieldName,
+  options,
+  selectedValue,
+  onSelect,
+}: FieldDropdownProps) => {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -64,7 +72,8 @@ const FieldDropdown = ({ fieldName, options, selectedValue, onSelect }: FieldDro
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node))
+        setOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -171,7 +180,8 @@ const FieldDropdown = ({ fieldName, options, selectedValue, onSelect }: FieldDro
                 transition: "background 0.1s",
               }}
               onMouseEnter={(e) =>
-                ((e.target as HTMLElement).style.background = "rgba(255,255,255,0.04)")
+                ((e.target as HTMLElement).style.background =
+                  "rgba(255,255,255,0.04)")
               }
               onMouseLeave={(e) =>
                 ((e.target as HTMLElement).style.background = "none")
@@ -212,7 +222,8 @@ const FieldDropdown = ({ fieldName, options, selectedValue, onSelect }: FieldDro
                 }}
                 onMouseEnter={(e) => {
                   if (!isCurrent)
-                    (e.target as HTMLElement).style.background = "rgba(255,255,255,0.04)";
+                    (e.target as HTMLElement).style.background =
+                      "rgba(255,255,255,0.04)";
                 }}
                 onMouseLeave={(e) => {
                   if (!isCurrent)
@@ -231,10 +242,20 @@ const FieldDropdown = ({ fieldName, options, selectedValue, onSelect }: FieldDro
 
 /* ── FilterBar ── */
 
-export const FilterBar = ({ manifestData, activeFilters, onFiltersChange }: FilterBarProps) => {
-  const fieldOptions = useMemo(() => extractFieldOptions(manifestData), [manifestData]);
+export const FilterBar = ({
+  manifestData,
+  activeFilters,
+  onFiltersChange,
+}: FilterBarProps) => {
+  const fieldOptions = useMemo(
+    () => extractFieldOptions(manifestData),
+    [manifestData],
+  );
 
-  const fieldNames = useMemo(() => Array.from(fieldOptions.keys()), [fieldOptions]);
+  const fieldNames = useMemo(
+    () => Array.from(fieldOptions.keys()),
+    [fieldOptions],
+  );
 
   if (fieldNames.length === 0) return null;
 
@@ -310,7 +331,7 @@ export const FilterBar = ({ manifestData, activeFilters, onFiltersChange }: Filt
 
 export function applyFilters(
   manifests: ManifestState[],
-  filters: ActiveFilter[]
+  filters: ActiveFilter[],
 ): ManifestState[] {
   if (filters.length === 0) return manifests;
 
@@ -321,10 +342,11 @@ export function applyFilters(
       filters.every((filter) =>
         file.fileFields?.some((f) => {
           if (f.name !== filter.fieldName) return false;
-          const val = f.value ?? (f.acc !== "plain" ? "(encrypted)" : "(empty)");
+          const val =
+            f.value ?? (f.acc !== "plain" ? "(encrypted)" : "(empty)");
           return val === filter.value;
-        })
-      )
+        }),
+      ),
     );
   });
 }

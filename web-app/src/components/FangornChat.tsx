@@ -1,20 +1,25 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { FileEntry, ManifestState, SchemaState } from "@fangorn-network/client-types";
-import { Bubble, CONTEXT_COLORS, TypingDots } from "./primitives";
 import {
-  SchemaBlock,
-  ManifestStatesBlock,
-  FileEntriesBlock,
-} from "./index";
-import { ChatEntry, SendOptions } from "@/hooks/useFangornAgent";
+  FileEntry,
+  ManifestState,
+  SchemaState,
+} from "@fangorn-network/client-types";
+import { Bubble, CONTEXT_COLORS, TypingDots } from "./primitives";
+import { SchemaBlock, ManifestStatesBlock, FileEntriesBlock } from "./index";
+import { ChatEntry, SendOptions, ChatMode } from "@/hooks/useFangornAgent";
 import { ChatProvider } from "./Chat/Chat";
+import ToolSelector from "./ToolSelector";
+import type { UseToolboxSelectionReturn } from "@/hooks/useToolboxSelection";
+
+// Re-export for convenience — callers that used the old type can keep working
+export type { UseToolboxSelectionReturn as ToolboxHook };
 
 interface ReplyContext {
   contextLabel: string;
-  contextType: "schema" | "manifest" | "file" ;
-	dataContext: any;
+  contextType: "schema" | "manifest" | "file";
+  dataContext: any;
 }
 
 interface FangornChatProps {
@@ -22,6 +27,12 @@ interface FangornChatProps {
   loading: boolean;
   error: string | null;
   sendMessage: (message: string, options?: SendOptions) => void;
+  /** Pass the full return value of useToolboxSelection() */
+  toolbox: UseToolboxSelectionReturn;
+  /** Current chat mode */
+  chatMode: ChatMode;
+  /** Callback when the user toggles chat mode */
+  onChatModeChange: (mode: ChatMode) => void;
 }
 
 export default function FangornChat({
@@ -29,6 +40,9 @@ export default function FangornChat({
   loading,
   error,
   sendMessage,
+  toolbox,
+  chatMode,
+  onChatModeChange,
 }: FangornChatProps) {
   const [input, setInput] = useState("");
   const [replyContext, setReplyContext] = useState<ReplyContext | null>(null);
@@ -55,10 +69,9 @@ export default function FangornChat({
     setReplyContext({
       contextLabel: entry.contextLabel,
       contextType: entry.contextType as ReplyContext["contextType"],
-			dataContext: entry.data
+      dataContext: entry.data,
     });
 
-    // Focus the input
     inputRef.current?.focus();
   };
 
@@ -67,29 +80,33 @@ export default function FangornChat({
   };
 
   const handleSubmit = () => {
-  const trimmed = input.trim();
-  if (!trimmed || loading) return;
+    const trimmed = input.trim();
+    if (!trimmed || loading) return;
 
-  sendMessage(trimmed, replyContext ? {
-    contextLabel: replyContext.contextLabel,
-    contextType: replyContext.contextType,
-    displayMessage: trimmed,
-    dataContext: replyContext.dataContext,
-  } : undefined);
+    sendMessage(
+      trimmed,
+      replyContext
+        ? {
+            contextLabel: replyContext.contextLabel,
+            contextType: replyContext.contextType,
+            displayMessage: trimmed,
+            dataContext: replyContext.dataContext,
+          }
+        : undefined,
+    );
 
-  setReplyContext(null);
-  setInput("");
-  if (inputRef.current) {
-    inputRef.current.style.height = "auto";
-  }
-};
+    setReplyContext(null);
+    setInput("");
+    if (inputRef.current) {
+      inputRef.current.style.height = "auto";
+    }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
     }
-    // Escape clears reply context
     if (e.key === "Escape" && replyContext) {
       clearReplyContext();
     }
@@ -98,8 +115,12 @@ export default function FangornChat({
   const renderEntry = (entry: ChatEntry) => {
     if (entry.role === "user") {
       return (
-        <Bubble key={entry.id} role="user"
-          contextLabel={entry.contextLabel} contextType={entry.contextType}>
+        <Bubble
+          key={entry.id}
+          role="user"
+          contextLabel={entry.contextLabel}
+          contextType={entry.contextType}
+        >
           {entry.displayMessage || entry.message}
         </Bubble>
       );
@@ -107,12 +128,22 @@ export default function FangornChat({
 
     if (entry.role === "claude") {
       return (
-        <div key={entry.id} style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 4 }}>
-          <Bubble role="claude"
-            contextLabel={entry.contextLabel} contextType={entry.contextType}>
+        <div
+          key={entry.id}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-start",
+            gap: 4,
+          }}
+        >
+          <Bubble
+            role="claude"
+            contextLabel={entry.contextLabel}
+            contextType={entry.contextType}
+          >
             {entry.message}
           </Bubble>
-          {/* Reply button — only on context-tagged claude messages */}
           {entry.contextLabel && entry.contextType && (
             <button
               onClick={() => handleReply(entry)}
@@ -122,14 +153,20 @@ export default function FangornChat({
                 cursor: "pointer",
                 fontSize: 10,
                 fontWeight: 500,
-                color: CONTEXT_COLORS[entry.contextType] || "var(--color-text-tertiary, #5a5a5a)",
+                color:
+                  CONTEXT_COLORS[entry.contextType] ||
+                  "var(--color-text-tertiary, #5a5a5a)",
                 fontFamily: "var(--font-mono, monospace)",
                 padding: "2px 4px",
                 opacity: 0.7,
                 transition: "opacity 0.15s",
               }}
-              onMouseEnter={(e) => { (e.target as HTMLElement).style.opacity = "1"; }}
-              onMouseLeave={(e) => { (e.target as HTMLElement).style.opacity = "0.7"; }}
+              onMouseEnter={(e) => {
+                (e.target as HTMLElement).style.opacity = "1";
+              }}
+              onMouseLeave={(e) => {
+                (e.target as HTMLElement).style.opacity = "0.7";
+              }}
             >
               ↩ Reply
             </button>
@@ -139,22 +176,41 @@ export default function FangornChat({
     }
 
     if (entry.role === "system") {
-      return <Bubble key={entry.id} role="system">{entry.message}</Bubble>;
+      return (
+        <Bubble key={entry.id} role="system">
+          {entry.message}
+        </Bubble>
+      );
     }
 
     switch (entry.resultType) {
       case "schemas":
-        return <SchemaBlock key={entry.id} schemaStates={entry.data as SchemaState[]} />;
+        return (
+          <SchemaBlock
+            key={entry.id}
+            schemaStates={entry.data as SchemaState[]}
+          />
+        );
       case "manifest_states":
-        return <ManifestStatesBlock key={entry.id} manifestStates={entry.data as ManifestState[]} />;
+        return (
+          <ManifestStatesBlock
+            key={entry.id}
+            manifestStates={entry.data as ManifestState[]}
+          />
+        );
       case "files":
-        return <FileEntriesBlock key={entry.id} files={entry.data as FileEntry[]} />;
+        return (
+          <FileEntriesBlock key={entry.id} files={entry.data as FileEntry[]} />
+        );
       default:
         return null;
     }
   };
 
-  const replyBorderColor = replyContext ? CONTEXT_COLORS[replyContext.contextType] || "var(--color-border-primary, #3a3a3a)" : undefined;
+  const replyBorderColor = replyContext
+    ? CONTEXT_COLORS[replyContext.contextType] ||
+      "var(--color-border-primary, #3a3a3a)"
+    : undefined;
 
   return (
     <ChatProvider value={{ sendMessage }}>
@@ -286,6 +342,194 @@ export default function FangornChat({
               </div>
             )}
 
+            {/* ── Mode toggle + Tool selector row ── */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                marginBottom: 8,
+              }}
+            >
+              {/* Chat mode toggle */}
+              <button
+                onClick={() =>
+                  onChatModeChange(
+                    chatMode === "full-agentic"
+                      ? "tool-scoped"
+                      : "full-agentic",
+                  )
+                }
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 5,
+                  border: `0.5px solid ${
+                    chatMode === "full-agentic"
+                      ? "#c9a24f"
+                      : "var(--color-border-tertiary, #1e1e1e)"
+                  }`,
+                  borderRadius: 8,
+                  padding: "5px 10px",
+                  background:
+                    chatMode === "full-agentic"
+                      ? "rgba(201,162,79,0.1)"
+                      : "transparent",
+                  color:
+                    chatMode === "full-agentic"
+                      ? "#c9a24f"
+                      : "var(--color-text-tertiary, #5a5a5a)",
+                  fontSize: 12,
+                  fontWeight: 500,
+                  fontFamily: "var(--font-mono, monospace)",
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                  flexShrink: 0,
+                }}
+                title={
+                  chatMode === "full-agentic"
+                    ? "Full agentic mode — all tools available"
+                    : "Tool-scoped mode — only selected tools"
+                }
+              >
+                <svg
+                  width="13"
+                  height="13"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  {chatMode === "full-agentic" ? (
+                    <>
+                      <circle cx="12" cy="12" r="3" />
+                      <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
+                    </>
+                  ) : (
+                    <path d="M12 3v18M3 12h18" />
+                  )}
+                </svg>
+                {chatMode === "full-agentic" ? "Full Agent" : "Scoped"}
+              </button>
+
+              {/* Tool selector — only visible in scoped mode */}
+              {chatMode === "tool-scoped" && (
+                <>
+                  <ToolSelector
+                    toolboxMap={toolbox.toolboxMap}
+                    selectedTools={toolbox.selectedTools}
+                    loading={toolbox.loading}
+                    error={toolbox.error}
+                    toggleTool={toolbox.toggleTool}
+                    toggleToolbox={toolbox.toggleToolbox}
+                    clearAll={toolbox.clearAll}
+                    selectAll={toolbox.selectAll}
+                  />
+
+                  {/* Quick summary of selected tools */}
+                  {toolbox.selectedToolList.length > 0 && (
+                    <span
+                      style={{
+                        fontSize: 10,
+                        color: "var(--color-text-tertiary, #5a5a5a)",
+                        fontFamily: "var(--font-mono, monospace)",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        maxWidth: "50%",
+                      }}
+                      title={toolbox.selectedToolList.join(", ")}
+                    >
+                      {toolbox.selectedToolList.slice(0, 3).join(", ")}
+                      {toolbox.selectedToolList.length > 3 &&
+                        ` +${toolbox.selectedToolList.length - 3}`}
+                    </span>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Full-agentic warning banner */}
+            {chatMode === "full-agentic" && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 7,
+                  padding: "7px 10px",
+                  marginBottom: 8,
+                  borderRadius: 8,
+                  borderLeft: "3px solid #c9a24f",
+                  background: "rgba(201,162,79,0.06)",
+                  animation: "fangornFadeIn 0.2s ease-out",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 13,
+                    lineHeight: 1,
+                    flexShrink: 0,
+                    marginTop: 1,
+                  }}
+                >
+                  ⚠
+                </span>
+                <span
+                  style={{
+                    fontSize: 11,
+                    color: "#c9a24f",
+                    fontFamily: "var(--font-mono, monospace)",
+                    lineHeight: 1.4,
+                  }}
+                >
+                  Full agentic mode requires an LLM with multi-step workflow
+                  capabilities. Responses may be <b>significantly</b> slower and
+                  consume more tokens.
+                </span>
+              </div>
+            )}
+
+            {/* Tool-scoped info banner */}
+            {chatMode === "tool-scoped" && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 7,
+                  padding: "7px 10px",
+                  marginBottom: 8,
+                  borderRadius: 8,
+                  borderLeft: "3px solid #7cb77a",
+                  background: "rgba(124,183,122,0.06)",
+                  animation: "fangornFadeIn 0.2s ease-out",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: 12,
+                    lineHeight: 1,
+                    flexShrink: 0,
+                    marginTop: 1,
+                  }}
+                >
+                  ⛶
+                </span>
+                <span
+                  style={{
+                    fontSize: 11,
+                    color: "#7cb77a",
+                    fontFamily: "var(--font-mono, monospace)",
+                    lineHeight: 1.4,
+                  }}
+                >
+                  The agent will only use selected tools for interactions.
+                </span>
+              </div>
+            )}
+
+            {/* Text input + send button */}
             <div
               style={{
                 display: "flex",
@@ -304,10 +548,15 @@ export default function FangornChat({
                 onChange={(e) => {
                   setInput(e.target.value);
                   e.target.style.height = "auto";
-                  e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
+                  e.target.style.height =
+                    Math.min(e.target.scrollHeight, 120) + "px";
                 }}
                 onKeyDown={handleKeyDown}
-                placeholder={replyContext ? `Reply to ${replyContext.contextLabel}...` : "Ask something..."}
+                placeholder={
+                  replyContext
+                    ? `Reply to ${replyContext.contextLabel}...`
+                    : "Ask something..."
+                }
                 rows={1}
                 disabled={loading}
                 style={{
@@ -330,12 +579,16 @@ export default function FangornChat({
                 disabled={!input.trim() || loading}
                 style={{
                   border: "none",
-                  background: input.trim() && !loading
-                    ? (replyContext ? replyBorderColor : "var(--color-text-primary, #fafafa)")
-                    : "var(--color-border-tertiary, #1e1e1e)",
-                  color: input.trim() && !loading
-                    ? "var(--color-background-primary, #141414)"
-                    : "var(--color-text-tertiary, #5a5a5a)",
+                  background:
+                    input.trim() && !loading
+                      ? replyContext
+                        ? replyBorderColor
+                        : "var(--color-text-primary, #fafafa)"
+                      : "var(--color-border-tertiary, #1e1e1e)",
+                  color:
+                    input.trim() && !loading
+                      ? "var(--color-background-primary, #141414)"
+                      : "var(--color-text-tertiary, #5a5a5a)",
                   borderRadius: 8,
                   padding: "6px 14px",
                   fontSize: 13,

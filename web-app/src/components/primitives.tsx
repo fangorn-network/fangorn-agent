@@ -1,7 +1,7 @@
 import { useState, ReactNode } from "react";
 import { ACCENT, typeColor } from "@/constants";
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 // ─── Pill badge ─────────────────────────────────────────────
 interface PillProps {
@@ -52,15 +52,23 @@ interface BubbleProps {
   contextType?: string;
 }
 
-export const Bubble = ({ role, children, contextLabel, contextType }: BubbleProps) => {
+export const Bubble = ({
+  role,
+  children,
+  contextLabel,
+  contextType,
+}: BubbleProps) => {
   const isUser = role === "user";
-  const borderColor = contextType ? CONTEXT_COLORS[contextType] || "var(--color-border-primary, #3a3a3a)" : undefined;
+  const borderColor = contextType
+    ? CONTEXT_COLORS[contextType] || "var(--color-border-primary, #3a3a3a)"
+    : undefined;
 
-  const bubbleContent = role === "claude" && typeof children === "string" ? (
-    <ReactMarkdown remarkPlugins={[remarkGfm]}>{children}</ReactMarkdown>
-  ) : (
-    children
-  );
+  const bubbleContent =
+    role === "claude" && typeof children === "string" ? (
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>{children}</ReactMarkdown>
+    ) : (
+      children
+    );
 
   return (
     <div
@@ -87,14 +95,17 @@ export const Bubble = ({ role, children, contextLabel, contextType }: BubbleProp
             gap: 4,
           }}
         >
-          <span style={{
-            width: 6,
-            height: 6,
-            borderRadius: "50%",
-            backgroundColor: borderColor || "var(--color-text-tertiary, #5a5a5a)",
-            display: "inline-block",
-            flexShrink: 0,
-          }} />
+          <span
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: "50%",
+              backgroundColor:
+                borderColor || "var(--color-text-tertiary, #5a5a5a)",
+              display: "inline-block",
+              flexShrink: 0,
+            }}
+          />
           {contextLabel}
         </div>
       )}
@@ -108,10 +119,12 @@ export const Bubble = ({ role, children, contextLabel, contextType }: BubbleProp
           fontSize: 14,
           lineHeight: 1.55,
           // Context border
-          ...(borderColor ? {
-            borderLeft: `3px solid ${borderColor}`,
-            paddingLeft: 12,
-          } : {}),
+          ...(borderColor
+            ? {
+                borderLeft: `3px solid ${borderColor}`,
+                paddingLeft: 12,
+              }
+            : {}),
           ...(isUser
             ? {
                 background: "rgba(255, 255, 255, 0.06)",
@@ -153,7 +166,14 @@ export const Card = ({ title, children, style }: CardProps) => (
     }}
   >
     {title && (
-      <div style={{ fontSize: 13, fontWeight: 600, color: "var(--color-text-primary, #1a1a1a)", marginBottom: 8 }}>
+      <div
+        style={{
+          fontSize: 13,
+          fontWeight: 600,
+          color: "var(--color-text-primary, #1a1a1a)",
+          marginBottom: 8,
+        }}
+      >
         {title}
       </div>
     )}
@@ -180,7 +200,11 @@ export const FieldRow = ({ label, value, mono, topBorder }: FieldRowProps) => (
       alignItems: "flex-start",
       gap: 8,
       ...(topBorder
-        ? { borderTop: "0.5px solid var(--color-border-tertiary, #e0e0e0)", paddingTop: 6, marginTop: 4 }
+        ? {
+            borderTop: "0.5px solid var(--color-border-tertiary, #e0e0e0)",
+            paddingTop: 6,
+            marginTop: 4,
+          }
         : {}),
     }}
   >
@@ -191,7 +215,9 @@ export const FieldRow = ({ label, value, mono, topBorder }: FieldRowProps) => (
         textAlign: "right",
         maxWidth: "65%",
         wordBreak: "break-all",
-        ...(mono ? { fontFamily: "var(--font-mono, monospace)", fontSize: 11 } : {}),
+        ...(mono
+          ? { fontFamily: "var(--font-mono, monospace)", fontSize: 11 }
+          : {}),
       }}
     >
       {value}
@@ -221,7 +247,9 @@ export const TypingDots = () => (
 
 // ─── Truncate address ───────────────────────────────────────
 export const truncAddr = (addr?: string) =>
-  addr && addr.length > 16 ? `${addr.slice(0, 8)}...${addr.slice(-6)}` : addr || "—";
+  addr && addr.length > 16
+    ? `${addr.slice(0, 8)}...${addr.slice(-6)}`
+    : addr || "—";
 
 // ─── Action button ──────────────────────────────────────────
 interface ActionBtnProps {
@@ -233,7 +261,14 @@ interface ActionBtnProps {
   style?: React.CSSProperties;
 }
 
-export const ActionBtn = ({ children, onClick, ghost, small, disabled, style: extraStyle }: ActionBtnProps) => (
+export const ActionBtn = ({
+  children,
+  onClick,
+  ghost,
+  small,
+  disabled,
+  style: extraStyle,
+}: ActionBtnProps) => (
   <button
     onClick={disabled ? undefined : onClick}
     style={{
@@ -253,14 +288,20 @@ export const ActionBtn = ({ children, onClick, ghost, small, disabled, style: ex
           : "#0f2a4a",
       fontSize: small ? 12 : 13,
       fontWeight: 500,
-      border: ghost ? "0.5px solid var(--color-border-secondary, #ccc)" : "none",
+      border: ghost
+        ? "0.5px solid var(--color-border-secondary, #ccc)"
+        : "none",
       borderRadius: 8,
       cursor: disabled ? "not-allowed" : "pointer",
       transition: "opacity 0.15s, transform 0.1s",
       ...extraStyle,
     }}
-    onMouseDown={(e) => !disabled && (e.currentTarget.style.transform = "scale(0.97)")}
-    onMouseUp={(e) => !disabled && (e.currentTarget.style.transform = "scale(1)")}
+    onMouseDown={(e) =>
+      !disabled && (e.currentTarget.style.transform = "scale(0.97)")
+    }
+    onMouseUp={(e) =>
+      !disabled && (e.currentTarget.style.transform = "scale(1)")
+    }
   >
     {children}
   </button>
@@ -292,7 +333,12 @@ interface PaginationBtnProps {
   active?: boolean;
 }
 
-const PaginationBtn = ({ children, onClick, disabled, active }: PaginationBtnProps) => (
+const PaginationBtn = ({
+  children,
+  onClick,
+  disabled,
+  active,
+}: PaginationBtnProps) => (
   <button
     onClick={disabled ? undefined : onClick}
     style={{
@@ -304,8 +350,14 @@ const PaginationBtn = ({ children, onClick, disabled, active }: PaginationBtnPro
       fontSize: 12,
       fontWeight: active ? 600 : 400,
       background: active ? ACCENT : "var(--color-background-primary, #fff)",
-      color: active ? "#fff" : disabled ? "var(--color-text-tertiary, #999)" : "var(--color-text-primary, #1a1a1a)",
-      border: active ? "none" : "0.5px solid var(--color-border-tertiary, #e0e0e0)",
+      color: active
+        ? "#fff"
+        : disabled
+          ? "var(--color-text-tertiary, #999)"
+          : "var(--color-text-primary, #1a1a1a)",
+      border: active
+        ? "none"
+        : "0.5px solid var(--color-border-tertiary, #e0e0e0)",
       borderRadius: 6,
       cursor: disabled ? "not-allowed" : "pointer",
       transition: "background 0.15s, color 0.15s",
@@ -323,7 +375,12 @@ interface PaginationProps {
   loading?: boolean;
 }
 
-export const Pagination = ({ currentPage, totalPages, onPageChange, loading }: PaginationProps) => {
+export const Pagination = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+  loading,
+}: PaginationProps) => {
   if (totalPages <= 1) return null;
 
   const maxVisible = 5;
@@ -345,33 +402,75 @@ export const Pagination = ({ currentPage, totalPages, onPageChange, loading }: P
         animation: "fangornFadeIn 0.3s ease-out",
       }}
     >
-      <PaginationBtn onClick={() => onPageChange(currentPage - 1)} disabled={currentPage === 1 || loading}>
+      <PaginationBtn
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1 || loading}
+      >
         ‹
       </PaginationBtn>
       {start > 1 && (
         <>
-          <PaginationBtn onClick={() => onPageChange(1)} disabled={loading}>1</PaginationBtn>
-          {start > 2 && <span style={{ fontSize: 11, color: "var(--color-text-tertiary, #999)", padding: "0 2px" }}>…</span>}
+          <PaginationBtn onClick={() => onPageChange(1)} disabled={loading}>
+            1
+          </PaginationBtn>
+          {start > 2 && (
+            <span
+              style={{
+                fontSize: 11,
+                color: "var(--color-text-tertiary, #999)",
+                padding: "0 2px",
+              }}
+            >
+              …
+            </span>
+          )}
         </>
       )}
       {pageNumbers.map((p) => (
-        <PaginationBtn key={p} active={p === currentPage} onClick={() => onPageChange(p)} disabled={loading}>
+        <PaginationBtn
+          key={p}
+          active={p === currentPage}
+          onClick={() => onPageChange(p)}
+          disabled={loading}
+        >
           {p}
         </PaginationBtn>
       ))}
       {end < totalPages && (
         <>
-          {end < totalPages - 1 && <span style={{ fontSize: 11, color: "var(--color-text-tertiary, #999)", padding: "0 2px" }}>…</span>}
-          <PaginationBtn onClick={() => onPageChange(totalPages)} disabled={loading}>
+          {end < totalPages - 1 && (
+            <span
+              style={{
+                fontSize: 11,
+                color: "var(--color-text-tertiary, #999)",
+                padding: "0 2px",
+              }}
+            >
+              …
+            </span>
+          )}
+          <PaginationBtn
+            onClick={() => onPageChange(totalPages)}
+            disabled={loading}
+          >
             {totalPages}
           </PaginationBtn>
         </>
       )}
-      <PaginationBtn onClick={() => onPageChange(currentPage + 1)} disabled={currentPage === totalPages || loading}>
+      <PaginationBtn
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages || loading}
+      >
         ›
       </PaginationBtn>
       {loading && (
-        <span style={{ fontSize: 11, color: "var(--color-text-tertiary, #999)", marginLeft: 6 }}>
+        <span
+          style={{
+            fontSize: 11,
+            color: "var(--color-text-tertiary, #999)",
+            marginLeft: 6,
+          }}
+        >
           loading…
         </span>
       )}

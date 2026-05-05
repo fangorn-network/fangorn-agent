@@ -1,9 +1,6 @@
 import type { SchemaState, Schema } from "@fangorn-network/client-types";
 import { Pill, Card, FieldRow, truncAddr } from "../primitives";
-import {
-  BaseCard,
-  ThreadIndicator,
-} from "./BaseCard";
+import { BaseCard, ThreadIndicator } from "./BaseCard";
 import { CardChatConfig } from "../Chat/Chat";
 
 const SCHEMA_COLOR = "#6e8efb";
@@ -37,7 +34,13 @@ export const SchemaCard = ({
       accentColor={SCHEMA_COLOR}
       onClick={onSelect}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+        }}
+      >
         <div
           style={{
             fontSize: 13,
@@ -66,7 +69,13 @@ export const SchemaCard = ({
       >
         owner: {truncAddr(schema.owner)}
       </div>
-      <div style={{ fontSize: 11, color: "var(--color-text-tertiary, #5a5a5a)", marginTop: 2 }}>
+      <div
+        style={{
+          fontSize: 11,
+          color: "var(--color-text-tertiary, #5a5a5a)",
+          marginTop: 2,
+        }}
+      >
         {versionCount} version{versionCount !== 1 ? "s" : ""}
         {schema.schemaId && <span> · ID: {truncAddr(schema.schemaId)}</span>}
       </div>
@@ -86,8 +95,11 @@ interface SchemaDetailCardProps {
   schema: SchemaState;
   onChatSent?: () => void;
 }
- 
-export const SchemaDetailCard = ({ schema, onChatSent }: SchemaDetailCardProps) => {
+
+export const SchemaDetailCard = ({
+  schema,
+  onChatSent,
+}: SchemaDetailCardProps) => {
   const versions = schema.versions ?? [];
   const latestVersion: Schema | undefined = versions[versions.length - 1];
   const fields = latestVersion?.fields ?? [];
@@ -97,9 +109,9 @@ export const SchemaDetailCard = ({ schema, onChatSent }: SchemaDetailCardProps) 
     contextLabel: `Re: ${schema.name}`,
     placeholder: "Ask about this schema...",
     buildContext: () => ({
-			id: schema.id,
+      id: schema.id,
       name: schema.name,
-			type: "schema",
+      type: "schema",
       owner: schema.owner,
       versionCount: versions.length,
       latestFields: fields.map((f) => `${f.name} (${f.fieldType})`),
@@ -145,7 +157,12 @@ export const SchemaDetailCard = ({ schema, onChatSent }: SchemaDetailCardProps) 
                   fontSize: 12,
                 }}
               >
-                <span style={{ fontWeight: 500, color: "var(--color-text-primary, #fafafa)" }}>
+                <span
+                  style={{
+                    fontWeight: 500,
+                    color: "var(--color-text-primary, #fafafa)",
+                  }}
+                >
                   {f.name}
                 </span>
                 <Pill type={f.fieldType}>{f.fieldType}</Pill>

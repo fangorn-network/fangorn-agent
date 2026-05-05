@@ -137,7 +137,8 @@ export function BaseBlock<T>({
         {countText}
         {totalPages > 1 && (
           <>
-            {" "}— page {currentPage} of {totalPages}
+            {" "}
+            — page {currentPage} of {totalPages}
           </>
         )}
         :
