@@ -1,6 +1,6 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import { GmailToolbox } from "./toolboxes/gmailToolbox/GmailToolbox.js";
-import { DataContext, FangornAgentToolConfig, initializeToolbox, Toolbox } from "./types.js";
+import { DataContext, FangornAgentToolConfig, initializeToolbox, McpUiResult, Toolbox } from "./types.js";
 import { McpToolbox } from "./toolboxes/mcpToolbox/mcpToolbox.js";
 import { FangornToolbox } from "./toolboxes/fangornToolbox/fangornToolbox.js";
 import {
@@ -8,6 +8,7 @@ import {
 } from "./prompts.js";
 import { TasteToolbox } from "./toolboxes/tasteToolbox/tasteToolbox.js";
 import { buildSummary } from "./utils.js";
+import { Agent0Toolbox } from "./toolboxes/agent0Toolbox/agent0Toolbox.js";
 
 // Examples of a toolbox:
 // Web3 toolbox: wallets, signing, funds, etc.
@@ -16,12 +17,6 @@ import { buildSummary } from "./utils.js";
 // etc.
 // Toolboxes are a collection of tools that are local to the agent.
 // Tool names whose raw results should be forwarded to the frontend
-
-export interface McpUiResult {
-  toolName?: string;
-  resultType?: string;
-  data?: any;
-}
 
 export class ToolBay {
   private currentTools: Map<String, DynamicStructuredTool> = new Map();
@@ -45,6 +40,12 @@ export class ToolBay {
   ): Promise<ToolBay> {
     const toolboxes: Toolbox[] = [];
 
+		if (fangornAgentToolConfig.fangornToolConfig.enabled) {
+    	const fangornToolbox = await initializeToolbox(FangornToolbox, fangornAgentToolConfig);
+    	const fangornToolboxImpl = fangornToolbox as FangornToolbox;
+    	fangornToolboxImpl.setDataContextProvider(dataContextProvider);
+    	toolboxes.push(fangornToolbox);
+		}
     if (fangornAgentToolConfig.mcpServerConfig.enabled) {
       const fangornMcpUrl =
         fangornAgentToolConfig.mcpServerConfig.mcpServerUrls ?? ["http://localhost:4000"];
@@ -59,20 +60,18 @@ export class ToolBay {
       );
       toolboxes.push(mcpToolbox);
     }
-    if (fangornAgentToolConfig.gmailConfig.enabled) {
-      const gmailToolbox = await initializeToolbox(GmailToolbox, fangornAgentToolConfig);
-      toolboxes.push(gmailToolbox);
-    }
+		if (fangornAgentToolConfig.agent0SdkToolConfig.enabled) {
+			const agent0Toolbox = await initializeToolbox(Agent0Toolbox, fangornAgentToolConfig);
+			toolboxes.push(agent0Toolbox)
+		}
 		if (fangornAgentToolConfig.useTasteTools) {
     	const tasteToolbox = await initializeToolbox(TasteToolbox, fangornAgentToolConfig);
     	toolboxes.push(tasteToolbox);
 		}
-		if (fangornAgentToolConfig.fangornToolConfig.enabled) {
-    	const fangornToolbox = await initializeToolbox(FangornToolbox, fangornAgentToolConfig);
-    	const fangornToolboxImpl = fangornToolbox as FangornToolbox;
-    	fangornToolboxImpl.setDataContextProvider(dataContextProvider);
-    	toolboxes.push(fangornToolbox);
-		}
+    if (fangornAgentToolConfig.gmailConfig.enabled) {
+      const gmailToolbox = await initializeToolbox(GmailToolbox, fangornAgentToolConfig);
+      toolboxes.push(gmailToolbox);
+    }
 
     return new ToolBay(toolboxes, dataContextProvider);
   }
@@ -150,29 +149,24 @@ export class ToolBay {
     console.log(`Executing tool: ${toolName}`);
 
     let result = await tool!.invoke(toolArgs);
-    const parsed = JSON.parse(result);
-    let displayData = parsed.displayData;
 
-    // If this is an MCP tool whose data should be rendered in the UI,
+		result = this.processToolResult(result, toolName)
+    console.log("Tool call was executed. Here are the results:");
+    console.log(JSON.stringify(result, null, 2));
+
+    return result;
+  }
+
+	processToolResult(result: any, toolName: string) {
+		const parsed = JSON.parse(result);
+    let displayData = parsed.displayData;
+		// If this is an MCP tool whose data should be rendered in the UI,
     // stash the parsed result so the server can forward it to the frontend.
     if (displayData) {
       try {
         const data: any = parsed.data;
         const resultType: string = parsed.resultType;
-
-        if (resultType !== "non-standard") {
-          const count = Array.isArray(data) ? data.length : 1;
-          const summary = buildSummary(data, resultType);
-          result = buildFangornMusicPromptResponse(count, resultType, summary);
-          console.log(
-            `result summary given to agent: ${JSON.stringify(result, null, 2)}`,
-          );
-        } else {
-          console.log("It was non-standard");
-          console.log("resultType");
-          result = `${result} \n\nIt looks like you made a raw query. The user will not get to see the full data in the UI.`;
-        }
-
+				result = this.processDisplayData(data, resultType)
         this.mcpData = { toolName, data, resultType };
       } catch {
         // If it doesn't parse, skip — the model still gets the string
@@ -181,12 +175,24 @@ export class ToolBay {
         );
       }
     }
+		return result
+	}
 
-    console.log("Tool call was executed. Here are the results:");
-    console.log(JSON.stringify(result, null, 2));
-
-    return result;
-  }
+	processDisplayData(data: any, resultType: string) {
+		let agentPrompt
+    if (resultType !== "non-standard") {
+      const count = Array.isArray(data) ? data.length : 1;
+      const summary = buildSummary(data, resultType);
+      agentPrompt = buildFangornMusicPromptResponse(count, resultType, summary);
+      console.log(
+        `result summary given to agent: ${JSON.stringify(agentPrompt, null, 2)}`,
+      );
+    } else {
+      console.log("It was non-standard");
+      console.log("resultType");
+      agentPrompt = `${agentPrompt} \n\nIt looks like you made a raw query. The user will not get to see the full data in the UI.`;
+    }
+	}
 
   inject(newTools: DynamicStructuredTool[], toolToRemove?: string) {
     newTools.forEach((t) => this.currentTools.set(t.name, t));
@@ -232,4 +238,8 @@ export class ToolBay {
       tb.getTools().map((t) => `${t.name}: ${t.description}`),
     );
   }
+
+	public getAllToolBoxNames(): string[] {
+		return this.toolboxes.map((tb) => tb.name)
+	}
 }

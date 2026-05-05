@@ -23,6 +23,12 @@ export interface DataContext {
   excludeIds?: string[];
 }
 
+export interface McpUiResult {
+  toolName?: string;
+  resultType?: string;
+  data?: any;
+}
+
 export interface FangornAgentToolConfig {
 	gmailConfig: GmailToolConfig
 	mcpServerConfig: McpServerConfig

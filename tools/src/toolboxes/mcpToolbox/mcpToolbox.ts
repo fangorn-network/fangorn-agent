@@ -44,34 +44,39 @@ export class McpToolbox implements Toolbox {
       additionalToolNamePrefix: "",
     });
     const tools = await client.getTools();
-    const toolsWithExclude: Map<string, string> = new Map();
-    const toolNames: string[] = [];
-    // Here, we intercept the returned tools to
-    // see if there are input fields the agent shouldn't
-    // know about or that we don't want it to mess up.
-    const sanitizedTools = tools.map((t) => {
-      // console.log(`schema: \n ${JSON.stringify(t.schema)}`)
-      const schema = t.schema;
+		let sanitizedTools: DynamicStructuredTool[] = []
+		let toolNames: string[] = []
+		let toolsWithExclude: Map<string, string> = new Map()
+		if (tools && tools.length > 0) {
+			const toolsWithExclude: Map<string, string> = new Map();
+    	const toolNames: string[] = [];
+    	// Here, we intercept the returned tools to
+    	// see if there are input fields the agent shouldn't
+    	// know about or that we don't want it to mess up.
+    	sanitizedTools = tools.map((t) => {
+    	  // console.log(`schema: \n ${JSON.stringify(t.schema)}`)
+    	  const schema = t.schema;
 
-      if (
-        typeof schema === "object" &&
-        schema !== null &&
-        "properties" in schema
-      ) {
-        let properties = schema.properties;
-        if ("excludeIds" in properties) {
-          const { excludeIds, ...otherProps } = properties;
-          schema.properties = otherProps;
-          console.log("New Properties:");
-          console.log(schema.properties);
-          t.schema = schema;
-          // In the future, "excludeIds" should be the name of the field that is excluded
-          toolsWithExclude.set(t.name, "excludeIds");
-        }
-      }
-      toolNames.push(t.name);
-      return t;
-    });
+    	  if (
+    	    typeof schema === "object" &&
+    	    schema !== null &&
+    	    "properties" in schema
+    	  ) {
+    	    let properties = schema.properties;
+    	    if ("excludeIds" in properties) {
+    	      const { excludeIds, ...otherProps } = properties;
+    	      schema.properties = otherProps;
+    	      console.log("New Properties:");
+    	      console.log(schema.properties);
+    	      t.schema = schema;
+    	      // In the future, "excludeIds" should be the name of the field that is excluded
+    	      toolsWithExclude.set(t.name, "excludeIds");
+    	    }
+    	  }
+    	  toolNames.push(t.name);
+    	  return t;
+    	});
+		}
 
     return new McpToolbox(
       toolboxName,
