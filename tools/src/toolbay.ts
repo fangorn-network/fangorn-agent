@@ -98,10 +98,10 @@ export class ToolBay {
     console.log(`Specific tools activated: ${toolNames}`);
     if (toolNames.length > 0) {
       this.dirty = true;
-      let activeTools = this.toolboxes.map((tb) =>
+      let activatedTools = this.toolboxes.map((tb) =>
         tb.getToolsByName(toolNames),
       );
-      this.currentTools = new Map(activeTools.flatMap((m) => [...m]));
+      this.currentTools = new Map(activatedTools.flatMap((m) => [...m]));
       console.log("currentTools:", [...this.currentTools.keys()]);
     } else {
       console.warn(
