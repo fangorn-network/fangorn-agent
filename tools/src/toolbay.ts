@@ -4,7 +4,7 @@ import { DataContext, FangornAgentToolConfig, initializeToolbox, McpUiResult, To
 import { McpToolbox } from "./toolboxes/mcpToolbox/mcpToolbox.js";
 import { FangornToolbox } from "./toolboxes/fangornToolbox/fangornToolbox.js";
 import {
-  buildFangornMusicPromptResponse,
+  buildFangornMusicPromptResponse as buildShortenedPromptResponse,
 } from "./prompts.js";
 import { TasteToolbox } from "./toolboxes/tasteToolbox/tasteToolbox.js";
 import { buildSummary } from "./utils.js";
@@ -183,7 +183,7 @@ export class ToolBay {
     if (resultType !== "non-standard") {
       const count = Array.isArray(data) ? data.length : 1;
       const summary = buildSummary(data, resultType);
-      agentPrompt = buildFangornMusicPromptResponse(count, resultType, summary);
+      agentPrompt = buildShortenedPromptResponse(count, resultType, summary);
       console.log(
         `result summary given to agent: ${JSON.stringify(agentPrompt, null, 2)}`,
       );
