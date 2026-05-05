@@ -69,7 +69,7 @@ const server = setupServer(
 	
 );
 
-describe("The toolbay", () => {
+describe("Toolbay", () => {
 	let dataContextProvider: () => DataContext;
 	let toolbay: ToolBay;
 
@@ -90,7 +90,7 @@ describe("The toolbay", () => {
 		expect(toolboxes.length).toBe(0)
 	})
 
-	it ("Loads all toolboxes when activateAgenticTools is called", async () => {
+	it ("activateAgenticTools loads all toolboxes", async () => {
 		toolbay.activateAgenticTools()
 		const toolboxes = toolbay.consumeDirty()
 		expect(toolboxes.length).toBe(5)
@@ -99,7 +99,7 @@ describe("The toolbay", () => {
 		expect(toolbay.getAllToolBoxNames()).toStrictEqual(loadedToolboxNames)
 	})
 
-	it ("Loads only the specified tools when activateTools is called", async () => {
+	it ("activateTools only activates the specified tools", async () => {
 		const toolsToActivate = ["x402f_fetch", "get_schema"]
 		toolbay.activateTools([toolsToActivate[0]])
 		let tools = toolbay.consumeDirty()
@@ -113,7 +113,7 @@ describe("The toolbay", () => {
 		expect(tools[1].name).toBe(toolsToActivate[1])
 	})
 
-	it ("Clears loaded tools on reset", async () => {
+	it ("reset clears loaded tools", async () => {
 		toolbay.activateTools(["x402f_fetch"])
 		const tools = toolbay.consumeDirty()
 		expect(tools.length).toBe(1)
@@ -123,7 +123,7 @@ describe("The toolbay", () => {
 		expect(resetTools.length).toBe(0)
 	})
 
-	it ("Clears loaded toolboxes on reset after agentic usage", async () => {
+	it ("reset clears loaded toolboxes", async () => {
 		toolbay.activateAgenticTools()
 		let toolboxes = toolbay.consumeDirty()
 		expect(toolboxes.length).toBe(5)
@@ -131,7 +131,7 @@ describe("The toolbay", () => {
 		toolboxes = toolbay.consumeDirty()
 	})
 	
-	it ("Does not require tools to be passed in to activateTools", async () => {
+	it ("activateTools does not require tools ", async () => {
 		toolbay.activateTools([])
 		const tools = toolbay.consumeDirty()
 		expect(tools.length).toBe(0)
