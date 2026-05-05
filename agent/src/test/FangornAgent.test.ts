@@ -1,10 +1,19 @@
-import { describe, it, expect, beforeEach, vi, beforeAll, afterEach, afterAll } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  vi,
+  beforeAll,
+  afterEach,
+  afterAll,
+} from "vitest";
 import { FangornAgent } from "../FangornAgent.js";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 import { fangornAgentToolConfig } from "./testConfigs.js";
 import { DataContext } from "agent-tools";
-import { fakeModel } from "langchain"
+import { fakeModel } from "langchain";
 // import { getModelType } from "../llm.js";
 
 const server = setupServer(
@@ -37,16 +46,16 @@ const server = setupServer(
         id: body.id,
         result: {
           tools: [
-        {
-          name: "get_schema",
-          description: "...",
-          inputSchema: { type: "object", properties: {} },
-        },
-        {
-          name: "get_file_by_id",
-          description: "...",
-          inputSchema: { type: "object", properties: {} },
-        },
+            {
+              name: "get_schema",
+              description: "...",
+              inputSchema: { type: "object", properties: {} },
+            },
+            {
+              name: "get_file_by_id",
+              description: "...",
+              inputSchema: { type: "object", properties: {} },
+            },
           ],
         },
       });
@@ -57,44 +66,54 @@ const server = setupServer(
         jsonrpc: "2.0",
         id: body.id,
         result: {
-          content: [{ type: "text", text: JSON.stringify({ id: "123", name: "test" }) }],
+          content: [
+            { type: "text", text: JSON.stringify({ id: "123", name: "test" }) },
+          ],
         },
       });
     }
 
     return HttpResponse.json(
-      { jsonrpc: "2.0", id: body.id, error: { code: -32601, message: "unknown method" } },
-      { status: 400 }
+      {
+        jsonrpc: "2.0",
+        id: body.id,
+        error: { code: -32601, message: "unknown method" },
+      },
+      { status: 400 },
     );
   }),
-	
 );
 
-const mockedLLM = fakeModel()
+const mockedLLM = fakeModel();
 
 vi.mock("../llm.js", async () => {
   const actual = await vi.importActual("../llm.js");
   return {
     ...actual,
     getModelType: vi.fn((llmType) => {
-			console.log("Getting mocked LLM instead of ", llmType)
-			return mockedLLM
-		}),
+      console.log("Getting mocked LLM instead of ", llmType);
+      return mockedLLM;
+    }),
   };
 });
 
-let dataContextProvider: (() => DataContext)
+let dataContextProvider: () => DataContext;
 
-	beforeAll(() => {
-		server.listen()
-		dataContextProvider = () => { return {}}
-	})
-	afterEach(() => server.resetHandlers())
-	afterAll(() => server.close())
+beforeAll(() => {
+  server.listen();
+  dataContextProvider = () => {
+    return {};
+  };
+});
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
 
 describe("Fangorn Agent", () => {
-	it ("create successfully initializes the agent", () =>  {
-		const agent = FangornAgent.create(fangornAgentToolConfig, dataContextProvider)
-		expect(agent).toBeDefined()
-	})
-})
+  it("create successfully initializes the agent", () => {
+    const agent = FangornAgent.create(
+      fangornAgentToolConfig,
+      dataContextProvider,
+    );
+    expect(agent).toBeDefined();
+  });
+});

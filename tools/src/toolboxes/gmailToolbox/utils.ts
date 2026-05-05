@@ -40,7 +40,7 @@ export function encodeEmail(
   to: string,
   subject: string,
   body: string,
-	agentSignoff: string,
+  agentSignoff: string,
   replyToMessageId?: string,
   threadId?: string,
 ) {

@@ -13,10 +13,10 @@ export class TasteToolbox implements Toolbox {
 
   constructor() {}
 
-	getToolsByName(toolNames: string[]): Map<String, DynamicStructuredTool> {
-		const matchingToolMap = getToolsByName(this.getTools(), toolNames)
-		return matchingToolMap;
-	}
+  getToolsByName(toolNames: string[]): Map<String, DynamicStructuredTool> {
+    const matchingToolMap = getToolsByName(this.getTools(), toolNames);
+    return matchingToolMap;
+  }
 
   getTools(): DynamicStructuredTool[] {
     return [readTaste, readTasteForUpdate, updateTaste];

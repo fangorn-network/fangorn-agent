@@ -21,7 +21,10 @@ async function main() {
   const dataContextProvider: () => DataContext = () => {
     return app.locals.dataContext;
   };
-  const agent = await FangornAgent.create(fangornAgentToolConfig, dataContextProvider);
+  const agent = await FangornAgent.create(
+    fangornAgentToolConfig,
+    dataContextProvider,
+  );
 
   console.log("Fangorn Agent created!");
 
@@ -116,21 +119,21 @@ async function main() {
     console.log(`Chat endpoint running at http://localhost:${PORT}`);
   });
 
-	app.get("/toolbox-map", async (_req, res) => {
-  try {
-    const toolBoxMap: Map<string, string[]> = agent.getToolBoxToolNamesMap();
-		console.log(JSON.stringify(toolBoxMap))
-    // Convert Map to a plain object for JSON serialization
-    const payload: Record<string, string[]> = {};
-    toolBoxMap.forEach((toolNames, boxName) => {
-      payload[boxName] = toolNames;
-    });
-    res.json(payload);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to retrieve toolbox map" });
-  }
-});
+  app.get("/toolbox-map", async (_req, res) => {
+    try {
+      const toolBoxMap: Map<string, string[]> = agent.getToolBoxToolNamesMap();
+      console.log(JSON.stringify(toolBoxMap));
+      // Convert Map to a plain object for JSON serialization
+      const payload: Record<string, string[]> = {};
+      toolBoxMap.forEach((toolNames, boxName) => {
+        payload[boxName] = toolNames;
+      });
+      res.json(payload);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: "Failed to retrieve toolbox map" });
+    }
+  });
 }
 
 main();

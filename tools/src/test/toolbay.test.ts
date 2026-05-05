@@ -1,4 +1,12 @@
-import { describe, it, expect, beforeEach, beforeAll, afterEach, afterAll } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  beforeEach,
+  beforeAll,
+  afterEach,
+  afterAll,
+} from "vitest";
 import { DataContext } from "../types.js";
 import { fangornAgentToolConfig } from "./testConfigs.js";
 import { ToolBay } from "../toolbay.js";
@@ -36,16 +44,16 @@ const server = setupServer(
         id: body.id,
         result: {
           tools: [
-        {
-          name: "get_schema",
-          description: "...",
-          inputSchema: { type: "object", properties: {} },
-        },
-        {
-          name: "get_file_by_id",
-          description: "...",
-          inputSchema: { type: "object", properties: {} },
-        },
+            {
+              name: "get_schema",
+              description: "...",
+              inputSchema: { type: "object", properties: {} },
+            },
+            {
+              name: "get_file_by_id",
+              description: "...",
+              inputSchema: { type: "object", properties: {} },
+            },
           ],
         },
       });
@@ -56,84 +64,91 @@ const server = setupServer(
         jsonrpc: "2.0",
         id: body.id,
         result: {
-          content: [{ type: "text", text: JSON.stringify({ id: "123", name: "test" }) }],
+          content: [
+            { type: "text", text: JSON.stringify({ id: "123", name: "test" }) },
+          ],
         },
       });
     }
 
     return HttpResponse.json(
-      { jsonrpc: "2.0", id: body.id, error: { code: -32601, message: "unknown method" } },
-      { status: 400 }
+      {
+        jsonrpc: "2.0",
+        id: body.id,
+        error: { code: -32601, message: "unknown method" },
+      },
+      { status: 400 },
     );
   }),
-	
 );
 
 describe("Toolbay", () => {
-	let dataContextProvider: () => DataContext;
-	let toolbay: ToolBay;
+  let dataContextProvider: () => DataContext;
+  let toolbay: ToolBay;
 
-	beforeAll(() => server.listen())
-	afterEach(() => server.resetHandlers())
-	afterAll(() => server.close())
+  beforeAll(() => server.listen());
+  afterEach(() => server.resetHandlers());
+  afterAll(() => server.close());
 
-	beforeEach( async () => {
-		dataContextProvider = (() => {
-			return   {excludeIds: ["abc"]}
-		})
-		toolbay = await ToolBay.initToolbay(dataContextProvider, fangornAgentToolConfig)
+  beforeEach(async () => {
+    dataContextProvider = () => {
+      return { excludeIds: ["abc"] };
+    };
+    toolbay = await ToolBay.initToolbay(
+      dataContextProvider,
+      fangornAgentToolConfig,
+    );
+  });
 
-	})
+  it("Loads no tools initially", async () => {
+    const toolboxes = toolbay.consumeDirty();
+    expect(toolboxes.length).toBe(0);
+  });
 
-	it ("Loads no tools initially", async () => {
-		const toolboxes = toolbay.consumeDirty()
-		expect(toolboxes.length).toBe(0)
-	})
+  it("activateAgenticTools loads all toolboxes", async () => {
+    toolbay.activateAgenticTools();
+    const toolboxes = toolbay.consumeDirty();
+    expect(toolboxes.length).toBe(5);
+    const loadedToolboxNames = toolboxes.map((tb) => tb.name);
 
-	it ("activateAgenticTools loads all toolboxes", async () => {
-		toolbay.activateAgenticTools()
-		const toolboxes = toolbay.consumeDirty()
-		expect(toolboxes.length).toBe(5)
-		const loadedToolboxNames = toolboxes.map((tb) => tb.name)
+    expect(toolbay.getAllToolBoxNames()).toStrictEqual(loadedToolboxNames);
+  });
 
-		expect(toolbay.getAllToolBoxNames()).toStrictEqual(loadedToolboxNames)
-	})
+  it("activateTools only activates the specified tools", async () => {
+    const toolsToActivate = ["x402f_fetch", "get_schema"];
+    toolbay.activateTools([toolsToActivate[0]]);
+    let tools = toolbay.consumeDirty();
+    expect(tools.length).toBe(1);
+    expect(tools[0].name).toBe("x402f_fetch");
+    toolbay.resetToolBay();
+    toolbay.activateTools(toolsToActivate);
+    tools = toolbay.consumeDirty();
+    expect(tools.length).toBe(2);
+    expect(tools[0].name).toBe(toolsToActivate[0]);
+    expect(tools[1].name).toBe(toolsToActivate[1]);
+  });
 
-	it ("activateTools only activates the specified tools", async () => {
-		const toolsToActivate = ["x402f_fetch", "get_schema"]
-		toolbay.activateTools([toolsToActivate[0]])
-		let tools = toolbay.consumeDirty()
-		expect(tools.length).toBe(1)
-		expect(tools[0].name).toBe("x402f_fetch")
-		toolbay.resetToolBay()
-		toolbay.activateTools(toolsToActivate)
-		tools = toolbay.consumeDirty()
-		expect(tools.length).toBe(2)
-		expect(tools[0].name).toBe(toolsToActivate[0])
-		expect(tools[1].name).toBe(toolsToActivate[1])
-	})
+  it("reset clears loaded tools", async () => {
+    toolbay.activateTools(["x402f_fetch"]);
+    const tools = toolbay.consumeDirty();
+    expect(tools.length).toBe(1);
+    expect(tools[0].name).toBe("x402f_fetch");
+    toolbay.resetToolBay();
+    const resetTools = toolbay.consumeDirty();
+    expect(resetTools.length).toBe(0);
+  });
 
-	it ("reset clears loaded tools", async () => {
-		toolbay.activateTools(["x402f_fetch"])
-		const tools = toolbay.consumeDirty()
-		expect(tools.length).toBe(1)
-		expect(tools[0].name).toBe("x402f_fetch")
-		toolbay.resetToolBay()
-		const resetTools = toolbay.consumeDirty()
-		expect(resetTools.length).toBe(0)
-	})
+  it("reset clears loaded toolboxes", async () => {
+    toolbay.activateAgenticTools();
+    let toolboxes = toolbay.consumeDirty();
+    expect(toolboxes.length).toBe(5);
+    toolbay.resetToolBay();
+    toolboxes = toolbay.consumeDirty();
+  });
 
-	it ("reset clears loaded toolboxes", async () => {
-		toolbay.activateAgenticTools()
-		let toolboxes = toolbay.consumeDirty()
-		expect(toolboxes.length).toBe(5)
-		toolbay.resetToolBay()
-		toolboxes = toolbay.consumeDirty()
-	})
-	
-	it ("activateTools does not require tools ", async () => {
-		toolbay.activateTools([])
-		const tools = toolbay.consumeDirty()
-		expect(tools.length).toBe(0)
-	})
-})
+  it("activateTools does not require tools ", async () => {
+    toolbay.activateTools([]);
+    const tools = toolbay.consumeDirty();
+    expect(tools.length).toBe(0);
+  });
+});

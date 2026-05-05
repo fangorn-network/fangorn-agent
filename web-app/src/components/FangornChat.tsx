@@ -355,7 +355,9 @@ export default function FangornChat({
               <button
                 onClick={() =>
                   onChatModeChange(
-                    chatMode === "full-agentic" ? "tool-scoped" : "full-agentic",
+                    chatMode === "full-agentic"
+                      ? "tool-scoped"
+                      : "full-agentic",
                   )
                 }
                 style={{
@@ -483,7 +485,8 @@ export default function FangornChat({
                   }}
                 >
                   Full agentic mode requires an LLM with multi-step workflow
-                  capabilities. Responses may be <b>significantly</b> slower and consume more tokens.
+                  capabilities. Responses may be <b>significantly</b> slower and
+                  consume more tokens.
                 </span>
               </div>
             )}

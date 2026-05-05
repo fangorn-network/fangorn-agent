@@ -10,12 +10,12 @@ import { useToolboxSelection } from "@/hooks/useToolboxSelection";
 export default function ExplorePage() {
   const toolbox = useToolboxSelection();
   const [chatMode, setChatMode] = useState<ChatMode>("tool-scoped");
-	const toolNameListRef = useRef<string[]>(toolbox.selectedToolList);
+  const toolNameListRef = useRef<string[]>(toolbox.selectedToolList);
   toolNameListRef.current = toolbox.selectedToolList;
- 
+
   const chatModeRef = useRef<ChatMode>(chatMode);
   chatModeRef.current = chatMode;
- 
+
   const { chatHistory, loading, error, sendMessage } = useFangornAgent({
     toolNameListRef,
     chatModeRef,
@@ -56,9 +56,9 @@ export default function ExplorePage() {
               loading={loading}
               error={error}
               sendMessage={sendMessage}
-							toolbox={toolbox}
-							chatMode={chatMode}
-      				onChatModeChange={setChatMode}
+              toolbox={toolbox}
+              chatMode={chatMode}
+              onChatModeChange={setChatMode}
             />
           )}
         </div>

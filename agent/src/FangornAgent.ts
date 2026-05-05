@@ -11,7 +11,7 @@ import {
   ToolBay,
   McpUiResult,
   DataContext,
-	FangornAgentToolConfig,
+  FangornAgentToolConfig,
 } from "@fangorn-network/agent-tools";
 import {
   BaseMessage,
@@ -37,10 +37,13 @@ export class FangornAgent {
   private shortTermMemory: FangornSTM;
 
   static async create(
-		fangornAgentToolConfig: FangornAgentToolConfig,
+    fangornAgentToolConfig: FangornAgentToolConfig,
     dataContextProvider: () => DataContext,
   ): Promise<FangornAgent> {
-    const toolbay = await ToolBay.initToolbay(dataContextProvider, fangornAgentToolConfig);
+    const toolbay = await ToolBay.initToolbay(
+      dataContextProvider,
+      fangornAgentToolConfig,
+    );
     return new FangornAgent(toolbay);
   }
 
@@ -49,9 +52,9 @@ export class FangornAgent {
 
     let llmType = process.env.LLM;
     if (!llmType) {
-			console.warn("No LLM type specified, defaulting to ollama")
-			llmType = "ollama"
-		}
+      console.warn("No LLM type specified, defaulting to ollama");
+      llmType = "ollama";
+    }
 
     this.model = getModelType(llmType);
 
@@ -107,11 +110,7 @@ export class FangornAgent {
     this.toolbay.activateTools(toolNameList);
     const modelWithTools = this.model.bindTools(this.toolbay.consumeDirty());
     console.log("Beginning agent loop...");
-    return await this.agentLoop(
-      modelWithTools,
-      messages,
-      useMemory,
-    );
+    return await this.agentLoop(modelWithTools, messages, useMemory);
   }
 
   /**
@@ -296,7 +295,7 @@ export class FangornAgent {
     return this.toolbay.getAllToolNames();
   }
 
-	public getToolBoxToolNamesMap(): Map<string, string[]> {
-		return this.toolbay.getToolBoxToolNamesMap()
-	}
+  public getToolBoxToolNamesMap(): Map<string, string[]> {
+    return this.toolbay.getToolBoxToolNamesMap();
+  }
 }

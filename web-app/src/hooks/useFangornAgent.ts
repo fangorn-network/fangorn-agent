@@ -58,7 +58,10 @@ interface UseFangornAgentOptions {
 
 let entryId = 0;
 
-export function useFangornAgent({ toolNameListRef, chatModeRef }: UseFangornAgentOptions) {
+export function useFangornAgent({
+  toolNameListRef,
+  chatModeRef,
+}: UseFangornAgentOptions) {
   const [state, setState] = useState<AgentState>({
     loading: false,
     error: null,

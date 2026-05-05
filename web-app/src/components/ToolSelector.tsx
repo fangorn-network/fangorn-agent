@@ -12,7 +12,7 @@ const C = {
   text: "var(--color-text-primary, #fafafa)",
   textDim: "var(--color-text-secondary, #999)",
   textMuted: "var(--color-text-tertiary, #5a5a5a)",
-  accent: "#7cb77a",       // earthy green — fits "Fangorn"
+  accent: "#7cb77a", // earthy green — fits "Fangorn"
   accentDim: "#3d5e3c",
 } as const;
 
@@ -212,8 +212,7 @@ export default function ToolSelector({
             const selectedInBox = tools.filter((t) => selectedTools.has(t));
             const allSelected =
               tools.length > 0 && selectedInBox.length === tools.length;
-            const someSelected =
-              selectedInBox.length > 0 && !allSelected;
+            const someSelected = selectedInBox.length > 0 && !allSelected;
             const expanded = expandedBoxes.has(boxName);
 
             return (
@@ -279,7 +278,8 @@ export default function ToolSelector({
                   <span
                     style={{
                       fontSize: 10,
-                      color: someSelected || allSelected ? C.accent : C.textMuted,
+                      color:
+                        someSelected || allSelected ? C.accent : C.textMuted,
                       fontFamily: "var(--font-mono, monospace)",
                       fontWeight: 500,
                     }}
@@ -322,7 +322,10 @@ export default function ToolSelector({
                               "transparent")
                           }
                         >
-                          <Checkbox checked={isSelected} onChange={() => toggleTool(toolName)} />
+                          <Checkbox
+                            checked={isSelected}
+                            onChange={() => toggleTool(toolName)}
+                          />
                           <span
                             style={{
                               fontSize: 11,
@@ -429,7 +432,13 @@ function Checkbox({
   );
 }
 
-function PillButton({ onClick, label }: { onClick: () => void; label: string }) {
+function PillButton({
+  onClick,
+  label,
+}: {
+  onClick: () => void;
+  label: string;
+}) {
   return (
     <button
       onClick={onClick}

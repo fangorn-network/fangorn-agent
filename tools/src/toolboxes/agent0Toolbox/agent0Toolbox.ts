@@ -6,19 +6,21 @@ import { getToolsByName } from "../utils.js";
 
 export class Agent0Toolbox implements Toolbox {
   public name: string = "agent0-toolbox";
-	private tools: DynamicStructuredTool[];
+  private tools: DynamicStructuredTool[];
 
   static async init(config: FangornAgentToolConfig): Promise<Agent0Toolbox> {
-		const tools: DynamicStructuredTool[] = createAgent0Tools(config.agent0SdkToolConfig)
+    const tools: DynamicStructuredTool[] = createAgent0Tools(
+      config.agent0SdkToolConfig,
+    );
     return new Agent0Toolbox(tools);
   }
 
-	constructor(tools: DynamicStructuredTool[]) {
-		this.tools = tools
-	}
+  constructor(tools: DynamicStructuredTool[]) {
+    this.tools = tools;
+  }
 
   getToolsByName(toolNames: string[]): Map<String, DynamicStructuredTool> {
-    const matchingToolMap = getToolsByName(this.getTools(), toolNames)
+    const matchingToolMap = getToolsByName(this.getTools(), toolNames);
     return matchingToolMap;
   }
 

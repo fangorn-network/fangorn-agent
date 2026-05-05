@@ -8,9 +8,7 @@ import {
 } from "../../constants.js";
 import { Agent0SdkToolConfig } from "../../types.js";
 
-export function getAgent0Sdk(
-	agent0SdkToolConfig: Agent0SdkToolConfig
-) {
+export function getAgent0Sdk(agent0SdkToolConfig: Agent0SdkToolConfig) {
   let agent0Sdk;
   if (agent0SdkToolConfig.chainConfig.chain.id === arbitrumSepoliaChainId) {
     agent0Sdk = new SDK({

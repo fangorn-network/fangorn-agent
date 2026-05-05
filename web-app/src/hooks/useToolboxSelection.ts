@@ -34,13 +34,12 @@ export function useToolboxSelection(): UseToolboxSelectionReturn {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const apiUrl =
-      process.env.NEXT_PUBLIC_AGENT_URL || "http://localhost:3001";
+    const apiUrl = process.env.NEXT_PUBLIC_AGENT_URL || "http://localhost:3001";
 
     fetch(`${apiUrl}/toolbox-map`)
       .then((res) => {
         if (!res.ok) throw new Error(`Server returned ${res.status}`);
-				console.log("res: ", JSON.stringify(res))
+        console.log("res: ", JSON.stringify(res));
         return res.json();
       })
       .then((data: ToolboxMap) => {

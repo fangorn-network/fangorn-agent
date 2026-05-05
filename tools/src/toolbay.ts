@@ -1,5 +1,11 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
-import { DataContext, FangornAgentToolConfig, McpUiResult, Toolbox, ToolboxPlugin } from "./types.js";
+import {
+  DataContext,
+  FangornAgentToolConfig,
+  McpUiResult,
+  Toolbox,
+  ToolboxPlugin,
+} from "./types.js";
 
 import { buildSummary, processToolResult } from "./utils.js";
 import { activateToolboxPlugins } from "./toolboxes/utils.js";
@@ -22,10 +28,10 @@ export class ToolBay {
 
   static async initToolbay(
     dataContextProvider: () => DataContext,
-		config: FangornAgentToolConfig,
+    config: FangornAgentToolConfig,
   ): Promise<ToolBay> {
-		let toolboxes = await activateToolboxPlugins(config, dataContextProvider)
-  	return new ToolBay(toolboxes, dataContextProvider);
+    let toolboxes = await activateToolboxPlugins(config, dataContextProvider);
+    return new ToolBay(toolboxes, dataContextProvider);
   }
 
   constructor(toolboxes: Toolbox[], dataContextProvider: () => DataContext) {
@@ -100,15 +106,14 @@ export class ToolBay {
 
     console.log(`Executing tool: ${toolName}`);
     const result = await tool!.invoke(toolArgs);
-		const {finalResult, mcpData} = processToolResult(result, toolName)
-		
-		if (mcpData) this.mcpData = mcpData
+    const { finalResult, mcpData } = processToolResult(result, toolName);
+
+    if (mcpData) this.mcpData = mcpData;
     console.log("Tool call was executed. Here are the results:");
     console.log(JSON.stringify(result, null, 2));
 
     return finalResult;
   }
-
 
   inject(newTools: DynamicStructuredTool[], toolToRemove?: string) {
     newTools.forEach((t) => this.currentTools.set(t.name, t));
@@ -155,19 +160,19 @@ export class ToolBay {
     );
   }
 
-	public getAllToolBoxNames(): string[] {
-		return this.toolboxes.map((tb) => tb.name)
-	}
+  public getAllToolBoxNames(): string[] {
+    return this.toolboxes.map((tb) => tb.name);
+  }
 
-	public getToolBoxToolNamesMap(): Map<string, string[]> {
-		const toolBoxToolNamesMap = new Map()
-		this.toolboxes.forEach((tb) => {
-			const tbName = tb.name
-			const tools = tb.getTools()
-			const toolNames = tools.map((t) => t.name)
-			console.log(`setting ${tbName}:${toolNames}`)
-			toolBoxToolNamesMap.set(tbName, toolNames)
-		})
-		return toolBoxToolNamesMap;
-	}
+  public getToolBoxToolNamesMap(): Map<string, string[]> {
+    const toolBoxToolNamesMap = new Map();
+    this.toolboxes.forEach((tb) => {
+      const tbName = tb.name;
+      const tools = tb.getTools();
+      const toolNames = tools.map((t) => t.name);
+      console.log(`setting ${tbName}:${toolNames}`);
+      toolBoxToolNamesMap.set(tbName, toolNames);
+    });
+    return toolBoxToolNamesMap;
+  }
 }

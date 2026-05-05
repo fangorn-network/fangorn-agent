@@ -4,51 +4,46 @@ import {
   SchemaState,
 } from "@fangorn-network/client-types";
 
-import {
-  buildFangornMusicPromptResponse as buildShortenedPromptResponse,
-} from "./prompts.js";
+import { buildFangornMusicPromptResponse as buildShortenedPromptResponse } from "./prompts.js";
 
-
-export 	function processDisplayData(data: any, resultType: string) {
-		let agentPrompt
-    if (resultType !== "non-standard") {
-      const count = Array.isArray(data) ? data.length : 1;
-      const summary = buildSummary(data, resultType);
-      agentPrompt = buildShortenedPromptResponse(count, resultType, summary);
-      console.log(
-        `result summary given to agent: ${JSON.stringify(agentPrompt, null, 2)}`,
-      );
-    } else {
-      console.log("It was non-standard");
-      console.log("resultType");
-      agentPrompt = `${agentPrompt} \n\nIt looks like you made a raw query. The user will not get to see the full data in the UI.`;
-    }
+export function processDisplayData(data: any, resultType: string) {
+  let agentPrompt;
+  if (resultType !== "non-standard") {
+    const count = Array.isArray(data) ? data.length : 1;
+    const summary = buildSummary(data, resultType);
+    agentPrompt = buildShortenedPromptResponse(count, resultType, summary);
+    console.log(
+      `result summary given to agent: ${JSON.stringify(agentPrompt, null, 2)}`,
+    );
+  } else {
+    console.log("It was non-standard");
+    console.log("resultType");
+    agentPrompt = `${agentPrompt} \n\nIt looks like you made a raw query. The user will not get to see the full data in the UI.`;
+  }
 }
 
-
-export function	processToolResult(result: any, toolName: string) {
-		const parsed = JSON.parse(result);
-		let finalResult = result
-    let displayData = parsed.displayData;
-		let mcpData;
-		// If this is an MCP tool whose data should be rendered in the UI,
-    // stash the parsed result so the server can forward it to the frontend.
-    if (displayData) {
-      try {
-        const data: any = parsed.data;
-        const resultType: string = parsed.resultType;
-				finalResult = processDisplayData(data, resultType)
-        mcpData = { toolName, data, resultType };
-      } catch {
-        // If it doesn't parse, skip — the model still gets the string
-        console.log(
-          `[ToolBay] Could not parse MCP result for UI forwarding. Raw type: ${typeof result}, preview: ${String(result).slice(0, 200)}`,
-        );
-      }
+export function processToolResult(result: any, toolName: string) {
+  const parsed = JSON.parse(result);
+  let finalResult = result;
+  let displayData = parsed.displayData;
+  let mcpData;
+  // If this is an MCP tool whose data should be rendered in the UI,
+  // stash the parsed result so the server can forward it to the frontend.
+  if (displayData) {
+    try {
+      const data: any = parsed.data;
+      const resultType: string = parsed.resultType;
+      finalResult = processDisplayData(data, resultType);
+      mcpData = { toolName, data, resultType };
+    } catch {
+      // If it doesn't parse, skip — the model still gets the string
+      console.log(
+        `[ToolBay] Could not parse MCP result for UI forwarding. Raw type: ${typeof result}, preview: ${String(result).slice(0, 200)}`,
+      );
     }
-		return {finalResult, mcpData}
-	}
-
+  }
+  return { finalResult, mcpData };
+}
 
 export function buildSummary(data: any, resultType: string): string {
   if (!Array.isArray(data)) return JSON.stringify(data).slice(0, 500);

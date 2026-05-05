@@ -1,11 +1,16 @@
 import dotenv from "dotenv";
-import { Agent0SdkToolConfig, FangornAgentToolConfig, FangornToolConfig, GmailToolConfig, McpServerConfig } from "@fangorn-network/agent-tools";
+import {
+  Agent0SdkToolConfig,
+  FangornAgentToolConfig,
+  FangornToolConfig,
+  GmailToolConfig,
+  McpServerConfig,
+} from "@fangorn-network/agent-tools";
 import { FangornConfig } from "@fangorn-network/sdk";
 import { createWalletClient, Hex, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
 dotenv.config();
-
 
 export const useMemory = process.env.USE_MEMORY
   ? process.env.USE_MEMORY === "true"
@@ -58,31 +63,43 @@ const walletClient = createWalletClient({
   transport: http(chainConfig.rpcUrl),
 });
 
-export const useFangornTools = process.env.USE_FANGORN_TOOLS ? process.env.USE_FANGORN_TOOLS === "true" : false
-export const useTasteTools = process.env.USE_TASTE_TOOLS ? process.env.USE_TASTE_TOOLS === "true" : false
-const useGmail = process.env.USE_GMAIL ? process.env.USE_GMAIL === "true" : false;
-const useAgent0 = process.env.USE_AGENT0 ? process.env.USE_AGENT0 === "true" : false;
+export const useFangornTools = process.env.USE_FANGORN_TOOLS
+  ? process.env.USE_FANGORN_TOOLS === "true"
+  : false;
+export const useTasteTools = process.env.USE_TASTE_TOOLS
+  ? process.env.USE_TASTE_TOOLS === "true"
+  : false;
+const useGmail = process.env.USE_GMAIL
+  ? process.env.USE_GMAIL === "true"
+  : false;
+const useAgent0 = process.env.USE_AGENT0
+  ? process.env.USE_AGENT0 === "true"
+  : false;
 const useMcp = process.env.USE_MCP ? process.env.USE_MCP === "true" : false;
-const mcpServerUrls = process.env.FANGORN_MCP_URL ? [process.env.FANGORN_MCP_URL] : [""]
+const mcpServerUrls = process.env.FANGORN_MCP_URL
+  ? [process.env.FANGORN_MCP_URL]
+  : [""];
 
 console.log(`The agent ${useGmail ? "will" : "will not"} use Gmail`);
 console.log(`The agent ${useMcp ? "will" : "will not"} use MCP tools`);
 console.log(`The agent ${useAgent0 ? "will" : "will not"} use Agent0 tools`);
-console.log(`The agent ${useFangornTools ? "will" : "will not"} use x402f tools`);
+console.log(
+  `The agent ${useFangornTools ? "will" : "will not"} use x402f tools`,
+);
 
 export const fangornToolConfig: FangornToolConfig = {
-	enabled: useFangornTools,
+  enabled: useFangornTools,
   walletClient: walletClient as any,
   config: chainConfig,
   usdcContractAddress,
   usdcDomainName,
   facilitatorAddress,
-	resourceServerUrl,
+  resourceServerUrl,
   domain,
 };
 
 export const agent0SdkToolConfig: Agent0SdkToolConfig = {
-	enabled: useAgent0,
+  enabled: useAgent0,
   pinataJwt,
   chainConfig,
   key,
@@ -94,7 +111,7 @@ const gmailRefreshToken = process.env.GMAIL_REFRESH_TOKEN ?? "";
 const agentSignoff = process.env.AGENT_SIGNOFF ?? "";
 
 const gmailConfig: GmailToolConfig = {
-	enabled: useGmail,
+  enabled: useGmail,
   gmailClientId,
   gmailClientSecret,
   gmailRefreshToken,
@@ -102,14 +119,14 @@ const gmailConfig: GmailToolConfig = {
 };
 
 const mcpServerConfig: McpServerConfig = {
-	enabled: useMcp,
-	mcpServerUrls
-}
+  enabled: useMcp,
+  mcpServerUrls,
+};
 
 export const fangornAgentToolConfig: FangornAgentToolConfig = {
-	gmailConfig,
-	agent0SdkToolConfig,
-	fangornToolConfig,
-	mcpServerConfig,
-	useTasteTools
-}
+  gmailConfig,
+  agent0SdkToolConfig,
+  fangornToolConfig,
+  mcpServerConfig,
+  useTasteTools,
+};

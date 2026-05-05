@@ -14,12 +14,15 @@ export interface AsyncFactory<T> {
 
 export interface ToolboxPlugin {
   enabled(config: FangornAgentToolConfig): boolean;
-  init(config: FangornAgentToolConfig, dataContextProvider: () => DataContext): Promise<Toolbox>;
+  init(
+    config: FangornAgentToolConfig,
+    dataContextProvider: () => DataContext,
+  ): Promise<Toolbox>;
 }
 
 export async function initializeToolbox(
   factory: AsyncFactory<Toolbox>,
-	config?: FangornAgentToolConfig
+  config?: FangornAgentToolConfig,
 ): Promise<Toolbox> {
   return factory.init(config);
 }
@@ -35,40 +38,40 @@ export interface McpUiResult {
 }
 
 export interface FangornAgentToolConfig {
-	gmailConfig: GmailToolConfig
-	mcpServerConfig: McpServerConfig
-	agent0SdkToolConfig: Agent0SdkToolConfig
-	fangornToolConfig: FangornToolConfig
-	useTasteTools: boolean
+  gmailConfig: GmailToolConfig;
+  mcpServerConfig: McpServerConfig;
+  agent0SdkToolConfig: Agent0SdkToolConfig;
+  fangornToolConfig: FangornToolConfig;
+  useTasteTools: boolean;
 }
 
 export interface FangornToolConfig {
-	enabled: boolean
-	walletClient: any
-	config: any
-	usdcContractAddress: Hex
-	usdcDomainName: string
-	facilitatorAddress: Hex
-	resourceServerUrl: string
-	domain: string
+  enabled: boolean;
+  walletClient: any;
+  config: any;
+  usdcContractAddress: Hex;
+  usdcDomainName: string;
+  facilitatorAddress: Hex;
+  resourceServerUrl: string;
+  domain: string;
 }
 
 export interface McpServerConfig {
-	enabled: boolean
-	mcpServerUrls: string[]
+  enabled: boolean;
+  mcpServerUrls: string[];
 }
 
 export interface Agent0SdkToolConfig {
-	enabled: boolean
-	pinataJwt: string
-	chainConfig: any
-	key: Hex
-};
+  enabled: boolean;
+  pinataJwt: string;
+  chainConfig: any;
+  key: Hex;
+}
 
 export interface GmailToolConfig {
-	enabled: boolean
-	gmailClientId: string
-	gmailClientSecret: string
-	gmailRefreshToken: string
-	agentSignoff: string
+  enabled: boolean;
+  gmailClientId: string;
+  gmailClientSecret: string;
+  gmailRefreshToken: string;
+  agentSignoff: string;
 }
