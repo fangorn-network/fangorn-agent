@@ -103,7 +103,7 @@ async function main() {
     });
   });
 
-  app.get("/tools", async (req, res) => {
+  app.get("/tools", async (_req, res) => {
     console.log("Request to retrieve tool names receieved");
     const toolInfo = agent.getAllToolNames();
     console.log(toolInfo);

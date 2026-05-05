@@ -47,8 +47,11 @@ export class FangornAgent {
   constructor(toolbay: ToolBay) {
     this.toolbay = toolbay;
 
-    const llmType = process.env.LLM;
-    if (!llmType) throw new Error("No LLM specified");
+    let llmType = process.env.LLM;
+    if (!llmType) {
+			console.warn("No LLM type specified, defaulting to ollama")
+			llmType = "ollama"
+		}
 
     this.model = getModelType(llmType);
 

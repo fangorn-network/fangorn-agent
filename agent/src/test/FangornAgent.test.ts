@@ -1,9 +1,11 @@
-import { describe, it, expect, beforeEach, beforeAll, afterEach, afterAll } from "vitest";
+import { describe, it, expect, beforeEach, vi, beforeAll, afterEach, afterAll } from "vitest";
 import { FangornAgent } from "../FangornAgent.js";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 import { fangornAgentToolConfig } from "./testConfigs.js";
 import { DataContext } from "agent-tools";
+import { fakeModel } from "langchain"
+// import { getModelType } from "../llm.js";
 
 const server = setupServer(
   http.post("https://mcp.fangorn.network/mcp", async ({ request }) => {
@@ -68,6 +70,19 @@ const server = setupServer(
 	
 );
 
+const mockedLLM = fakeModel()
+
+vi.mock("../llm.js", async () => {
+  const actual = await vi.importActual("../llm.js");
+  return {
+    ...actual,
+    getModelType: vi.fn((llmType) => {
+			console.log("Getting mocked LLM instead of ", llmType)
+			return mockedLLM
+		}),
+  };
+});
+
 let dataContextProvider: (() => DataContext)
 
 	beforeAll(() => {
@@ -79,6 +94,7 @@ let dataContextProvider: (() => DataContext)
 
 describe("Fangorn Agent", () => {
 	it ("create successfully initializes the agent", () =>  {
-		FangornAgent.create(fangornAgentToolConfig, dataContextProvider)
+		const agent = FangornAgent.create(fangornAgentToolConfig, dataContextProvider)
+		expect(agent).toBeDefined()
 	})
 })
