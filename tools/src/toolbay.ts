@@ -1,23 +1,8 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
-import { GmailToolbox } from "./toolboxes/gmailToolbox/GmailToolbox.js";
-import { DataContext, FangornAgentToolConfig, initializeToolbox, McpUiResult, Toolbox, ToolboxPlugin } from "./types.js";
-import { McpToolbox } from "./toolboxes/mcpToolbox/mcpToolbox.js";
-import { FangornToolbox } from "./toolboxes/fangornToolbox/fangornToolbox.js";
-import {
-  buildFangornMusicPromptResponse as buildShortenedPromptResponse,
-} from "./prompts.js";
-import { TasteToolbox } from "./toolboxes/tasteToolbox/tasteToolbox.js";
-import { buildSummary, activateToolboxPlugins } from "./utils.js";
-import { Agent0Toolbox } from "./toolboxes/agent0Toolbox/agent0Toolbox.js";
+import { DataContext, FangornAgentToolConfig, McpUiResult, Toolbox, ToolboxPlugin } from "./types.js";
 
-
-// Examples of a toolbox:
-// Web3 toolbox: wallets, signing, funds, etc.
-// Websearch toolbox: google queries, using other LLMs for queries
-// Filesystem toolbox
-// etc.
-// Toolboxes are a collection of tools that are local to the agent.
-// Tool names whose raw results should be forwarded to the frontend
+import { buildSummary, processToolResult } from "./utils.js";
+import { activateToolboxPlugins } from "./toolboxes/utils.js";
 
 export class ToolBay {
   private currentTools: Map<String, DynamicStructuredTool> = new Map();
@@ -110,56 +95,22 @@ export class ToolBay {
       // Example of toolArgs:
       // {"fieldName":"genre","fieldValue":"Jazz","caseSensitive":false,"first":9}
       // this so if we wanted to exclude file ids we would do something like
-      // toolArgs["exludeIds"] = excludeIds
+      // toolArgs["exludeIds"] = excludeIdsSW
     }
 
     console.log(`Executing tool: ${toolName}`);
 
-    let result = await tool!.invoke(toolArgs);
+    const result = await tool!.invoke(toolArgs);
 
-		result = this.processToolResult(result, toolName)
+		const {finalResult, mcpData} = processToolResult(result, toolName)
+		
+		if (mcpData) this.mcpData = mcpData
     console.log("Tool call was executed. Here are the results:");
     console.log(JSON.stringify(result, null, 2));
 
-    return result;
+    return finalResult;
   }
 
-	processToolResult(result: any, toolName: string) {
-		const parsed = JSON.parse(result);
-    let displayData = parsed.displayData;
-		// If this is an MCP tool whose data should be rendered in the UI,
-    // stash the parsed result so the server can forward it to the frontend.
-    if (displayData) {
-      try {
-        const data: any = parsed.data;
-        const resultType: string = parsed.resultType;
-				result = this.processDisplayData(data, resultType)
-        this.mcpData = { toolName, data, resultType };
-      } catch {
-        // If it doesn't parse, skip — the model still gets the string
-        console.log(
-          `[ToolBay] Could not parse MCP result for UI forwarding. Raw type: ${typeof result}, preview: ${String(result).slice(0, 200)}`,
-        );
-      }
-    }
-		return result
-	}
-
-	processDisplayData(data: any, resultType: string) {
-		let agentPrompt
-    if (resultType !== "non-standard") {
-      const count = Array.isArray(data) ? data.length : 1;
-      const summary = buildSummary(data, resultType);
-      agentPrompt = buildShortenedPromptResponse(count, resultType, summary);
-      console.log(
-        `result summary given to agent: ${JSON.stringify(agentPrompt, null, 2)}`,
-      );
-    } else {
-      console.log("It was non-standard");
-      console.log("resultType");
-      agentPrompt = `${agentPrompt} \n\nIt looks like you made a raw query. The user will not get to see the full data in the UI.`;
-    }
-	}
 
   inject(newTools: DynamicStructuredTool[], toolToRemove?: string) {
     newTools.forEach((t) => this.currentTools.set(t.name, t));
