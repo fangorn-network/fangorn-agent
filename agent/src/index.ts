@@ -46,22 +46,18 @@ export class FangornAgent {
       dataContextProvider,
       fangornAgentConfig.fangornAgentToolConfig,
     );
-    return new FangornAgent(toolbay, fangornAgentConfig.useMemory);
+    return new FangornAgent(toolbay, fangornAgentConfig);
   }
 
-  constructor(toolbay: ToolBay, useMemory: boolean) {
+  constructor(toolbay: ToolBay, fangornAgentConfig: FangornAgentConfig) {
     this.toolbay = toolbay;
-    this.useMemory = useMemory
+    this.useMemory = fangornAgentConfig.useMemory
+    const llmProvider = fangornAgentConfig.llmProvider
+    const llmModel = fangornAgentConfig.llmModel
 
-    let llmType = process.env.LLM;
-    if (!llmType) {
-      console.warn("No LLM type specified, defaulting to ollama");
-      llmType = "ollama";
-    }
+    this.model = getModelType(llmProvider, llmModel);
 
-    this.model = getModelType(llmType);
-
-    this.shortTermMemory = new FangornSTM(llmType);
+    this.shortTermMemory = new FangornSTM(llmProvider);
 
     // Display systemPrompt info
     console.log(systemPromptHeader);

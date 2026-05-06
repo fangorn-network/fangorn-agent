@@ -1,3 +1,4 @@
+import { LLMProvider } from "@fangorn-network/agent-types";
 import {
   BaseMessage,
   HumanMessage,
@@ -6,10 +7,9 @@ import {
 } from "langchain";
 
 // medium is currently unused
-const MEMORY_BUDGETS: Record<string, number> = {
-  ollama: 1024, // 4B and under
-  medium: 6144, // 9B-27B
-  anthropic: 16384, // 70B+ or API models like Claude
+const MEMORY_BUDGETS: Record<LLMProvider, number> = {
+  [LLMProvider.Ollama]: 1024, // 4B and under
+  [LLMProvider.Anthropic]: 16384, // 70B+ or API models like Claude
 };
 
 export class FangornSTM {
@@ -17,9 +17,9 @@ export class FangornSTM {
   private memoryBudget: number;
   private newMessagesIndex: number;
 
-  constructor(llmType: string) {
+  constructor(llmProvider: LLMProvider) {
     this.shortTermMemory = [];
-    this.memoryBudget = MEMORY_BUDGETS[llmType];
+    this.memoryBudget = MEMORY_BUDGETS[llmProvider];
     this.newMessagesIndex = -1;
   }
 

@@ -5,6 +5,7 @@ import {
   FangornAgentToolConfig,
   FangornToolConfig,
   GmailToolConfig,
+  LLMProvider,
   McpServerConfig,
 } from "@fangorn-network/agent-types";
 import { FangornConfig } from "@fangorn-network/sdk";
@@ -132,7 +133,12 @@ const fangornAgentToolConfig: FangornAgentToolConfig = {
   useTasteTools,
 };
 
+const llmProvider = process.env.LLM! as LLMProvider
+const llmModel = process.env.LLM_MODEL!
+
 export const fangornAgentConfig: FangornAgentConfig = {
+  llmProvider,
+  llmModel,
   useMemory,
   fangornAgentToolConfig
 }

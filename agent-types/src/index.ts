@@ -76,7 +76,13 @@ export interface GmailToolConfig {
   agentSignoff: string;
 }
 
+export enum LLMProvider {
+  Ollama = "ollama",
+  Anthropic = "anthropic"
+}
 export interface FangornAgentConfig {
     useMemory: boolean
+    llmProvider: LLMProvider
+    llmModel: string
     fangornAgentToolConfig: FangornAgentToolConfig
 }
