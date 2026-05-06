@@ -11,8 +11,7 @@ import {
   ToolBay,
   McpUiResult,
   DataContext,
-  FangornAgentToolConfig,
-} from "@fangorn-network/agent-tools";
+} from "agent-tools";
 import {
   BaseMessage,
   HumanMessage,
