@@ -1,5 +1,5 @@
 {
-  "name": "agent-tools",
+  "name": "@fangorn-network/agent-tools",
   "version": "0.0.1",
   "description": "",
   "main": "build/index.js",
@@ -23,7 +23,7 @@
   "dependencies": {
     "@fangorn-network/client-types": "0.0.2",
     "@fangorn-network/fetch": "2026.4.27",
-    "agent-types": "workspace:*",
+    "@fangorn-network/agent-types": "workspace:*",
     "@langchain/core": "^1.1.36",
     "@langchain/langgraph": "^1.2.0",
     "@langchain/mcp-adapters": "^1.1.3",

@@ -1,5 +1,5 @@
 {
-  "name": "agent",
+  "name": "@fangorn-network/agent",
   "version": "0.0.1",
   "description": "",
   "main": "./build/index.js",
@@ -26,8 +26,8 @@
     "@langchain/anthropic": "^1.3.25",
     "@langchain/core": "^1.1.36",
     "@langchain/ollama": "^1.2.2",
-    "agent-tools": "workspace:*",
-    "agent-types": "workspace:*",
+    "@fangorn-network/agent-tools": "workspace:*",
+    "@fangorn-network/agent-types": "workspace:*",
     "langchain": "^1.3.3"
   },
   "devDependencies": {
