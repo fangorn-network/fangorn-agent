@@ -1,4 +1,4 @@
-import { initializeToolbox, ToolboxPlugin } from "../../types.js";
+import { initializeToolbox, ToolboxPlugin } from "agent-types";
 import { McpToolbox } from "./mcpToolbox.js";
 
 export default {

@@ -6,7 +6,7 @@ import {
   arbitrumSepoliaSubgraphOverrides,
   arbitrumSepoliaSubgraphUrl,
 } from "../../constants.js";
-import { Agent0SdkToolConfig } from "../../types.js";
+import { Agent0SdkToolConfig } from "agent-types";
 
 export function getAgent0Sdk(agent0SdkToolConfig: Agent0SdkToolConfig) {
   let agent0Sdk;

@@ -1,0 +1,26 @@
+{
+  "name": "agent-types",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./build/index.js",
+  "types": "./build/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./build/index.d.ts",
+      "default": "./build/index.js"
+    }
+  },
+  "files": [
+    "build"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "viem": "^2.45.0",
+    "@langchain/core": "^1.1.36"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.2"
+  }
+}

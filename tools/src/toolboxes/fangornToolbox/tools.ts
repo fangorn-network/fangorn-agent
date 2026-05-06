@@ -3,7 +3,7 @@ import { Hex } from "viem";
 import { FangornX402Middleware } from "@fangorn-network/fetch";
 import fs from "fs";
 import { z } from "zod";
-import { FangornToolConfig } from "../../types.js";
+import { FangornToolConfig } from "agent-types";
 
 export async function createX402FetchTool(
   fangornToolConfig: FangornToolConfig,

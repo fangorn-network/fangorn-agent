@@ -1,11 +1,12 @@
 import dotenv from "dotenv";
 import {
   Agent0SdkToolConfig,
+  FangornAgentConfig,
   FangornAgentToolConfig,
   FangornToolConfig,
   GmailToolConfig,
   McpServerConfig,
-} from "@fangorn-network/agent-tools";
+} from "agent-types";
 import { FangornConfig } from "@fangorn-network/sdk";
 import { createWalletClient, Hex, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
@@ -123,10 +124,15 @@ const mcpServerConfig: McpServerConfig = {
   mcpServerUrls,
 };
 
-export const fangornAgentToolConfig: FangornAgentToolConfig = {
+const fangornAgentToolConfig: FangornAgentToolConfig = {
   gmailConfig,
   agent0SdkToolConfig,
   fangornToolConfig,
   mcpServerConfig,
   useTasteTools,
 };
+
+export const fangornAgentConfig: FangornAgentConfig = {
+  useMemory,
+  fangornAgentToolConfig
+}

@@ -1,8 +1,8 @@
 import express from "express";
 import cors from "cors";
-import { FangornAgentResponse, FangornAgent } from "./FangornAgent.js";
-import { DataContext } from "@fangorn-network/agent-tools";
-import { fangornAgentToolConfig } from "./config.js";
+import { FangornAgentResponse, FangornAgent } from "agent";
+import { DataContext } from "agent-tools";
+import { fangornAgentConfig } from "./config.js";
 
 const app = express();
 app.use(cors());
@@ -22,7 +22,7 @@ async function main() {
     return app.locals.dataContext;
   };
   const agent = await FangornAgent.create(
-    fangornAgentToolConfig,
+    fangornAgentConfig,
     dataContextProvider,
   );
 

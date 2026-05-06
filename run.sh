@@ -74,7 +74,7 @@ fi
 
 echo "✅ Build successful."
 
-cd agent
+cd dev-server
 
 # ─────────────────────────────────────────────
 # Start the Web Server

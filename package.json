@@ -2,7 +2,7 @@
   "name": "fangorn-network",
   "private": true,
   "scripts": {
-    "build": "pnpm --filter agent-tools --filter fangorn-agent  build ",
+    "build": "pnpm --filter agent-types --filter agent-tools --filter agent --filter dev-server build ",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

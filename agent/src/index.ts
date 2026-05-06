@@ -19,9 +19,9 @@ import {
   SystemMessage,
   ToolMessage,
 } from "langchain";
-import { useMemory } from "./config.js";
 import { FangornSTM } from "./memory.js";
 import { FangornAgentModel, getModelType } from "./llm.js";
+import { FangornAgentConfig } from "agent-types";
 
 export interface FangornAgentResponse {
   text: string;
@@ -35,20 +35,22 @@ export class FangornAgent {
   private model: FangornAgentModel;
   private toolbay: ToolBay;
   private shortTermMemory: FangornSTM;
+  private useMemory: boolean;
 
   static async create(
-    fangornAgentToolConfig: FangornAgentToolConfig,
+    fangornAgentConfig: FangornAgentConfig,
     dataContextProvider: () => DataContext,
   ): Promise<FangornAgent> {
     const toolbay = await ToolBay.initToolbay(
       dataContextProvider,
-      fangornAgentToolConfig,
+      fangornAgentConfig.fangornAgentToolConfig,
     );
-    return new FangornAgent(toolbay);
+    return new FangornAgent(toolbay, fangornAgentConfig.useMemory);
   }
 
-  constructor(toolbay: ToolBay) {
+  constructor(toolbay: ToolBay, useMemory: boolean) {
     this.toolbay = toolbay;
+    this.useMemory = useMemory
 
     let llmType = process.env.LLM;
     if (!llmType) {
@@ -102,7 +104,7 @@ export class FangornAgent {
     const systemMessage = new SystemMessage(agenticSystemPrompt.content);
     const userMessage = new HumanMessage(query);
     let messages: BaseMessage[];
-    if (useMemory) {
+    if (this.useMemory) {
       messages = this.shortTermMemory.getInitialSTM(systemMessage, userMessage);
     } else {
       messages = [systemMessage, userMessage];
@@ -110,7 +112,7 @@ export class FangornAgent {
     this.toolbay.activateTools(toolNameList);
     const modelWithTools = this.model.bindTools(this.toolbay.consumeDirty());
     console.log("Beginning agent loop...");
-    return await this.agentLoop(modelWithTools, messages, useMemory);
+    return await this.agentLoop(modelWithTools, messages, this.useMemory);
   }
 
   /**

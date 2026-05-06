@@ -2,3 +2,5 @@ packages:
   - "agent"
   - "web-app"
   - "tools"
+  - "dev-server"
+  - "agent-types"

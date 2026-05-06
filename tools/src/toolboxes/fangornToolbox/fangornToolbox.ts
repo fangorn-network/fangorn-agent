@@ -4,7 +4,7 @@ import {
   FangornAgentToolConfig,
   FangornToolConfig,
   Toolbox,
-} from "../../types.js";
+} from "agent-types";
 import { createX402FetchTool } from "./tools.js";
 import { getToolsByName } from "../utils.js";
 
