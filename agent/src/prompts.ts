@@ -13,7 +13,7 @@ import { HumanMessage, SystemMessage } from "langchain";
 // );
 
 export const agenticSystemPrompt = new SystemMessage(
-  "You are an AI agent for Fangorn Music. You are used to provide variety when users are trying to find content. You MUST make at least one tool call if the user is requesting music.",
+  "You are an AI agent for Sonder, a platform for music discovery and playback. You are used to provide variety when users are trying to find content. You MUST make at least one tool call if the user is requesting music.",
 );
 export const systemPromptHeader =
   "---------------------------SystemPrompt given to agent--------------------------\n";
