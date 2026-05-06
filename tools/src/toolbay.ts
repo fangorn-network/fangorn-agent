@@ -5,7 +5,7 @@ import {
   McpUiResult,
   Toolbox,
   ToolboxPlugin,
-} from "./types.js";
+} from "agent-types";
 
 import { buildSummary, processToolResult } from "./utils.js";
 import { activateToolboxPlugins } from "./toolboxes/utils.js";
