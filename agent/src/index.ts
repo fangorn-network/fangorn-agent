@@ -8,10 +8,12 @@ import {
   chooseFiltersSystemPrompt,
 } from "./prompts.js";
 import {
-  ToolBay,
   McpUiResult,
   DataContext,
-} from "agent-tools";
+} from "agent-types";
+import {
+  ToolBay
+} from "agent-tools"
 import {
   BaseMessage,
   HumanMessage,

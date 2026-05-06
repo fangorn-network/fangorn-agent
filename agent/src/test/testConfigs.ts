@@ -5,7 +5,7 @@ import {
   FangornToolConfig,
   GmailToolConfig,
   McpServerConfig,
-} from "agent-tools";
+} from "agent-types";
 import { FangornAgentConfig } from "agent-types";
 import { vi } from "vitest";
 
