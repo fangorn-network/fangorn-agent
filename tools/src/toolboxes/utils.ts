@@ -4,7 +4,7 @@ import {
   FangornAgentToolConfig,
   Toolbox,
   ToolboxPlugin,
-} from "agent-types";
+} from "@fangorn-network/agent-types";
 import { dirname, join } from "path";
 import { existsSync, readdirSync } from "fs";
 import { fileURLToPath } from "url";

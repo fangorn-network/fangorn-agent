@@ -1,4 +1,4 @@
-import { initializeToolbox, ToolboxPlugin } from "agent-types";
+import { initializeToolbox, ToolboxPlugin } from "@fangorn-network/agent-types";
 import { GmailToolbox } from "./GmailToolbox.js";
 
 export default {

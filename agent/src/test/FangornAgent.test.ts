@@ -12,7 +12,7 @@ import { FangornAgent } from "../index.js";
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
 import { fangornAgentConfig } from "./testConfigs.js";
-import { DataContext } from "agent-types";
+import { DataContext } from "@fangorn-network/agent-types";
 import { fakeModel } from "langchain";
 
 const server = setupServer(

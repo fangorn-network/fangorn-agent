@@ -6,7 +6,7 @@ import {
   FangornToolConfig,
   GmailToolConfig,
   McpServerConfig,
-} from "agent-types";
+} from "@fangorn-network/agent-types";
 import { FangornConfig } from "@fangorn-network/sdk";
 import { createWalletClient, Hex, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";

@@ -15,7 +15,7 @@
   ],
   "scripts": {
     "build": "tsc",
-    "test": "pnpm --filter agent-types --filter agent-tools run build && vitest run"
+    "test": "pnpm --filter @fangorn-network/agent-types --filter @fangorn-network/agent-tools run build && vitest run"
   },
   "keywords": [],
   "author": "",

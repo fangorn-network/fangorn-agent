@@ -5,8 +5,8 @@ import {
   FangornToolConfig,
   GmailToolConfig,
   McpServerConfig,
-} from "agent-types";
-import { FangornAgentConfig } from "agent-types";
+} from "@fangorn-network/agent-types";
+import { FangornAgentConfig } from "@fangorn-network/agent-types";
 import { vi } from "vitest";
 
 const useMcp = true;

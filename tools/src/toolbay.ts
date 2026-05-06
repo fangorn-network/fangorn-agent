@@ -5,7 +5,7 @@ import {
   McpUiResult,
   Toolbox,
   ToolboxPlugin,
-} from "agent-types";
+} from "@fangorn-network/agent-types";
 
 import { buildSummary, processToolResult } from "./utils.js";
 import { activateToolboxPlugins } from "./toolboxes/utils.js";

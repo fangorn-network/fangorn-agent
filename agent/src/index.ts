@@ -10,10 +10,10 @@ import {
 import {
   McpUiResult,
   DataContext,
-} from "agent-types";
+} from "@fangorn-network/agent-types";
 import {
   ToolBay
-} from "agent-tools"
+} from "@fangorn-network/agent-tools"
 import {
   BaseMessage,
   HumanMessage,
@@ -22,7 +22,7 @@ import {
 } from "langchain";
 import { FangornSTM } from "./memory.js";
 import { FangornAgentModel, getModelType } from "./llm.js";
-import { FangornAgentConfig } from "agent-types";
+import { FangornAgentConfig } from "@fangorn-network/agent-types";
 
 export interface FangornAgentResponse {
   text: string;

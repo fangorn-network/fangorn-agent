@@ -3,7 +3,7 @@ import {
   FangornAgentToolConfig,
   GmailToolConfig,
   Toolbox,
-} from "agent-types";
+} from "@fangorn-network/agent-types";
 import { z } from "zod";
 import { google } from "googleapis";
 import { encodeEmail } from "./utils.js";

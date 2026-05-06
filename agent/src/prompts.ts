@@ -12,7 +12,7 @@ import { HumanMessage, SystemMessage } from "langchain";
 // Present information as if you are simply describing what kinds of data are available and what is in them."
 // );
 
-export const agenticSystemPrompt = new SystemMessage(
+export const agenticSystemPrompt: SystemMessage = new SystemMessage(
   "You are an AI agent for Sonder, a platform for music discovery and playback. You are used to provide variety when users are trying to find content. You MUST make at least one tool call if the user is requesting music.",
 );
 export const systemPromptHeader =
@@ -46,7 +46,7 @@ export function buildFangornMusicPromptResponse(
   );
 }
 
-export const findSimilarSystemPrompt = new SystemMessage(
+export const findSimilarSystemPrompt: SystemMessage = new SystemMessage(
   "You return 3 words in the fashion: word1, word2, word3. These words are based on the requirements of the prompt.",
 );
 
@@ -55,7 +55,7 @@ export function buildFindSimilarPrompt(data: any): HumanMessage {
   return new HumanMessage(prompt);
 }
 
-export const chooseFiltersSystemPrompt = new SystemMessage(
+export const chooseFiltersSystemPrompt: SystemMessage = new SystemMessage(
   "You return 8 words in the fashion: word1, word2, word3, ..., word8. These words are based on the requirements of the prompt",
 );
 
