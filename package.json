@@ -1,6 +1,5 @@
 {
   "name": "fangorn-network",
-  "private": false,
   "scripts": {
     "build": "pnpm --filter agent-types --filter agent-tools --filter agent --filter dev-server build ",
     "format": "prettier --write .",
