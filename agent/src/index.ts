@@ -8,20 +8,21 @@ import {
   chooseFiltersSystemPrompt,
 } from "./prompts.js";
 import {
-  ToolBay,
   McpUiResult,
   DataContext,
-  FangornAgentToolConfig,
-} from "@fangorn-network/agent-tools";
+} from "@fangorn-network/agent-types";
+import {
+  ToolBay
+} from "@fangorn-network/agent-tools"
 import {
   BaseMessage,
   HumanMessage,
   SystemMessage,
   ToolMessage,
 } from "langchain";
-import { useMemory } from "./config.js";
 import { FangornSTM } from "./memory.js";
 import { FangornAgentModel, getModelType } from "./llm.js";
+import { FangornAgentConfig } from "@fangorn-network/agent-types";
 
 export interface FangornAgentResponse {
   text: string;
@@ -35,30 +36,28 @@ export class FangornAgent {
   private model: FangornAgentModel;
   private toolbay: ToolBay;
   private shortTermMemory: FangornSTM;
+  private useMemory: boolean;
 
   static async create(
-    fangornAgentToolConfig: FangornAgentToolConfig,
+    fangornAgentConfig: FangornAgentConfig,
     dataContextProvider: () => DataContext,
   ): Promise<FangornAgent> {
     const toolbay = await ToolBay.initToolbay(
       dataContextProvider,
-      fangornAgentToolConfig,
+      fangornAgentConfig.fangornAgentToolConfig,
     );
-    return new FangornAgent(toolbay);
+    return new FangornAgent(toolbay, fangornAgentConfig);
   }
 
-  constructor(toolbay: ToolBay) {
+  constructor(toolbay: ToolBay, fangornAgentConfig: FangornAgentConfig) {
     this.toolbay = toolbay;
+    this.useMemory = fangornAgentConfig.useMemory
+    const llmProvider = fangornAgentConfig.llmProvider
+    const llmModel = fangornAgentConfig.llmModel
 
-    let llmType = process.env.LLM;
-    if (!llmType) {
-      console.warn("No LLM type specified, defaulting to ollama");
-      llmType = "ollama";
-    }
+    this.model = getModelType(llmProvider, llmModel);
 
-    this.model = getModelType(llmType);
-
-    this.shortTermMemory = new FangornSTM(llmType);
+    this.shortTermMemory = new FangornSTM(llmProvider);
 
     // Display systemPrompt info
     console.log(systemPromptHeader);
@@ -102,7 +101,7 @@ export class FangornAgent {
     const systemMessage = new SystemMessage(agenticSystemPrompt.content);
     const userMessage = new HumanMessage(query);
     let messages: BaseMessage[];
-    if (useMemory) {
+    if (this.useMemory) {
       messages = this.shortTermMemory.getInitialSTM(systemMessage, userMessage);
     } else {
       messages = [systemMessage, userMessage];
@@ -110,7 +109,7 @@ export class FangornAgent {
     this.toolbay.activateTools(toolNameList);
     const modelWithTools = this.model.bindTools(this.toolbay.consumeDirty());
     console.log("Beginning agent loop...");
-    return await this.agentLoop(modelWithTools, messages, useMemory);
+    return await this.agentLoop(modelWithTools, messages, this.useMemory);
   }
 
   /**

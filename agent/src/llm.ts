@@ -1,26 +1,23 @@
+import { LLMProvider } from "@fangorn-network/agent-types";
 import { ChatAnthropic } from "@langchain/anthropic";
 import { ChatOllama } from "@langchain/ollama";
 
-const VALID_LLMS = ["ollama", "anthropic"];
-
 export type FangornAgentModel = ChatOllama | ChatAnthropic;
 
-export function getModelType(llmType: string): FangornAgentModel {
-  if (!VALID_LLMS.includes(llmType)) throw new Error("Invalid LLM specified.");
+export function getModelType(llmProvider: LLMProvider, llmModel: string): FangornAgentModel {
   let model: FangornAgentModel;
-  if (llmType === "ollama") {
+  if (llmProvider === LLMProvider.Ollama) {
     const ollamaPort = process.env.OLLAMA_PORT || 11434; // fallback to default if not set
-    const ollamaModel = process.env.MODEL || "qwen3.5:4b";
-    console.log(`running ${ollamaModel} model`);
+    console.log(`running ${llmModel} model`);
     const baseUrl = `http://localhost:${ollamaPort}`;
     model = new ChatOllama({
-      model: ollamaModel,
+      model: llmModel,
       verbose: false,
       baseUrl,
     });
   } else {
     model = new ChatAnthropic({
-      model: "claude-sonnet-4-6",
+      model: llmModel,
       maxRetries: 3,
     });
   }

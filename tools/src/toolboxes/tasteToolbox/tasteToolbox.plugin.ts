@@ -1,4 +1,4 @@
-import { initializeToolbox, ToolboxPlugin } from "../../types.js";
+import { initializeToolbox, ToolboxPlugin } from "@fangorn-network/agent-types";
 import { TasteToolbox } from "./tasteToolbox.js";
 
 export default {

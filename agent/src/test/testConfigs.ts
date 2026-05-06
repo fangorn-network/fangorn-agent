@@ -5,7 +5,8 @@ import {
   FangornToolConfig,
   GmailToolConfig,
   McpServerConfig,
-} from "agent-tools";
+} from "@fangorn-network/agent-types";
+import { FangornAgentConfig } from "@fangorn-network/agent-types";
 import { vi } from "vitest";
 
 const useMcp = true;
@@ -74,10 +75,15 @@ export const fangornToolConfig: FangornToolConfig = {
   domain,
 };
 
-export const fangornAgentToolConfig: FangornAgentToolConfig = {
+const fangornAgentToolConfig: FangornAgentToolConfig = {
   gmailConfig,
   agent0SdkToolConfig,
   fangornToolConfig,
   mcpServerConfig,
   useTasteTools,
 };
+
+export const fangornAgentConfig: FangornAgentConfig = {
+  useMemory: false,
+  fangornAgentToolConfig
+}

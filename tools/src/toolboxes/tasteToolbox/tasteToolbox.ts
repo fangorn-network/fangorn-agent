@@ -1,5 +1,5 @@
 import { DynamicStructuredTool, tool } from "langchain";
-import { FangornAgentToolConfig, Toolbox } from "../../types.js";
+import { FangornAgentToolConfig, Toolbox } from "@fangorn-network/agent-types";
 import { z } from "zod";
 import { readTaste, readTasteForUpdate, updateTaste } from "./tools.js";
 import { getToolsByName } from "../utils.js";

@@ -2,7 +2,7 @@ import { DynamicStructuredTool, tool } from "langchain";
 import { MultiServerMCPClient } from "@langchain/mcp-adapters";
 import type { Connection } from "@langchain/mcp-adapters";
 import { z } from "zod";
-import { DataContext, Toolbox } from "../../types.js";
+import { DataContext, Toolbox } from "@fangorn-network/agent-types";
 import { getToolsByName } from "../utils.js";
 
 // Re-export the library's Connection type for convenience

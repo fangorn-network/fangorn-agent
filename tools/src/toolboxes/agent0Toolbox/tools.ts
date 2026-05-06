@@ -3,7 +3,7 @@ import { arbitrumSepoliaChainId } from "../../constants.js";
 // import { getAgent0Sdk } from "./utils.js";
 // import { agent0SdkConfig } from "../../config.js";
 import { z } from "zod";
-import { Agent0SdkToolConfig } from "../../types.js";
+import { Agent0SdkToolConfig } from "@fangorn-network/agent-types";
 import { getAgent0Sdk } from "./utils.js";
 
 export function createAgent0Tools(
