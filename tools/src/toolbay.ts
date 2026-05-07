@@ -24,7 +24,7 @@ export class ToolBay {
 
   private agenticChat = false;
 
-  dataContextProvider: (() => DataContext) | null = null;
+  dataContextProvider: (() => DataContext);
 
   /**
    * Initialise the toolbay by scanning the toolbox directory and
@@ -50,6 +50,48 @@ export class ToolBay {
     );
     this.dataContextProvider = dataContextProvider;
     this.toolboxDirectory = toolboxDir;
+  }
+
+  async addToolbox(entry: ToolboxEntry): Promise<void> {
+    const toolboxes = await activateToolboxPlugins(this.toolboxDirectory, [entry], this.dataContextProvider);
+    let index = this.toolboxes.length - 1
+    for (const tb of toolboxes) {
+      this.toolboxes.push(tb);
+      this.agenticToolboxMapping.set(tb.name, index);
+      index++
+      console.log(`[toolbay] Added toolboxes: ${tb.name}`);
+    }
+    this.dirty = true;
+  }
+
+  removeToolbox(name: string): void {
+    const idx = this.toolboxes.findIndex((tb) => tb.name === name);
+    if (idx === -1) return;
+
+    this.toolboxes.splice(idx, 1);
+    this.agenticToolboxMapping.delete(name);
+
+    // rebuild the index mapping
+    this.agenticToolboxMapping.clear();
+    this.toolboxes.forEach((tb, i) =>
+      this.agenticToolboxMapping.set(tb.name, i),
+    );
+
+    // remove any active tools from the removed toolbox
+    const toolNames = this.currentTools.keys();
+    for (const toolName of toolNames) {
+      if (!this.toolboxes.some((tb) => tb.getTools().some((t) => t.name === toolName))) {
+        this.currentTools.delete(toolName);
+        console.log("Removed ", toolName)
+      }
+    }
+
+    this.dirty = true;
+    console.log(`[toolbay] Removed toolbox: ${name}`);
+  }
+
+  getToolboxNames(): string[] {
+    return this.toolboxes.map((tb) => tb.name);
   }
 
   async activateAgenticTools() {

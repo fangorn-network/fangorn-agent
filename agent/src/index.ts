@@ -12,6 +12,7 @@ import {
   DataContext,
   LLMProvider,
   AgenticConfig,
+  ToolboxEntry,
 } from "@fangorn-network/agent-types";
 import {
   ToolBay
@@ -85,6 +86,19 @@ export class FangornAgent {
     this.llmModel = agenticConfig.llmModel
     this.agentModel = getFangornAgentModel(agenticConfig)
     console.log("Change completed")
+  }
+
+  async loadToolbox(
+    entry: ToolboxEntry
+  ): Promise<void> {
+    // const { activateToolboxPlugins } = await import("./toolboxes/utils.js");
+    console.log("Load toolbox called")
+    await this.toolbay.addToolbox(entry)
+  }
+
+  unloadToolbox(name: string): void {
+    console.log("Unload toolbox called")
+    this.toolbay.removeToolbox(name);
   }
 
   /**
