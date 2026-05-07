@@ -1,11 +1,5 @@
 import { FangornConfig } from "@fangorn-network/sdk";
-import {
-  Agent0SdkToolConfig,
-  FangornAgentToolConfig,
-  FangornToolConfig,
-  GmailToolConfig,
-  McpServerConfig,
-} from "../types.js";
+
 import { vi } from "vitest";
 
 const useMcp = true;
@@ -18,7 +12,7 @@ const key =
   "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 const chainConfig = FangornConfig.ArbitrumSepolia;
 
-export const agent0SdkToolConfig: Agent0SdkToolConfig = {
+export const agent0SdkToolConfig: FangornToolboxConfig = {
   enabled: useAgent0,
   pinataJwt,
   chainConfig,
@@ -30,7 +24,7 @@ const gmailClientSecret = "clientSecret";
 const gmailRefreshToken = "refreshToken";
 const agentSignoff = "agentSignoff";
 
-export const gmailConfig: GmailToolConfig = {
+export const gmailConfig: FangornToolboxConfig = {
   enabled: useGmail,
   gmailClientId,
   gmailClientSecret,
@@ -40,8 +34,7 @@ export const gmailConfig: GmailToolConfig = {
 
 const mcpServerUrls = ["https://mcp.fangorn.network/mcp"];
 
-export const mcpServerConfig: McpServerConfig = {
-  enabled: useMcp,
+export const mcpServerConfig: FangornToolboxConfig = {
   mcpServerUrls,
 };
 
@@ -63,8 +56,7 @@ const mockWalletClient = {
   transport: { type: "http" },
 };
 
-export const fangornToolConfig: FangornToolConfig = {
-  enabled: useFangornTools,
+export const fangornToolConfig: FangornToolboxConfig = {
   walletClient: mockWalletClient as any,
   config: chainConfig,
   usdcContractAddress,
@@ -74,10 +66,35 @@ export const fangornToolConfig: FangornToolConfig = {
   domain,
 };
 
-export const fangornAgentToolConfig: FangornAgentToolConfig = {
+export const fangornAgentToolConfig: FangornToolboxConfig = {
   gmailConfig,
   agent0SdkToolConfig,
   fangornToolConfig,
   mcpServerConfig,
   useTasteTools,
 };
+
+import { FangornToolboxConfig, ToolboxEntry } from "@fangorn-network/agent-types";
+
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+// CommonJS
+export const toolboxDir = join(__dirname, "..", "toolboxes");
+
+const fangornToolboxEntry: ToolboxEntry = {
+  "id": "fangornToolbox",
+  "enabled": true,
+  "fields": {...fangornToolConfig}
+}
+
+const fangornMcpEntry: ToolboxEntry = {
+  "id": "mcpToolbox",
+  "enabled": true,
+  "fields": {...mcpServerConfig}
+}
+
+
+export const toolboxEntries: ToolboxEntry[] = [fangornToolboxEntry, fangornMcpEntry]

@@ -3,7 +3,7 @@ import { McpToolbox } from "./mcpToolbox.js";
 
 export default {
   init: async (config, _dataContextProvider) => {
-    const fangornMcpUrl = config.mcpServerConfig.mcpServerUrls ?? [
+    const fangornMcpUrl = config.mcpServerUrls ?? [
       "http://localhost:4000",
     ];
     const mcpToolbox = await McpToolbox.init(
