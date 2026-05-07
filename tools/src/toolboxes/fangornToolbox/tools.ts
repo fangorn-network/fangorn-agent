@@ -3,11 +3,14 @@ import { Hex } from "viem";
 import { FangornX402Middleware } from "@fangorn-network/fetch";
 import fs from "fs";
 import { z } from "zod";
-import { FangornToolConfig } from "@fangorn-network/agent-types";
+import { FangornToolboxConfig } from "@fangorn-network/agent-types";
+import { FangornToolConfig } from "./config.js";
 
 export async function createX402FetchTool(
-  fangornToolConfig: FangornToolConfig,
+  fangornToolboxConfig: FangornToolboxConfig,
 ) {
+
+  const fangornToolConfig = fangornToolboxConfig as FangornToolConfig
   const fangornClient = await FangornX402Middleware.create({
     walletClient: fangornToolConfig.walletClient,
     config: fangornToolConfig.config,

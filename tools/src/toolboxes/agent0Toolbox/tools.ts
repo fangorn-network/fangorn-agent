@@ -1,9 +1,7 @@
 import { DynamicStructuredTool, tool } from "langchain";
 import { arbitrumSepoliaChainId } from "../../constants.js";
-// import { getAgent0Sdk } from "./utils.js";
-// import { agent0SdkConfig } from "../../config.js";
 import { z } from "zod";
-import { Agent0SdkToolConfig } from "@fangorn-network/agent-types";
+import { Agent0SdkToolConfig } from "./config.js";
 import { getAgent0Sdk } from "./utils.js";
 
 export function createAgent0Tools(

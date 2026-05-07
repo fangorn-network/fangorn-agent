@@ -1,8 +1,7 @@
 import { DynamicStructuredTool, tool } from "@langchain/core/tools";
 import { z } from "zod";
 import {
-  FangornAgentToolConfig,
-  FangornToolConfig,
+  FangornToolboxConfig,
   Toolbox,
 } from "@fangorn-network/agent-types";
 import { createX402FetchTool } from "./tools.js";
@@ -14,8 +13,8 @@ export class FangornToolbox implements Toolbox {
 
   dataContextProvider: (() => any) | null = null;
 
-  static async init(config: FangornAgentToolConfig): Promise<FangornToolbox> {
-    const x402Fetch = await createX402FetchTool(config.fangornToolConfig);
+  static async init(config: FangornToolboxConfig): Promise<FangornToolbox> {
+    const x402Fetch = await createX402FetchTool(config);
     return new FangornToolbox(x402Fetch);
   }
 

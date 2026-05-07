@@ -1,9 +1,8 @@
-import { initializeToolbox, ToolboxPlugin } from "@fangorn-network/agent-types";
+import { ToolboxPlugin } from "@fangorn-network/agent-types";
 import { McpToolbox } from "./mcpToolbox.js";
 
 export default {
-  enabled: (config) => config.mcpServerConfig.enabled,
-  init: async (config, dataContextProvider) => {
+  init: async (config, _dataContextProvider) => {
     const fangornMcpUrl = config.mcpServerConfig.mcpServerUrls ?? [
       "http://localhost:4000",
     ];

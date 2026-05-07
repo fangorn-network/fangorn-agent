@@ -1,5 +1,4 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
-import { Hex } from "viem";
 
 export interface Toolbox {
   name: string;
@@ -9,20 +8,19 @@ export interface Toolbox {
 }
 
 export interface AsyncFactory<T> {
-  init(config?: FangornAgentToolConfig): Promise<T>;
+  init(config?: FangornToolboxConfig): Promise<T>;
 }
 
 export interface ToolboxPlugin {
-  enabled(config: FangornAgentToolConfig): boolean;
   init(
-    config: FangornAgentToolConfig,
-    dataContextProvider: () => DataContext,
+    config: FangornToolboxConfig,
+    dataContextProvider?: () => DataContext,
   ): Promise<Toolbox>;
 }
-
+ 
 export async function initializeToolbox(
   factory: AsyncFactory<Toolbox>,
-  config?: FangornAgentToolConfig,
+  config?: FangornToolboxConfig,
 ): Promise<Toolbox> {
   return factory.init(config);
 }
@@ -37,52 +35,29 @@ export interface McpUiResult {
   data?: any;
 }
 
-export interface FangornAgentToolConfig {
-  gmailConfig: GmailToolConfig;
-  mcpServerConfig: McpServerConfig;
-  agent0SdkToolConfig: Agent0SdkToolConfig;
-  fangornToolConfig: FangornToolConfig;
-  useTasteTools: boolean;
-}
-
-export interface FangornToolConfig {
-  enabled: boolean;
-  walletClient: any;
-  config: any;
-  usdcContractAddress: Hex;
-  usdcDomainName: string;
-  facilitatorAddress: Hex;
-  resourceServerUrl: string;
-  domain: string;
-}
-
-export interface McpServerConfig {
-  enabled: boolean;
-  mcpServerUrls: string[];
-}
-
-export interface Agent0SdkToolConfig {
-  enabled: boolean;
-  pinataJwt: string;
-  chainConfig: any;
-  key: Hex;
-}
-
-export interface GmailToolConfig {
-  enabled: boolean;
-  gmailClientId: string;
-  gmailClientSecret: string;
-  gmailRefreshToken: string;
-  agentSignoff: string;
-}
-
 export enum LLMProvider {
   Ollama = "ollama",
   Anthropic = "anthropic"
 }
+
+export type FangornToolboxConfig = Record<string, any>
+
+export interface AgenticConfig {
+  llmProvider: LLMProvider
+  llmModel: string
+  apiKey?: string
+  url?: string
+}
+
+export interface ToolboxEntry {
+  id: string;
+  enabled: boolean;
+  fields: FangornToolboxConfig;
+}
+
 export interface FangornAgentConfig {
     useMemory: boolean
-    llmProvider: LLMProvider
-    llmModel: string
-    fangornAgentToolConfig: FangornAgentToolConfig
+    agenticConfig: AgenticConfig
+    toolboxDir: string
+    toolboxEntries: ToolboxEntry[]
 }

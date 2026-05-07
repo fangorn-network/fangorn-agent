@@ -1,0 +1,11 @@
+{
+  "name": "gmailToolbox",
+  "label": "Gmail",
+  "description": "Send and manage emails through Gmail",
+  "fields": [
+    { "key": "gmailClientId", "label": "Client ID", "type": "text", "placeholder": "xxx.apps.googleusercontent.com" },
+    { "key": "gmailClientSecret", "label": "Client Secret", "type": "password" },
+    { "key": "gmailRefreshToken", "label": "Refresh Token", "type": "password" },
+    { "key": "agentSignoff", "label": "Email Sign-off", "type": "text", "placeholder": "e.g. Best regards, Agent" }
+  ]
+}

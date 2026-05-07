@@ -1,0 +1,49 @@
+{
+  "name": "fangornToolbox",
+  "label": "Fangorn (x402f)",
+  "description": "Purchase and decrypt files using x402 and x402f",
+  "fields": [
+    {
+      "key": "usdcContractAddress",
+      "label": "USDC Contract Address",
+      "type": "text",
+      "placeholder": "0x..."
+    },
+    {
+      "key": "usdcDomainName",
+      "label": "USDC Domain Name",
+      "type": "text",
+      "placeholder": "e.g. USDC"
+    },
+    {
+      "key": "facilitatorAddress",
+      "label": "Facilitator Address",
+      "type": "text",
+      "placeholder": "0x..."
+    },
+    {
+      "key": "resourceServerUrl",
+      "label": "Resource Server URL",
+      "type": "url",
+      "placeholder": "https://..."
+    },
+    {
+      "key": "domain",
+      "label": "Domain",
+      "type": "text",
+      "placeholder": "e.g. fangorn.network"
+    },
+    {
+      "key": "walletClient",
+      "label": "Wallet Client",
+      "type": "text",
+      "appProvided": true
+    },
+    {
+      "key": "config",
+      "label": "Chain Config",
+      "type": "text",
+      "appProvided": true
+    }
+  ]
+}

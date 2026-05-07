@@ -1,9 +1,9 @@
 import { DynamicStructuredTool, tool } from "langchain";
 import {
-  FangornAgentToolConfig,
-  GmailToolConfig,
+  FangornToolboxConfig,
   Toolbox,
 } from "@fangorn-network/agent-types";
+import { GmailToolConfig } from "./config.js";
 import { z } from "zod";
 import { google } from "googleapis";
 import { encodeEmail } from "./utils.js";
@@ -16,8 +16,9 @@ export class GmailToolbox implements Toolbox {
 
   private agentSignoff;
 
-  static async init(config: FangornAgentToolConfig): Promise<GmailToolbox> {
-    return new GmailToolbox(config.gmailConfig);
+  static async init(config: FangornToolboxConfig): Promise<GmailToolbox> {
+    const gmailConfig = config as GmailToolConfig
+    return new GmailToolbox(gmailConfig);
   }
 
   constructor(gmailToolConfig: GmailToolConfig) {

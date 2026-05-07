@@ -1,9 +1,9 @@
 import { initializeToolbox, ToolboxPlugin } from "@fangorn-network/agent-types";
 import { GmailToolbox } from "./GmailToolbox.js";
+import { FangornToolConfig } from "../fangornToolbox/config.js";
 
 export default {
-  enabled: (config) => config.gmailConfig.enabled,
-  init: async (config, dataContextProvider) => {
+  init: async (config: FangornToolConfig, _dataContextProvider) => {
     const toolbox = await initializeToolbox(GmailToolbox, config);
     return toolbox;
   },

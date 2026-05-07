@@ -10,6 +10,8 @@ import {
 import {
   McpUiResult,
   DataContext,
+  LLMProvider,
+  AgenticConfig,
 } from "@fangorn-network/agent-types";
 import {
   ToolBay
@@ -21,7 +23,7 @@ import {
   ToolMessage,
 } from "langchain";
 import { FangornSTM } from "./memory.js";
-import { FangornAgentModel, getModelType } from "./llm.js";
+import { FangornAgentModel, getFangornAgentModel } from "./llm.js";
 import { FangornAgentConfig } from "@fangorn-network/agent-types";
 
 export interface FangornAgentResponse {
@@ -33,7 +35,9 @@ const MAX_INVOKE_RETRIES = 3;
 const MAX_TOOL_RETRIES = 3;
 
 export class FangornAgent {
-  private model: FangornAgentModel;
+  private agentModel: FangornAgentModel;
+  private llmProvider: LLMProvider;
+  private llmModel: string;
   private toolbay: ToolBay;
   private shortTermMemory: FangornSTM;
   private useMemory: boolean;
@@ -42,9 +46,11 @@ export class FangornAgent {
     fangornAgentConfig: FangornAgentConfig,
     dataContextProvider: () => DataContext,
   ): Promise<FangornAgent> {
+
     const toolbay = await ToolBay.initToolbay(
-      dataContextProvider,
-      fangornAgentConfig.fangornAgentToolConfig,
+      fangornAgentConfig.toolboxDir,
+      fangornAgentConfig.toolboxEntries,
+      dataContextProvider
     );
     return new FangornAgent(toolbay, fangornAgentConfig);
   }
@@ -52,17 +58,33 @@ export class FangornAgent {
   constructor(toolbay: ToolBay, fangornAgentConfig: FangornAgentConfig) {
     this.toolbay = toolbay;
     this.useMemory = fangornAgentConfig.useMemory
-    const llmProvider = fangornAgentConfig.llmProvider
-    const llmModel = fangornAgentConfig.llmModel
 
-    this.model = getModelType(llmProvider, llmModel);
+    const agenticConfig = fangornAgentConfig.agenticConfig
 
-    this.shortTermMemory = new FangornSTM(llmProvider);
+    this.agentModel = getFangornAgentModel(agenticConfig)
+    this.llmProvider = agenticConfig.llmProvider
+    this.llmModel = agenticConfig.llmModel
+
+    this.shortTermMemory = new FangornSTM(this.llmProvider);
 
     // Display systemPrompt info
     console.log(systemPromptHeader);
     console.log(agenticSystemPrompt);
     console.log(systemPromptFooter);
+  }
+
+  changeModel(agenticConfig: AgenticConfig) {
+    console.log(`Changing model from ${this.llmModel} to ${agenticConfig.llmModel}`)
+    this.agentModel = getFangornAgentModel(agenticConfig)
+    console.log("Change completed.")
+  }
+
+  changeProvider(agenticConfig: AgenticConfig) {
+    console.log(`Changing provider from ${this.llmProvider} to ${agenticConfig.llmProvider} using model ${agenticConfig.llmModel}`)
+    this.llmProvider = agenticConfig.llmProvider
+    this.llmModel = agenticConfig.llmModel
+    this.agentModel = getFangornAgentModel(agenticConfig)
+    console.log("Change completed")
   }
 
   /**
@@ -81,7 +103,7 @@ export class FangornAgent {
       systemMessage,
       userMessage,
     );
-    let modelWithTools = this.model.bindTools(this.toolbay.consumeDirty());
+    let modelWithTools = this.agentModel.bindTools(this.toolbay.consumeDirty());
     return await this.agentLoop(modelWithTools, messages, true);
   }
 
@@ -107,7 +129,7 @@ export class FangornAgent {
       messages = [systemMessage, userMessage];
     }
     this.toolbay.activateTools(toolNameList);
-    const modelWithTools = this.model.bindTools(this.toolbay.consumeDirty());
+    const modelWithTools = this.agentModel.bindTools(this.toolbay.consumeDirty());
     console.log("Beginning agent loop...");
     return await this.agentLoop(modelWithTools, messages, this.useMemory);
   }
@@ -135,7 +157,7 @@ export class FangornAgent {
     // query for files based on that tag. If there are results, we
     // smile, if there are none, we re-prompt the agent.
     let messages = [findSimilarSystemPrompt, prompt];
-    let agentResponse = await this.agentLoop(this.model, messages);
+    let agentResponse = await this.agentLoop(this.agentModel, messages);
 
     let searchWords = agentResponse.text.split(",");
 
@@ -155,7 +177,7 @@ export class FangornAgent {
     const prompt = buildChooseFiltersPrompt(taste);
 
     let messages = [chooseFiltersSystemPrompt, prompt];
-    let agentResponse = await this.agentLoop(this.model, messages);
+    let agentResponse = await this.agentLoop(this.agentModel, messages);
 
     let searchWords = agentResponse.text.split(",");
 
@@ -179,7 +201,7 @@ export class FangornAgent {
     let promptAgentCount = 0;
     while (true) {
       if (this.toolbay.isDirty()) {
-        model = this.model.bindTools(this.toolbay.consumeDirty());
+        model = this.agentModel.bindTools(this.toolbay.consumeDirty());
       }
       let agenticChoices: any = null;
       try {

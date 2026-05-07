@@ -1,19 +1,19 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import {
   DataContext,
-  FangornAgentToolConfig,
   McpUiResult,
   Toolbox,
-  ToolboxPlugin,
+  ToolboxEntry,
 } from "@fangorn-network/agent-types";
 
-import { buildSummary, processToolResult } from "./utils.js";
+import { processToolResult } from "./utils.js";
 import { activateToolboxPlugins } from "./toolboxes/utils.js";
 
 export class ToolBay {
   private currentTools: Map<String, DynamicStructuredTool> = new Map();
   private toolboxes: Toolbox[];
   private agenticToolboxMapping: Map<string, number> = new Map();
+  private toolboxDirectory: string;
 
   // Accumulated MCP results that should be forwarded to the frontend
   private mcpData: McpUiResult = {};
@@ -26,20 +26,30 @@ export class ToolBay {
 
   dataContextProvider: (() => DataContext) | null = null;
 
+  /**
+   * Initialise the toolbay by scanning the toolbox directory and
+   * loading plugins that the user has enabled via the UI.
+   */
   static async initToolbay(
+    toolboxDir: string,
+    toolboxEntries: ToolboxEntry[],
     dataContextProvider: () => DataContext,
-    config: FangornAgentToolConfig,
   ): Promise<ToolBay> {
-    let toolboxes = await activateToolboxPlugins(config, dataContextProvider);
-    return new ToolBay(toolboxes, dataContextProvider);
+    const toolboxes = await activateToolboxPlugins(
+      toolboxDir,
+      toolboxEntries,
+      dataContextProvider,
+    );
+    return new ToolBay(toolboxes, toolboxDir, dataContextProvider);
   }
-
-  constructor(toolboxes: Toolbox[], dataContextProvider: () => DataContext) {
+ 
+  constructor(toolboxes: Toolbox[], toolboxDir: string, dataContextProvider: () => DataContext) {
     this.toolboxes = toolboxes;
     toolboxes.forEach((tb, index) =>
       this.agenticToolboxMapping.set(tb.name, index),
     );
     this.dataContextProvider = dataContextProvider;
+    this.toolboxDirectory = toolboxDir;
   }
 
   async activateAgenticTools() {

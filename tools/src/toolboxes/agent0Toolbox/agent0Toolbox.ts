@@ -1,16 +1,18 @@
 import { DynamicStructuredTool, tool } from "@langchain/core/tools";
 import { z } from "zod";
-import { FangornAgentToolConfig, Toolbox } from "@fangorn-network/agent-types";
+import { Toolbox } from "@fangorn-network/agent-types";
 import { createAgent0Tools } from "./tools.js";
 import { getToolsByName } from "../utils.js";
+import { Agent0SdkToolConfig } from "./config.js";
 
 export class Agent0Toolbox implements Toolbox {
   public name: string = "agent0-toolbox";
   private tools: DynamicStructuredTool[];
 
-  static async init(config: FangornAgentToolConfig): Promise<Agent0Toolbox> {
+  static async init(config: Record<string, any>): Promise<Agent0Toolbox> {
+    const agent0config = config as Agent0SdkToolConfig
     const tools: DynamicStructuredTool[] = createAgent0Tools(
-      config.agent0SdkToolConfig,
+      agent0config
     );
     return new Agent0Toolbox(tools);
   }
