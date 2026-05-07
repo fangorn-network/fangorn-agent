@@ -1,5 +1,5 @@
 {
-  "name": "agent0Toolbox",
+  "id": "agent0Toolbox",
   "label": "Agent0 Toolbox",
   "description": " (WIP) Enable the agent to discover on-chain agents and communicate via the a2a protocol",
   "fields": [

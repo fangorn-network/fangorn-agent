@@ -1,5 +1,5 @@
 {
-  "name": "gmailToolbox",
+  "id": "gmailToolbox",
   "label": "Gmail",
   "description": "Send and manage emails through Gmail",
   "fields": [

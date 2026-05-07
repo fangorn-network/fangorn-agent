@@ -1,5 +1,5 @@
 {
-  "name": "fangornToolbox",
+  "id": "fangornToolbox",
   "label": "Fangorn (x402f)",
   "description": "Purchase and decrypt files using x402 and x402f",
   "fields": [

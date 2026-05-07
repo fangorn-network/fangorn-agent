@@ -1,5 +1,5 @@
 {
-  "name": "mcpToolbox",
+  "id": "mcpToolbox",
   "label": "MCP Servers",
   "description": "Connect to external MCP servers for additional tools",
   "fields": [
