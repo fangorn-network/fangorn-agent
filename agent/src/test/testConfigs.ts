@@ -10,6 +10,7 @@ const toolboxEntries: ToolboxEntry[] = []
 
 export const fangornAgentConfig: FangornAgentConfig = {
   useMemory: false,
+  systemPrompt: "You are an AI agent.",
   agenticConfig,
   toolboxDir,
   toolboxEntries

@@ -1,6 +1,5 @@
 import {
   buildFindSimilarPrompt,
-  agenticSystemPrompt,
   systemPromptFooter,
   systemPromptHeader,
   findSimilarSystemPrompt,
@@ -42,6 +41,7 @@ export class FangornAgent {
   private toolbay: ToolBay;
   private shortTermMemory: FangornSTM;
   private useMemory: boolean;
+  private defaultSystemPrompt: SystemMessage;
 
   static async create(
     fangornAgentConfig: FangornAgentConfig,
@@ -68,9 +68,11 @@ export class FangornAgent {
 
     this.shortTermMemory = new FangornSTM(this.llmProvider);
 
+    this.defaultSystemPrompt = new SystemMessage(fangornAgentConfig.systemPrompt)
+
     // Display systemPrompt info
     console.log(systemPromptHeader);
-    console.log(agenticSystemPrompt);
+    console.log(fangornAgentConfig.systemPrompt);
     console.log(systemPromptFooter);
   }
 
@@ -108,10 +110,10 @@ export class FangornAgent {
    * @param query The message to begin agent interaction with.
    * @returns
    */
-  async fullAgenticChat(query: string): Promise<FangornAgentResponse> {
+  async fullAgenticChat(query: string, systemPromptOverride?: string): Promise<FangornAgentResponse> {
+    let systemMessage: SystemMessage = this.getSystemPrompt(systemPromptOverride);
     console.log("FullAgenticChat: Message receieved");
     this.toolbay.activateAgenticTools();
-    const systemMessage = new SystemMessage(agenticSystemPrompt.content);
     const userMessage = new HumanMessage(query);
     const messages = this.shortTermMemory.getInitialSTM(
       systemMessage,
@@ -130,11 +132,12 @@ export class FangornAgent {
   async toolScopedAgenticChat(
     query: string,
     toolNameList: string[],
+    systemPromptOverride?:string
   ): Promise<FangornAgentResponse> {
     console.log(
       `LimitedChat: Agent will have ${toolNameList.length == 0 ? "no" : toolNameList} tools enabled`,
     );
-    const systemMessage = new SystemMessage(agenticSystemPrompt.content);
+    const systemMessage = this.getSystemPrompt(systemPromptOverride)
     const userMessage = new HumanMessage(query);
     let messages: BaseMessage[];
     if (this.useMemory) {
@@ -148,56 +151,19 @@ export class FangornAgent {
     return await this.agentLoop(modelWithTools, messages, this.useMemory);
   }
 
-  /**
-   * Find data that is similar to the data provided. Uses no short term memory
-   * and uses a pre-determined algorithm with the LLM to produce diverse results.
-   *
-   * @param data Reference data for discovery
-   */
-  async findSimilar(data: any): Promise<FangornAgentResponse> {
-    // const toolNameList = ["choose_tag"]
-    // this.toolbay.activateTools(toolNameList)
-    // const modelWithTools = this.model.bindTools(this.toolbay.consumeDirty())
-    // const modelWithStructuredOutput = this.model.withStructuredOutput(vibeWordsSchema)
-    console.log("Find similar called");
-    const prompt = buildFindSimilarPrompt(data);
-    data = {
-      tags: ["relaxed", "energetic", "longing"],
-      context: ["rainy-day", "love", "beauty"],
-    };
-    // Idea: We prompt the agent to choose one word that captures the "Vibe"
-    // based on the tags it has received. When it chooses its word, it will
-    // call the choose_tag tool and break the agent loop. We then
-    // query for files based on that tag. If there are results, we
-    // smile, if there are none, we re-prompt the agent.
-    let messages = [findSimilarSystemPrompt, prompt];
-    let agentResponse = await this.agentLoop(this.agentModel, messages);
+  public getSystemPrompt(systemPromptOverride?: string): SystemMessage {
+    if(systemPromptOverride) {
+      console.log(`Agent: System prompt override specified: ${systemPromptOverride}`)
+      return new SystemMessage(systemPromptOverride)
+    }
 
-    let searchWords = agentResponse.text.split(",");
-
-    console.log(`The agent's response: ${searchWords}`);
-
-    return { text: searchWords.join(), mcpResults: {} };
-
-    // The agent has called the tool and exited. Now we need to query the client
-    // Once we have data, we can re-bind the agent with more tools?
+    console.log(`Agent: Using default system prompt: ${this.defaultSystemPrompt.text}`)
+    return this.defaultSystemPrompt
   }
 
-  async returnFilters(data: any): Promise<FangornAgentResponse> {
-    console.log("Return filters called");
-
-    const taste =
-      "I enjoy a wide range of genres and my preferences shift based on my mood and setting. My primary interests include hip-hop, classic rock, psychedelic rock, and 90s R&B. I'm drawn to mainstream pop in social settings and lean toward moody R&B and soul during more reflective moments. I actively seek out emerging and underground artists through streaming platforms. I have no strong genre loyalty and prioritize how music sounds and resonates with me over genre labels";
-    const prompt = buildChooseFiltersPrompt(taste);
-
-    let messages = [chooseFiltersSystemPrompt, prompt];
-    let agentResponse = await this.agentLoop(this.agentModel, messages);
-
-    let searchWords = agentResponse.text.split(",");
-
-    console.log(`The agent's response: ${searchWords}`);
-
-    return { text: searchWords.join(), mcpResults: {} };
+  public setSystemPrompt(systemPrompt: string) {
+    console.log(`Agent: Setting new system prompt to be ${systemPrompt}`)
+    this.defaultSystemPrompt = new SystemMessage(systemPrompt)
   }
 
   /**

@@ -56,10 +56,11 @@ export interface ToolboxEntry {
 }
 
 export interface FangornAgentConfig {
-    useMemory: boolean
-    agenticConfig: AgenticConfig
-    toolboxDir: string
-    toolboxEntries: ToolboxEntry[]
+  systemPrompt: string;
+  useMemory: boolean
+  agenticConfig: AgenticConfig
+  toolboxDir: string
+  toolboxEntries: ToolboxEntry[]
 }
 
 /**
