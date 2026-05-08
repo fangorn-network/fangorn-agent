@@ -2,8 +2,7 @@ import { initializeToolbox, type ToolboxPlugin } from "@fangorn-network/agent-ty
 import { Agent0Toolbox } from "./agent0Toolbox.js";
 
 export default {
-  enabled: (config) => config.agent0SdkToolConfig.enabled,
-  init: async (config, dataContextProvider) => {
+  init: async (config, _dataContextProvider) => {
     const toolbox = await initializeToolbox(Agent0Toolbox, config);
     return toolbox;
   },

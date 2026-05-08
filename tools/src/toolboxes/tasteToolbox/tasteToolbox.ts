@@ -1,5 +1,5 @@
 import { DynamicStructuredTool, tool } from "langchain";
-import { FangornAgentToolConfig, Toolbox } from "@fangorn-network/agent-types";
+import { FangornToolboxConfig, Toolbox } from "@fangorn-network/agent-types";
 import { z } from "zod";
 import { readTaste, readTasteForUpdate, updateTaste } from "./tools.js";
 import { getToolsByName } from "../utils.js";
@@ -7,7 +7,7 @@ import { getToolsByName } from "../utils.js";
 export class TasteToolbox implements Toolbox {
   public name = "taste_toolbox";
 
-  static async init(config: FangornAgentToolConfig): Promise<TasteToolbox> {
+  static async init(_config: FangornToolboxConfig): Promise<TasteToolbox> {
     return new TasteToolbox();
   }
 

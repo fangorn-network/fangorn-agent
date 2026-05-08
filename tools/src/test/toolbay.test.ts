@@ -7,12 +7,12 @@ import {
   afterEach,
   afterAll,
 } from "vitest";
-import { DataContext } from "../types.js";
-import { fangornAgentToolConfig } from "./testConfigs.js";
 import { ToolBay } from "../toolbay.js";
 
 import { http, HttpResponse } from "msw";
 import { setupServer } from "msw/node";
+import { DataContext } from "@fangorn-network/agent-types";
+import { toolboxDir, toolboxEntries } from "./testConfigs.js";
 
 const server = setupServer(
   http.post("https://mcp.fangorn.network/mcp", async ({ request }) => {
@@ -95,8 +95,9 @@ describe("Toolbay", () => {
       return { excludeIds: ["abc"] };
     };
     toolbay = await ToolBay.initToolbay(
+      toolboxDir,
+      toolboxEntries,
       dataContextProvider,
-      fangornAgentToolConfig,
     );
   });
 
@@ -105,10 +106,10 @@ describe("Toolbay", () => {
     expect(toolboxes.length).toBe(0);
   });
 
-  it("activateAgenticTools loads all toolboxes", async () => {
+  it("activateAgenticTools loads all activated toolboxes as tools", async () => {
     toolbay.activateAgenticTools();
     const toolboxes = toolbay.consumeDirty();
-    expect(toolboxes.length).toBe(5);
+    expect(toolboxes.length).toBe(2);
     const loadedToolboxNames = toolboxes.map((tb) => tb.name);
 
     expect(toolbay.getAllToolBoxNames()).toStrictEqual(loadedToolboxNames);
@@ -141,9 +142,10 @@ describe("Toolbay", () => {
   it("reset clears loaded toolboxes", async () => {
     toolbay.activateAgenticTools();
     let toolboxes = toolbay.consumeDirty();
-    expect(toolboxes.length).toBe(5);
+    expect(toolboxes.length).toBe(2);
     toolbay.resetToolBay();
     toolboxes = toolbay.consumeDirty();
+    expect(toolboxes.length).toBe(0);
   });
 
   it("activateTools does not require tools ", async () => {

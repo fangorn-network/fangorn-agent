@@ -1,13 +1,13 @@
 import { DynamicStructuredTool } from "langchain";
 import {
   DataContext,
-  FangornAgentToolConfig,
   Toolbox,
+  ToolboxEntry,
   ToolboxPlugin,
 } from "@fangorn-network/agent-types";
-import { dirname, join } from "path";
+import { join } from "path";
 import { existsSync, readdirSync } from "fs";
-import { fileURLToPath } from "url";
+import { pathToFileURL } from "url";
 
 export function getToolsByName(
   tools: DynamicStructuredTool[],
@@ -22,29 +22,56 @@ export function getToolsByName(
 }
 
 /**
- * Activate toolbox plugins. We expect toolbox plugins to be stored in the toolboxes directory with a toolbox directory of the same name.
- * We also expect the naming convention *.plugin.{ts,js}
- * IE: toolboxes/specificPluginToolbox/specificPluginToolbox.ts
- * */
+ * Scan the toolbox directory, load each plugin, and initialise
+ * the ones the user has enabled via the UI.
+ *
+ * Each plugin's init() receives its own fields from the persisted
+ * config so it can self-configure.
+ */
 export async function activateToolboxPlugins(
-  config: FangornAgentToolConfig,
-  dataContextProvider: () => DataContext,
+  toolboxDir: string,
+  entries: ToolboxEntry[],
+  dataContextProvider?: () => DataContext,
 ): Promise<Toolbox[]> {
   const toolboxes: Toolbox[] = [];
-  const __dirname = dirname(fileURLToPath(import.meta.url));
-  for (const dir of readdirSync(__dirname, { withFileTypes: true })) {
+
+  if (!existsSync(toolboxDir)) {
+    console.warn(`[toolboxes] Directory not found: ${toolboxDir}`);
+    return toolboxes;
+  }
+
+  const entryMap = new Map(entries.map((e) => [e.id, e]));
+
+  for (const dir of readdirSync(toolboxDir, { withFileTypes: true })) {
     if (!dir.isDirectory()) continue;
-    const pluginPath = join(__dirname, dir.name, `${dir.name}.plugin`);
-    if (!existsSync(`${pluginPath}.ts`) && !existsSync(`${pluginPath}.js`))
+
+    const pluginPath = join(toolboxDir, dir.name, `${dir.name}.plugin`);
+    const jsPath = `${pluginPath}.js`;
+    const tsPath = `${pluginPath}.ts`;
+
+    if (!existsSync(jsPath) && !existsSync(tsPath)) continue;
+
+    const entry = entryMap.get(dir.name);
+
+    if (!entry?.enabled) {
+      console.warn(`[toolboxes] Disabled: ${dir.name}`);
       continue;
-    const { default: plugin }: { default: ToolboxPlugin } = await import(
-      `${pluginPath}.js`
-    );
-    if (plugin.enabled(config)) {
-      toolboxes.push(await plugin.init(config, dataContextProvider));
-    } else {
-      console.warn(`${dir.name} plugin is not enabled`);
+    }
+
+    const importPath = existsSync(jsPath) ? jsPath : tsPath;
+
+    try {
+      const importUrl = pathToFileURL(importPath).href;
+      const { default: plugin }: { default: ToolboxPlugin } =
+        await import(importUrl);
+
+      const toolbox = await plugin.init(entry.fields, dataContextProvider);
+      toolboxes.push(toolbox);
+      console.log(`[toolboxes] Loaded: ${dir.name}`);
+    } catch (err: any) {
+      console.error(`[toolboxes] Failed to load ${dir.name}:`, err.message);
     }
   }
+
   return toolboxes;
 }

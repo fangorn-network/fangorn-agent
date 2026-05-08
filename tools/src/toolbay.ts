@@ -1,19 +1,19 @@
 import { DynamicStructuredTool } from "@langchain/core/tools";
 import {
   DataContext,
-  FangornAgentToolConfig,
   McpUiResult,
   Toolbox,
-  ToolboxPlugin,
+  ToolboxEntry,
 } from "@fangorn-network/agent-types";
 
-import { buildSummary, processToolResult } from "./utils.js";
+import { processToolResult } from "./utils.js";
 import { activateToolboxPlugins } from "./toolboxes/utils.js";
 
 export class ToolBay {
   private currentTools: Map<String, DynamicStructuredTool> = new Map();
   private toolboxes: Toolbox[];
   private agenticToolboxMapping: Map<string, number> = new Map();
+  private toolboxDirectory: string;
 
   // Accumulated MCP results that should be forwarded to the frontend
   private mcpData: McpUiResult = {};
@@ -24,22 +24,74 @@ export class ToolBay {
 
   private agenticChat = false;
 
-  dataContextProvider: (() => DataContext) | null = null;
+  dataContextProvider: (() => DataContext);
 
+  /**
+   * Initialise the toolbay by scanning the toolbox directory and
+   * loading plugins that the user has enabled via the UI.
+   */
   static async initToolbay(
+    toolboxDir: string,
+    toolboxEntries: ToolboxEntry[],
     dataContextProvider: () => DataContext,
-    config: FangornAgentToolConfig,
   ): Promise<ToolBay> {
-    let toolboxes = await activateToolboxPlugins(config, dataContextProvider);
-    return new ToolBay(toolboxes, dataContextProvider);
+    const toolboxes = await activateToolboxPlugins(
+      toolboxDir,
+      toolboxEntries,
+      dataContextProvider,
+    );
+    return new ToolBay(toolboxes, toolboxDir, dataContextProvider);
   }
-
-  constructor(toolboxes: Toolbox[], dataContextProvider: () => DataContext) {
+ 
+  constructor(toolboxes: Toolbox[], toolboxDir: string, dataContextProvider: () => DataContext) {
     this.toolboxes = toolboxes;
     toolboxes.forEach((tb, index) =>
       this.agenticToolboxMapping.set(tb.name, index),
     );
     this.dataContextProvider = dataContextProvider;
+    this.toolboxDirectory = toolboxDir;
+  }
+
+  async addToolbox(entry: ToolboxEntry): Promise<void> {
+    const toolboxes = await activateToolboxPlugins(this.toolboxDirectory, [entry], this.dataContextProvider);
+    let index = this.toolboxes.length - 1
+    for (const tb of toolboxes) {
+      this.toolboxes.push(tb);
+      this.agenticToolboxMapping.set(tb.name, index);
+      index++
+      console.log(`[toolbay] Added toolboxes: ${tb.name}`);
+    }
+    this.dirty = true;
+  }
+
+  removeToolbox(name: string): void {
+    const idx = this.toolboxes.findIndex((tb) => tb.name === name);
+    if (idx === -1) return;
+
+    this.toolboxes.splice(idx, 1);
+    this.agenticToolboxMapping.delete(name);
+
+    // rebuild the index mapping
+    this.agenticToolboxMapping.clear();
+    this.toolboxes.forEach((tb, i) =>
+      this.agenticToolboxMapping.set(tb.name, i),
+    );
+
+    // remove any active tools from the removed toolbox
+    const toolNames = this.currentTools.keys();
+    for (const toolName of toolNames) {
+      if (!this.toolboxes.some((tb) => tb.getTools().some((t) => t.name === toolName))) {
+        this.currentTools.delete(toolName);
+        console.log("Removed ", toolName)
+      }
+    }
+
+    this.dirty = true;
+    console.log(`[toolbay] Removed toolbox: ${name}`);
+  }
+
+  getToolboxNames(): string[] {
+    return this.toolboxes.map((tb) => tb.name);
   }
 
   async activateAgenticTools() {

@@ -1,7 +1,10 @@
 {
   "name": "fangorn-network",
   "scripts": {
-    "build": "pnpm --filter agent-types --filter agent-tools --filter agent --filter dev-server build ",
+    "build:agent": "pnpm --filter agent-types --filter agent-tools --filter agent build",
+    "build:dev": "pnpm --filter agent-types --filter agent-tools --filter agent --filter dev-server build",
+    "build:types": "pnpm --filter agent-types build",
+    "build:tools": "pnpm --filter agent-tools build",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

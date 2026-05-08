@@ -9,8 +9,9 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true
   },
-  "include": ["src/**/*", "src/prompts.ts"],
+  "include": ["src/**/*", "src/prompts.ts", "src/**/*.json", "src/toolbay.ts"],
   "exclude": ["node_modules", "build", "src/**/*.test.ts", "src/test/**"]
 }

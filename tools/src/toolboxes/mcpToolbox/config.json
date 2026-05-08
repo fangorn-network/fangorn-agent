@@ -1,0 +1,8 @@
+{
+  "id": "mcpToolbox",
+  "label": "MCP Servers",
+  "description": "Connect to external MCP servers for additional tools",
+  "fields": [
+    { "key": "mcpServerUrls", "label": "Server URLs", "type": "url-list", "placeholder": "https://mcp.example.com/mcp" }
+  ]
+}
