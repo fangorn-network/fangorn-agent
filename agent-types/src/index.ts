@@ -61,3 +61,25 @@ export interface FangornAgentConfig {
     toolboxDir: string
     toolboxEntries: ToolboxEntry[]
 }
+
+/**
+ * Describes a field the UI should render for a given toolbox.
+ */
+export interface ToolboxFieldDescriptor {
+  key: string;
+  label: string;
+  type: "text" | "password" | "url" | "url-list" | "toggle";
+  placeholder?: string;
+  appProvided?: boolean;
+}
+
+/**
+ * Metadata the UI needs to render a toolbox config card.
+ * Discovered from each toolbox's config.json.
+ */
+export interface ToolboxDescriptor {
+  id: string;
+  label: string;
+  description: string;
+  fields: ToolboxFieldDescriptor[];
+}
