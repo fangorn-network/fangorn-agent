@@ -11,11 +11,10 @@ import {
   DataContext,
   LLMProvider,
   AgenticConfig,
+  AgentEventHandler,
   ToolboxEntry,
 } from "@fangorn-network/agent-types";
-import {
-  ToolBay
-} from "@fangorn-network/agent-tools"
+import { ToolBay } from "@fangorn-network/agent-tools";
 import {
   BaseMessage,
   HumanMessage,
@@ -47,28 +46,32 @@ export class FangornAgent {
     fangornAgentConfig: FangornAgentConfig,
     dataContextProvider: () => DataContext,
   ): Promise<FangornAgent> {
-
     const toolbay = await ToolBay.initToolbay(
       fangornAgentConfig.toolboxDir,
       fangornAgentConfig.toolboxEntries,
-      dataContextProvider
+      dataContextProvider,
     );
     return new FangornAgent(toolbay, fangornAgentConfig);
   }
 
   constructor(toolbay: ToolBay, fangornAgentConfig: FangornAgentConfig) {
     this.toolbay = toolbay;
-    this.useMemory = fangornAgentConfig.useMemory
+    this.useMemory = fangornAgentConfig.useMemory;
 
-    const agenticConfig = fangornAgentConfig.agenticConfig
+    const agenticConfig = fangornAgentConfig.agenticConfig;
 
-    this.agentModel = getFangornAgentModel(agenticConfig)
-    this.llmProvider = agenticConfig.llmProvider
-    this.llmModel = agenticConfig.llmModel
+    this.agentModel = getFangornAgentModel(agenticConfig);
+    this.llmProvider = agenticConfig.llmProvider;
+    this.llmModel = agenticConfig.llmModel;
 
-    this.shortTermMemory = new FangornSTM(this.llmProvider);
+    this.shortTermMemory = new FangornSTM(
+      this.llmProvider,
+      fangornAgentConfig.memoryBudget,
+    );
 
-    this.defaultSystemPrompt = new SystemMessage(fangornAgentConfig.systemPrompt)
+    this.defaultSystemPrompt = new SystemMessage(
+      fangornAgentConfig.systemPrompt,
+    );
 
     // Display systemPrompt info
     console.log(systemPromptHeader);
@@ -77,29 +80,31 @@ export class FangornAgent {
   }
 
   changeModel(agenticConfig: AgenticConfig) {
-    console.log(`Changing model from ${this.llmModel} to ${agenticConfig.llmModel}`)
-    this.agentModel = getFangornAgentModel(agenticConfig)
-    console.log("Change completed.")
+    console.log(
+      `Changing model from ${this.llmModel} to ${agenticConfig.llmModel}`,
+    );
+    this.agentModel = getFangornAgentModel(agenticConfig);
+    console.log("Change completed.");
   }
 
   changeProvider(agenticConfig: AgenticConfig) {
-    console.log(`Changing provider from ${this.llmProvider} to ${agenticConfig.llmProvider} using model ${agenticConfig.llmModel}`)
-    this.llmProvider = agenticConfig.llmProvider
-    this.llmModel = agenticConfig.llmModel
-    this.agentModel = getFangornAgentModel(agenticConfig)
-    console.log("Change completed")
+    console.log(
+      `Changing provider from ${this.llmProvider} to ${agenticConfig.llmProvider} using model ${agenticConfig.llmModel}`,
+    );
+    this.llmProvider = agenticConfig.llmProvider;
+    this.llmModel = agenticConfig.llmModel;
+    this.agentModel = getFangornAgentModel(agenticConfig);
+    console.log("Change completed");
   }
 
-  async loadToolbox(
-    entry: ToolboxEntry
-  ): Promise<void> {
+  async loadToolbox(entry: ToolboxEntry): Promise<void> {
     // const { activateToolboxPlugins } = await import("./toolboxes/utils.js");
-    console.log("Load toolbox called")
-    await this.toolbay.addToolbox(entry)
+    console.log("Load toolbox called");
+    await this.toolbay.addToolbox(entry);
   }
 
   unloadToolbox(name: string): void {
-    console.log("Unload toolbox called")
+    console.log("Unload toolbox called");
     this.toolbay.removeToolbox(name);
   }
 
@@ -110,8 +115,13 @@ export class FangornAgent {
    * @param query The message to begin agent interaction with.
    * @returns
    */
-  async fullAgenticChat(query: string, systemPromptOverride?: string): Promise<FangornAgentResponse> {
-    let systemMessage: SystemMessage = this.getSystemPrompt(systemPromptOverride);
+  async fullAgenticChat(
+    query: string,
+    systemPromptOverride?: string,
+    onEvent?: AgentEventHandler,
+  ): Promise<FangornAgentResponse> {
+    let systemMessage: SystemMessage =
+      this.getSystemPrompt(systemPromptOverride);
     console.log("FullAgenticChat: Message receieved");
     this.toolbay.activateAgenticTools();
     const userMessage = new HumanMessage(query);
@@ -120,7 +130,7 @@ export class FangornAgent {
       userMessage,
     );
     let modelWithTools = this.agentModel.bindTools(this.toolbay.consumeDirty());
-    return await this.agentLoop(modelWithTools, messages, true);
+    return await this.agentLoop(modelWithTools, messages, true, onEvent);
   }
 
   /**
@@ -132,12 +142,13 @@ export class FangornAgent {
   async toolScopedAgenticChat(
     query: string,
     toolNameList: string[],
-    systemPromptOverride?:string
+    systemPromptOverride?: string,
+    onEvent?: AgentEventHandler,
   ): Promise<FangornAgentResponse> {
     console.log(
       `LimitedChat: Agent will have ${toolNameList.length == 0 ? "no" : toolNameList} tools enabled`,
     );
-    const systemMessage = this.getSystemPrompt(systemPromptOverride)
+    const systemMessage = this.getSystemPrompt(systemPromptOverride);
     const userMessage = new HumanMessage(query);
     let messages: BaseMessage[];
     if (this.useMemory) {
@@ -146,24 +157,35 @@ export class FangornAgent {
       messages = [systemMessage, userMessage];
     }
     this.toolbay.activateTools(toolNameList);
-    const modelWithTools = this.agentModel.bindTools(this.toolbay.consumeDirty());
+    const modelWithTools = this.agentModel.bindTools(
+      this.toolbay.consumeDirty(),
+    );
     console.log("Beginning agent loop...");
-    return await this.agentLoop(modelWithTools, messages, this.useMemory);
+    return await this.agentLoop(
+      modelWithTools,
+      messages,
+      this.useMemory,
+      onEvent,
+    );
   }
 
   public getSystemPrompt(systemPromptOverride?: string): SystemMessage {
-    if(systemPromptOverride) {
-      console.log(`Agent: System prompt override specified: ${systemPromptOverride}`)
-      return new SystemMessage(systemPromptOverride)
+    if (systemPromptOverride) {
+      console.log(
+        `Agent: System prompt override specified: ${systemPromptOverride}`,
+      );
+      return new SystemMessage(systemPromptOverride);
     }
 
-    console.log(`Agent: Using default system prompt: ${this.defaultSystemPrompt.text}`)
-    return this.defaultSystemPrompt
+    console.log(
+      `Agent: Using default system prompt: ${this.defaultSystemPrompt.text}`,
+    );
+    return this.defaultSystemPrompt;
   }
 
   public setSystemPrompt(systemPrompt: string) {
-    console.log(`Agent: Setting new system prompt to be ${systemPrompt}`)
-    this.defaultSystemPrompt = new SystemMessage(systemPrompt)
+    console.log(`Agent: Setting new system prompt to be ${systemPrompt}`);
+    this.defaultSystemPrompt = new SystemMessage(systemPrompt);
   }
 
   /**
@@ -177,6 +199,7 @@ export class FangornAgent {
     model: any,
     messages: BaseMessage[],
     stmEnabled: boolean = false,
+    onEvent?: AgentEventHandler,
   ): Promise<FangornAgentResponse> {
     let promptAgentCount = 0;
     while (true) {
@@ -201,12 +224,36 @@ export class FangornAgent {
       }
       messages.push(agenticChoices);
 
+      this.emitRoundEvents(agenticChoices, onEvent);
+
       // No tools are going to be called, process the final response
       if (!agenticChoices.tool_calls?.length) {
         return this.processAgentResponse(agenticChoices, messages, stmEnabled);
       }
       console.log("Intercepting tool calls:", agenticChoices.tool_calls);
-      this.performToolCalls(agenticChoices, messages);
+      await this.performToolCalls(agenticChoices, messages, onEvent);
+    }
+  }
+
+  /**
+   * Surface a round's reasoning and any interim text to the caller so the
+   * user can watch progress. Final answers are not emitted here — they are
+   * returned by the loop.
+   */
+  private emitRoundEvents(agenticChoices: any, onEvent?: AgentEventHandler) {
+    if (!onEvent) return;
+    const reasoning = agenticChoices.additional_kwargs?.reasoning_content;
+    if (typeof reasoning === "string" && reasoning.trim()) {
+      onEvent({ type: "thinking", text: reasoning.trim() });
+    }
+    if (agenticChoices.tool_calls?.length) {
+      const text =
+        typeof agenticChoices.content === "string"
+          ? agenticChoices.content
+          : "";
+      if (text.trim()) {
+        onEvent({ type: "assistant_text", text: text.trim() });
+      }
     }
   }
 
@@ -227,12 +274,22 @@ export class FangornAgent {
     return fullMessage;
   }
 
-  private async performToolCalls(agenticChoices: any, messages: BaseMessage[]) {
+  private async performToolCalls(
+    agenticChoices: any,
+    messages: BaseMessage[],
+    onEvent?: AgentEventHandler,
+  ) {
     let retryToolCallCount = 0;
     for (const toolCall of agenticChoices.tool_calls) {
       const containsTool = this.toolbay.containsTool(toolCall.name);
       if (!containsTool) {
         console.log(`Tool "${toolCall.name}" not found`);
+        onEvent?.({
+          type: "tool_result",
+          name: toolCall.name,
+          ok: false,
+          preview: `Tool "${toolCall.name}" not found.`,
+        });
         const toolMessage = new ToolMessage({
           tool_call_id: toolCall.id,
           content: `Tool "${toolCall.name}" not found.`,
@@ -240,7 +297,13 @@ export class FangornAgent {
         messages.push(toolMessage);
         continue;
       }
+      onEvent?.({
+        type: "tool_call",
+        name: toolCall.name,
+        args: toolCall.args ?? {},
+      });
       let result: any;
+      let toolOk = true;
       try {
         result = await this.toolbay.invokeToolcall(
           toolCall.name,
@@ -248,6 +311,7 @@ export class FangornAgent {
         );
         retryToolCallCount = 0;
       } catch (err: any) {
+        toolOk = false;
         retryToolCallCount++;
         if (retryToolCallCount >= MAX_TOOL_RETRIES) {
           result = `Tool failed after ${MAX_TOOL_RETRIES} attempts. Last error: ${err.message || String(err)}. Please inform the user that this query could not be completed.`;
@@ -256,9 +320,17 @@ export class FangornAgent {
           result = `Tool error: ${err.message || String(err)}. Please fix your query and try again. (Attempt ${retryToolCallCount} of ${MAX_TOOL_RETRIES})`;
         }
       }
+      const content =
+        typeof result === "string" ? result : JSON.stringify(result);
+      onEvent?.({
+        type: "tool_result",
+        name: toolCall.name,
+        ok: toolOk,
+        preview: content.length > 200 ? content.slice(0, 200) + "…" : content,
+      });
       const toolMessage = new ToolMessage({
         tool_call_id: toolCall.id,
-        content: typeof result === "string" ? result : JSON.stringify(result),
+        content,
       });
       messages.push(toolMessage);
     }

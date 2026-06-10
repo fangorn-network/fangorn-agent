@@ -17,9 +17,9 @@ export class FangornSTM {
   private memoryBudget: number;
   private newMessagesIndex: number;
 
-  constructor(llmProvider: LLMProvider) {
+  constructor(llmProvider: LLMProvider, memoryBudget?: number) {
     this.shortTermMemory = [];
-    this.memoryBudget = MEMORY_BUDGETS[llmProvider];
+    this.memoryBudget = memoryBudget ?? MEMORY_BUDGETS[llmProvider];
     this.newMessagesIndex = -1;
   }
 

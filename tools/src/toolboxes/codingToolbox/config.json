@@ -1,0 +1,13 @@
+{
+  "id": "codingToolbox",
+  "label": "Coding Tools",
+  "description": "Read, write, edit, and search files in a workspace, and run shell commands",
+  "fields": [
+    {
+      "key": "workspaceRoot",
+      "label": "Workspace Root",
+      "type": "text",
+      "placeholder": "/path/to/project"
+    }
+  ]
+}

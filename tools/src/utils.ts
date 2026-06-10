@@ -23,7 +23,13 @@ export function processDisplayData(data: any, resultType: string) {
 }
 
 export function processToolResult(result: any, toolName: string) {
-  const parsed = JSON.parse(result);
+  let parsed: any;
+  try {
+    parsed = JSON.parse(result);
+  } catch {
+    // Plain-text tool result — pass it through untouched.
+    return { finalResult: result, mcpData: undefined };
+  }
   let finalResult = result;
   let displayData = parsed.displayData;
   let mcpData;

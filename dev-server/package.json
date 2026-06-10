@@ -11,14 +11,12 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
-    "@fangorn-network/sdk": "^2026.4.23",
     "@fangorn-network/agent": "workspace:*",
     "@fangorn-network/agent-tools": "workspace:*",
     "@fangorn-network/agent-types": "workspace:*",
     "cors": "^2.8.6",
     "dotenv": "^17.2.4",
-    "express": "^5.2.1",
-    "viem": "^2.45.0"
+    "express": "^5.2.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

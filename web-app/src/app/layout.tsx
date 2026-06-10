@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Fangorn Agent",
+  title: "Fangorn Code",
   description:
-    "Talk with your Fangorn Agent, a personal AI assistant from Fangorn",
+    "A local coding agent built on the Fangorn agent harness and Ollama",
 };
 
 export default function RootLayout({

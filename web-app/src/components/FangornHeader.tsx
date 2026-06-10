@@ -1,6 +1,25 @@
-import { FangornLogo } from "../../public/svg/fangorn-logo";
+"use client";
 
-export default function FangornHeader() {
+import { useEffect, useState } from "react";
+import { FangornLogo } from "../../public/svg/fangorn-logo";
+import ModelSelector from "./ModelSelector";
+import { API_URL } from "@/lib/api";
+
+interface FangornHeaderProps {
+  /** True while the agent is responding */
+  busy?: boolean;
+}
+
+export default function FangornHeader({ busy }: FangornHeaderProps) {
+  const [workspaceRoot, setWorkspaceRoot] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch(`${API_URL}/config`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => setWorkspaceRoot(data?.workspaceRoot ?? null))
+      .catch(() => setWorkspaceRoot(null));
+  }, []);
+
   return (
     <header
       className="flex items-center justify-between px-6 py-4 flex-shrink-0"
@@ -24,19 +43,21 @@ export default function FangornHeader() {
               color: "var(--text-primary)",
             }}
           >
-            Explore
+            Fangorn Code
           </h1>
           <p
             className="text-xs"
             style={{
               color: "var(--text-secondary)",
-              fontFamily: "var(--font-body)",
+              fontFamily: "var(--font-mono, monospace)",
             }}
+            title="The workspace the agent works in"
           >
-            Browse for & discover data in the Fangorn Network
+            {workspaceRoot ?? "Local coding agent powered by Ollama"}
           </p>
         </div>
       </div>
+      <ModelSelector busy={busy} />
     </header>
   );
 }

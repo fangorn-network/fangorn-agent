@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { API_URL } from "@/lib/api";
 
 export type ToolboxMap = Record<string, string[]>;
 
@@ -34,16 +35,16 @@ export function useToolboxSelection(): UseToolboxSelectionReturn {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_AGENT_URL || "http://localhost:3001";
-
-    fetch(`${apiUrl}/toolbox-map`)
+    fetch(`${API_URL}/toolbox-map`)
       .then((res) => {
         if (!res.ok) throw new Error(`Server returned ${res.status}`);
-        console.log("res: ", JSON.stringify(res));
         return res.json();
       })
       .then((data: ToolboxMap) => {
         setToolboxMap(data);
+        // Start with every tool enabled — the coding agent needs its
+        // full toolset by default; users can still deselect.
+        setSelectedTools(new Set(Object.values(data).flat()));
         setLoading(false);
       })
       .catch((err) => {

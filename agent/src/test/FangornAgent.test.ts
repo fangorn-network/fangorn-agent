@@ -109,10 +109,7 @@ afterAll(() => server.close());
 
 describe("Fangorn Agent", () => {
   it("create successfully initializes the agent", () => {
-    const agent = FangornAgent.create(
-      fangornAgentConfig,
-      dataContextProvider,
-    );
+    const agent = FangornAgent.create(fangornAgentConfig, dataContextProvider);
     expect(agent).toBeDefined();
   });
 });
